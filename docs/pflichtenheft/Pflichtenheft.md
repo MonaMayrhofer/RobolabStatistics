@@ -8,7 +8,7 @@
 
 ## Motivation
 
-Dieses Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von unserem Professor, Herrn Professor Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
+Dieses Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von Herrn Professor Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
 
 ## Ausgangslage und Ist-Zustand
 
