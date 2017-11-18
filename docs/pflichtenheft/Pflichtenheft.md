@@ -14,11 +14,11 @@ Diese Projekt wird im Rahmen von SYP durcheführt und wurde von unserem Professo
 
 ### Problembereich
 
-Was ist das Robolab?
-Plan des Robolabs?
-Unsicher?
+In der HTL-Leonding gibt es im Untergeschoss das Robolab. Dort drinnen arbeiten Schüler und Lehrer zum einen an den NAO's (Humanoide Roboter) und zum anderen - under der aufsicht von Professor Stütz - an Raspberries und anderen ähnlichen Projekten.
 
-Das Robolab der HTL Leonding ist derzeit zu wenig gesichert, wenn Schäden angerichtet werden, kann der Verursacher nicht genau bestimmt werden. Jeder mit Zutrittserlaubnis kann den Raum betreten, wer sich aber darin wann aufhält kann nicht bestimmt werden.
+![Plan des Robolabs](./images/Robolab-Plan.jpg "Relevanter Bereich des Robolabs (nicht maßstabsgetreu)")
+
+Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast jeder Schüler zugriff verschaffen kann ist die Sicherheit der Roboloab nicht gewährleistet. Wenn Schäden - ob willkürlich oder durch einen Unfall - auftreten kann zur Zeit nicht nachgewiesen werden, wer dafür verwantwortlich gemacht werden kann.
 
 ### Glossar
 
@@ -57,10 +57,19 @@ Lichtverhältnisse
 Fehlerbehandlung
 
 ## Mengengerüst
-Stammdaten der Schüler
+Folgende Stammdaten werden sich ergeben:
+
+Jede Person die Zutrittsauthorisierung hat, wird eingetragen mit:
+* Name
+* Klasse
+* Gesichtsdaten
+
+Für jedes Eintrittsereignis wird mitprotokolliert:
+* Uhrzeit und Datum
+* Vermutete Person
+* Erkennungsgenauigkeit
 
 ## Risikoakzeptanz ???
 
 ## Schnittstellenübersicht
-
-## Abbildunsverzeichnis
+Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer Kamera auf. Die Kamera ist möglicherweise Infrarot oder Weitwinkelfähig.
