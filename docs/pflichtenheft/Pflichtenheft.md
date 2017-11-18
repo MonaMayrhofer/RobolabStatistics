@@ -7,7 +7,7 @@
 
 ## Motivation
 
-Diese Projekt wird im Rahmen von SYP durcheführt und wurde von unserem Professor, Herrn Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
+Diese Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von unserem Professor, Herrn Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
 
 ## Ausgangslage und Ist-Zustand
 
@@ -21,12 +21,15 @@ Das Robolab der HTL Leonding ist derzeit zu wenig gesichert, wenn Schäden anger
 
 ### Glossar
 
-| Begriff | Erklärung |
-| - | - |
-| Robolab | Raum, der im Problembereich genau beschrieben wurde |
-| NAOs | Humanoide Roboter, mit denen unter anderem im Robolab gearbeitet wird |
-| Raspberry Pi | Minicomputer |
-| Eintrittsereignis | Betreten des Robolabs |
+| Begriff | Erklärung
+| - | -
+| Robolab | Raum, der im Problembereich genau beschrieben wurde
+| NAOs | Humanoide Roboter, mit denen unter anderem im Robolab gearbeitet wird
+| Raspberry Pi | Minicomputer
+| Eintrittsereignis | Betreten des Robolabs
+| Winkelagnostizität | Fähigkeit, Gesichter zu erkennen, die nicht zwingend frontal aufgenommen wurden
+| Erkennungssicherheit | Wert zur Bestimmung, wie sehr ein erkanntes Gesicht mit einem der Vergleichsbildern übereinstimmt
+| Erkennungsgenauigkeit | Erfolgschance, ein Gesicht richtig zuzuordnen
 
 ### Abläufe
 
@@ -35,29 +38,29 @@ Das Robolab der HTL Leonding ist derzeit zu wenig gesichert, wenn Schäden anger
 ## Zielsetzung
 
 Die Sicherheit im Robolab soll durch Installation einer Kamera mit Gesichtserkennung erhöht werden. Mindestens 90% aller Gesichter sollten richtig erkannt und identifiziert werden, wodurch Daten über den Aufenthalt von Personen im Raum gesammelt werden können. Zu verwenden sind die in der Ausstattung enthaltenen Kameras sowie der Raspberry Pi.
-Das System soll auch dazu fähig sein, wenn es am Straßenrand installiert wird, vorbeifahrende Fahrzeuge zu erkennen und den Kategorien PKW und LKW zuzuordnen.
 
-Verwendet wird das System im Gesichtserkennungs-Modus nur von den Betreibern des Robolabs, die die Aufenthaltsdaten brauchen.
+Verwendet wird das System bzw. dessen generiertes Protokoll nur von den Betreibern des Robolabs, die die Aufenthaltsdaten brauchen.
 
 ## Sollzustand
 
-Die Software auf dem Raspberry Pi soll Gesichter erkennen und sowohl Daten über die Person, als auch Zeitpunkt der Registrierung in eine Textdatei speichern. Die Gesichter sollen nicht zwingend frontal aufgenommen werden müssen, demnach muss Perspektivenunabhängigkeit gegeben sein.
-Im Abschnitt der Fahrzeuge soll nur erkannt werden, ob das vorbeifahrende Fahrzeug ein PKW oder LKW ist. Andere Eigenschaften wie Modell, Farbe, Größe u. A. sollen *nicht* beachtet werden.
-
-TODO AUFTEILEN
+Die Software auf dem Raspberry Pi soll Gesichter erkennen und sowohl Daten über die Person, als auch Zeitpunkt der Registrierung in eine Datei speichern. Die Gesichter sollen nicht zwingend frontal aufgenommen werden müssen, demnach muss Winkelagnostizität gegeben sein.
 
 ### Funktionale Anforderungen
-Arbeitsaufteilung
+
+ID: Anf01: Gesichter erkennen\
+ID: Anf02: Gesichter zuordnen\
+ID: Anf03: Protokoll erstellen\
+ID: Anf04: Protokolle über Fileserver zugänglich machen
+
 #### Use Case
 
-TODO Soll use case diagramm
+![Use-Case-Diagramm des Robolabs](./images/Use-Case-Diagram-After.jpg "Use-Case-Diagramm des Robolabs mit Sicherheitssystem")
 
-##### Beschreibung der Use-Cases
 ### Nicht-Funktionale Anforderungen
-Erkennungsgenauigkeit
-Performance
-Lichtverhältnisse
-Fehlerbehandlung
+Die Erkennungsgenauigkeit soll möglichst hoch sein, als Mindestzielwert wird 90% in Betracht gezogen.
+Das System soll nicht überlastet werden, wenn es viele Personen gleichzeitig erkennt und zuordnen muss. Es muss nicht zwingend in Echtzeit die Gesichter erkennen können.
+Auch bei ungünstigen Lichtverhältnissen soll die 90%-Quote eingehalten werden.
+Nichterkennungen sollen auch mitprotokolliert werden.
 
 ## Mengengerüst
 Stammdaten der Schüler
