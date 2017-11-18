@@ -1,6 +1,6 @@
 # Pflichtenheft
 
-## Rahmenbedingungen:
+## Rahmenbedingungen
 * Projektauftraggeber: Professor Thomas Stütz
 * Projektleiter: Erik Mayrhofer
 * Projektmitarbeiter: Erik Mayrhofer, Florian Schwarcz
@@ -8,7 +8,7 @@
 
 ## Motivation
 
-Diese Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von unserem Professor, Herrn Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
+Dieses Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von unserem Professor, Herrn Professor Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
 
 ## Ausgangslage und Ist-Zustand
 
@@ -18,7 +18,7 @@ In der HTL-Leonding gibt es im Untergeschoss das Robolab. Dort drinnen arbeiten 
 
 ![Plan des Robolabs](./images/Robolab-Plan.jpg "Relevanter Bereich des Robolabs (nicht maßstabsgetreu)")
 
-Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast jeder Schüler Zugriff verschaffen kann ist die Sicherheit der Robolab nicht gewährleistet. Wenn Schäden - ob willkürlich oder durch einen Unfall - auftreten, kann zur Zeit nicht nachgewiesen werden, wer dafür verwantwortlich ist.
+Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast jeder Schüler Zugriff verschaffen kann, ist die Sicherheit des Robolabs nicht gewährleistet. Wenn Schäden - ob willkürlich oder durch einen Unfall - auftreten, kann zur Zeit nicht nachgewiesen werden, wer dafür verantwortlich ist.
 
 ### Glossar
 
@@ -53,7 +53,7 @@ ID: Anf02: Gesichter zuordnen\
 ID: Anf03: Protokoll erstellen\
 ID: Anf04: Protokolle über Fileserver zugänglich machen
 
-#### Robolab Soll-Use-Case-Diagramm
+### Robolab Soll-Use-Case-Diagramm
 
 ![Use-Case-Diagramm des Robolabs](./images/Use-Case-Diagram-After.jpg "Use-Case-Diagramm des Robolabs mit Sicherheitssystem")
 
