@@ -67,9 +67,7 @@ Jede Person die Zutrittsauthorisierung hat, wird eingetragen mit:
 Für jedes Eintrittsereignis wird mitprotokolliert:
 * Uhrzeit und Datum
 * Vermutete Person
-* Erkennungsgenauigkeit
-
-## Risikoakzeptanz ???
+* Erkennungssicherheit
 
 ## Schnittstellenübersicht
 Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer Kamera auf. Die Kamera ist möglicherweise Infrarot oder Weitwinkelfähig.
