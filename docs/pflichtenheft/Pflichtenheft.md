@@ -1,6 +1,7 @@
 # Pflichtenheft
 
 ## Rahmenbedingungen:
+* Projektauftraggeber: Professor Thomas Stütz
 * Projektleiter: Erik Mayrhofer
 * Projektmitarbeiter: Erik Mayrhofer, Florian Schwarcz
 * Ausstattung: Raspberry Pi, PI-Infrarotkamera, RPI Weitwinkel-CAM, Logitech 270 Webcam
@@ -13,11 +14,11 @@ Diese Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von uns
 
 ### Problembereich
 
-In der HTL-Leonding gibt es im Untergeschoss das Robolab. Dort drinnen arbeiten Schüler und Lehrer zum einen an den NAO's (Humanoide Roboter) und zum anderen - under der aufsicht von Professor Stütz - an Raspberries und anderen ähnlichen Projekten.
+In der HTL-Leonding gibt es im Untergeschoss das Robolab. Dort drinnen arbeiten Schüler und Lehrer zum einen an den NAO's (Humanoide Roboter) und zum anderen - unter der Aufsicht von Professor Stütz - an Raspberries und anderen ähnlichen Projekten.
 
 ![Plan des Robolabs](./images/Robolab-Plan.jpg "Relevanter Bereich des Robolabs (nicht maßstabsgetreu)")
 
-Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast jeder Schüler zugriff verschaffen kann ist die Sicherheit der Roboloab nicht gewährleistet. Wenn Schäden - ob willkürlich oder durch einen Unfall - auftreten kann zur Zeit nicht nachgewiesen werden, wer dafür verwantwortlich gemacht werden kann.
+Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast jeder Schüler Zugriff verschaffen kann ist die Sicherheit der Robolab nicht gewährleistet. Wenn Schäden - ob willkürlich oder durch einen Unfall - auftreten, kann zur Zeit nicht nachgewiesen werden, wer dafür verwantwortlich ist.
 
 ### Glossar
 
@@ -31,19 +32,19 @@ Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast j
 | Erkennungssicherheit | Wert zur Bestimmung, wie sehr ein erkanntes Gesicht mit einem der Vergleichsbildern übereinstimmt
 | Erkennungsgenauigkeit | Erfolgschance, ein Gesicht richtig zuzuordnen
 
-### Abläufe
+### Robolab Use-Case-Diagramm
 
 ![Use-Case-Diagramm des Robolabs](./images/Use-Case-Diagram-Before.jpg "Use-Case-Diagramm des Robolabs ohne Sicherheitssystem")
 
 ## Zielsetzung
 
-Die Sicherheit im Robolab soll durch Installation einer Kamera mit Gesichtserkennung erhöht werden. Mindestens 90% aller Gesichter sollten richtig erkannt und identifiziert werden, wodurch Daten über den Aufenthalt von Personen im Raum gesammelt werden können. Zu verwenden sind die in der Ausstattung enthaltenen Kameras sowie der Raspberry Pi.
+Die Sicherheit im Robolab soll durch Installation einer Kamera mit Gesichtserkennung erhöht werden. Es sollen Daten über den Aufenthalt von Personen im Raum gesammelt werden. Zu verwenden sind die in der Ausstattung enthaltenen Kameras sowie der Raspberry Pi.
 
 Verwendet wird das System bzw. dessen generiertes Protokoll nur von den Betreibern des Robolabs, die die Aufenthaltsdaten brauchen.
 
 ## Sollzustand
 
-Die Software auf dem Raspberry Pi soll Gesichter erkennen und sowohl Daten über die Person, als auch Zeitpunkt der Registrierung in eine Datei speichern. Die Gesichter sollen nicht zwingend frontal aufgenommen werden müssen, demnach muss Winkelagnostizität gegeben sein.
+Die Software auf dem Raspberry Pi soll Gesichter erkennen und sowohl Daten über die Person, als auch Zeitpunkt der Registrierung in eine Datei speichern. Die Gesichter werden nicht zwingend frontal aufgenommen, demnach muss Winkelagnostizität gegeben sein.
 
 ### Funktionale Anforderungen
 
@@ -52,20 +53,20 @@ ID: Anf02: Gesichter zuordnen\
 ID: Anf03: Protokoll erstellen\
 ID: Anf04: Protokolle über Fileserver zugänglich machen
 
-#### Use Case
+#### Robolab Soll-Use-Case-Diagramm
 
 ![Use-Case-Diagramm des Robolabs](./images/Use-Case-Diagram-After.jpg "Use-Case-Diagramm des Robolabs mit Sicherheitssystem")
 
 ### Nicht-Funktionale Anforderungen
 Die Erkennungsgenauigkeit soll möglichst hoch sein, als Mindestzielwert wird 90% in Betracht gezogen.
-Das System soll nicht überlastet werden, wenn es viele Personen gleichzeitig erkennt und zuordnen muss. Es muss nicht zwingend in Echtzeit die Gesichter erkennen können.
+Das System soll nicht überlastet werden, wenn es viele Personen gleichzeitig erkennt und zuordnen muss. Es muss nicht zwingend in Echtzeit die Gesichter zuordnen können.
 Auch bei ungünstigen Lichtverhältnissen soll die 90%-Quote eingehalten werden.
 Nichterkennungen sollen auch mitprotokolliert werden.
 
 ## Mengengerüst
 Folgende Stammdaten werden sich ergeben:
 
-Jede Person die Zutrittsauthorisierung hat, wird eingetragen mit:
+Jede Person, die Zutrittsauthorisierung hat, wird eingetragen mit:
 * Name
 * Klasse
 * Gesichtsdaten
@@ -76,4 +77,4 @@ Für jedes Eintrittsereignis wird mitprotokolliert:
 * Erkennungssicherheit
 
 ## Schnittstellenübersicht
-Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer Kamera auf. Die Kamera ist möglicherweise Infrarot oder Weitwinkelfähig.
+Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer Kamera auf. Die Kamera ist möglicherweise infrarot- oder weitwinkelfähig.
