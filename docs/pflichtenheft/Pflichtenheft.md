@@ -3,9 +3,8 @@
 ## Rahmenbedingungen:
 * Projektleiter: Erik Mayrhofer
 * Projektmitarbeiter: Erik Mayrhofer, Florian Schwarcz
-* Ausstattung: Raspberry Pi, IR-Kamera, Fischaugenkamera, LG Webcam
+* Ausstattung: Raspberry Pi, PI-Infrarotkamera, RPI Weitwinkel-CAM, Logitech 270 Webcam
 
-TODO NUMMERN
 ## Motivation
 
 Diese Projekt wird im Rahmen von SYP durcheführt und wurde von unserem Professor, Herrn Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
@@ -22,19 +21,23 @@ Das Robolab der HTL Leonding ist derzeit zu wenig gesichert, wenn Schäden anger
 
 ### Glossar
 
-Nao / Stütz
-Bereiche
+| Begriff | Erklärung |
+| - | - |
+| Robolab | Raum, der im Problembereich genau beschrieben wurde |
+| NAOs | Humanoide Roboter, mit denen unter anderem im Robolab gearbeitet wird |
+| Raspberry Pi | Minicomputer |
+| Eintrittsereignis | Betreten des Robolabs |
 
 ### Abläufe
 
-Use-Case vom RoboLab?
+![Use-Case-Diagramm des Robolabs](./images/Use-Case-Diagram-Before.jpg "Use-Case-Diagramm des Robolabs ohne Sicherheitssystem")
 
 ## Zielsetzung
 
-Die Sicherheit im Robolab soll durch Installation einer Kamera mit Gesichtserkennung erhöht werden. 90% aller Gesichter sollten richtig erkannt und identifiziert werden, wodurch Daten über den Aufenthalt von Personen im Raum gesammelt werden können. Zu verwenden sind die in der Ausstattung enthaltenen Kameras sowie der Raspberry Pi.
+Die Sicherheit im Robolab soll durch Installation einer Kamera mit Gesichtserkennung erhöht werden. Mindestens 90% aller Gesichter sollten richtig erkannt und identifiziert werden, wodurch Daten über den Aufenthalt von Personen im Raum gesammelt werden können. Zu verwenden sind die in der Ausstattung enthaltenen Kameras sowie der Raspberry Pi.
 Das System soll auch dazu fähig sein, wenn es am Straßenrand installiert wird, vorbeifahrende Fahrzeuge zu erkennen und den Kategorien PKW und LKW zuzuordnen.
 
-TODO Zielgruppe des Interfaces
+Verwendet wird das System im Gesichtserkennungs-Modus nur von den Betreibern des Robolabs, die die Aufenthaltsdaten brauchen.
 
 ## Sollzustand
 
@@ -47,7 +50,7 @@ TODO AUFTEILEN
 Arbeitsaufteilung
 #### Use Case
 
-TODO SOll use case diagramm
+TODO Soll use case diagramm
 
 ##### Beschreibung der Use-Cases
 ### Nicht-Funktionale Anforderungen
