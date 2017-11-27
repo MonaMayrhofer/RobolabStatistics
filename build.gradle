@@ -1,0 +1,14 @@
+task cmakeOpencv(type: Exec, group: "thirdparty") {
+    doFirst{
+        new File("thirdparty/opencv/build").mkdirs()
+    }
+    workingDir = "thirdparty/opencv/build"
+    executable = "cmake"
+    args  ".." //TODO DON'T BUILD PYTHON HERE
+}
+
+task compileOpencv(type: Exec, group: "thirdparty", dependsOn: "cmakeOpencv") {
+    workingDir = "thirdparty/opencv/build"
+    executable = "make"
+    args "-j4"
+}
