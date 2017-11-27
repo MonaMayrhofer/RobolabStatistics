@@ -37,3 +37,6 @@ gradle-app.setting
 !gradle-wrapper.jar
 .gradletasknamecache
 
+#Lib
+lib/
+thirdparty/

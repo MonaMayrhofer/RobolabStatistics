@@ -16,19 +16,50 @@ dependencies {
     // testCompile 'junit:junit:4.12'
 }
 
-
-task cmakeOpencv(type: Exec, group: "thirdparty") {
+task cmakeOpencv(group: "thirdparty") {
     doFirst{
         new File("thirdparty/opencv/build").mkdirs()
     }
-    workingDir = "thirdparty/opencv/build"
-    executable = "cmake"
-    args  ".." //TODO DON'T BUILD PYTHON HERE
+    ext.installPath = new File("lib/thirdparty/opencv").getAbsolutePath()
+    exec {
+        workingDir "thirdparty/opencv/build"
+        commandLine 'cmake',
+                '-D', 'BUILD_TESTS=OFF',
+                '-D', 'BUILD_PERF_TESTS=OFF',
+                '-D', 'BUILD_opencv_python2=OFF',
+                '-D', 'BUILD_opencv_python3=OFF',
+                '-D', 'BUILD_opencv_stitching=OFF',
+                '-D', 'BUILD_opencv_videostab=OFF',
+                '-D', "CMAKE_INSTALL_PREFIX=${installPath}",
+                '..'
+    }
+    doLast {
+        copy {
+            from "/thirdparty/opencv/build/lib/libopencv_java331.so"
+            into "/lib/opencv"
+        }
+    }
+
+    //TODO Do we need superres module? And modules under windows
 }
 
-task compileOpencv(type: Exec, group: "thirdparty", dependsOn: "cmakeOpencv") {
-    workingDir = "thirdparty/opencv/build"
-    executable = "make"
-    args "-j4"
+task compileOpencv(group: "thirdparty", dependsOn: "cmakeOpencv") {
+    doFirst{
+        println "Building Opencv with "+buildCores+" Cores"
+    }
+    exec {
+        workingDir = "thirdparty/opencv/build"
+        commandLine 'make', '-j'+buildCores
+    }
+    doLast {
+        println "Copying files to lib"
+        copy {
+            from "thirdparty/opencv/build/lib/libopencv_java331.so"
+            into "lib/opencv/"
+        }
+        copy {
+            from "thirdparty/opencv/build/bin/opencv-331.jar"
+            into "lib/opencv/"
+        }
+    }
 }
-
