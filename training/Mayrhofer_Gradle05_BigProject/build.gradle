@@ -1,10 +1,11 @@
-ext.needsopencv = true
+group = 'opencv'
 
 apply plugin: 'java'
 apply plugin: 'application'
 
 mainClassName = 'App'
 
+//TODO Outsource this into RobolabStatistics
 repositories {
     flatDir {
         dirs '/home/obyoxar/Dokumente/RobolabStatistics/RobolabStatistics/lib/opencv/'
@@ -13,10 +14,4 @@ repositories {
 
 dependencies{
     compile name: 'opencv-331'
-}
-
-compileJava {
-    doFirst{
-
-    }
 }

@@ -60,3 +60,10 @@ task compileOpencv(group: "thirdparty", dependsOn: "cmakeOpencv") {
         }
     }
 }
+
+configure(subprojects.findAll {it.group}){
+    tasks.withType(JavaExec) {
+        systemProperty "java.library.path", "/home/obyoxar/Dokumente/RobolabStatistics/RobolabStatistics/lib/opencv"
+    }
+
+}
