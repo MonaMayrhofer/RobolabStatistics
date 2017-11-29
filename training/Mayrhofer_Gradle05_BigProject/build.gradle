@@ -1,0 +1,22 @@
+ext.needsopencv = true
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'App'
+
+repositories {
+    flatDir {
+        dirs '/home/obyoxar/Dokumente/RobolabStatistics/RobolabStatistics/lib/opencv/'
+    }
+}
+
+dependencies{
+    compile name: 'opencv-331'
+}
+
+compileJava {
+    doFirst{
+
+    }
+}
