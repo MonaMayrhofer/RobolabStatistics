@@ -10,4 +10,5 @@ rootProject.name = 'RobolabStatistics'
 //ThirdParty
 include 'thirdparty'
 
-includeTraining "Mayrhofer_Gradle05_BigProject"
+//Training Projects
+includeTraining 'Gradle_Demo'
