@@ -1,7 +1,7 @@
-#RobolabStatistics
+# RobolabStatistics
 This is more like an Opencv-Laboratory than an actual project. 
 
-##File Structure
+## File Structure
 ### SRC
 The src folder contains useable applications.
 ### Training
