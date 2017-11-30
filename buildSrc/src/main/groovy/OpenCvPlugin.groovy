@@ -7,7 +7,7 @@ class OpenCvPlugin implements Plugin<Project> {
     @Override
     void apply(Project target) {
         target.tasks.withType(JavaExec) {
-            systemProperty "java.library.path", "/home/obyoxar/Dokumente/RobolabStatistics/RobolabStatistics/lib/opencv"
+            systemProperty "java.library.path", target.rootProject.file('lib/opencv').absolutePath
         }
 
         target.dependencies {
@@ -16,7 +16,7 @@ class OpenCvPlugin implements Plugin<Project> {
 
         target.repositories {
             flatDir {
-                dirs '/home/obyoxar/Dokumente/RobolabStatistics/RobolabStatistics/lib/opencv/'
+                dirs target.rootProject.file('lib/opencv').absolutePath
             }
         }
     }
