@@ -9,7 +9,7 @@ If you want to push anything onto our repository do not use one of the existing 
 
 Found a bug?
 
-Feel free to create an issue to inform us about what the bug is and where it is located. Please use the lables we provide. Before creating we recomment checking if an issue about that bug has already been created to avoid duplicates.
+Feel free to create an issue to inform us about how the bug occurred, what the program did and what it should have done. If you already found the bug, please mention where is located. Please use the lables we provide. Before creating we recomment checking if an issue about that bug has already been created to avoid duplicates.
 
 Thank you for your interest,
 
