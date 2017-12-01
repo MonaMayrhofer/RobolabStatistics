@@ -1,0 +1,14 @@
+
+def includeTraining(name) {
+    include name
+    project(":"+name).projectDir = file("training/"+name)
+    project(":"+name).name = "training_"+project(":"+name).name
+}
+
+rootProject.name = 'RobolabStatistics'
+
+//ThirdParty
+include 'thirdparty'
+
+//Training Projects
+includeTraining 'Gradle_Demo'
