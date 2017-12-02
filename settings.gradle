@@ -8,7 +8,7 @@ def includeTraining(name) {
 rootProject.name = 'RobolabStatistics'
 
 //ThirdParty
-include 'thirdparty'
+include 'gen'
 
 //Training Projects
 includeTraining 'Gradle_Demo'
