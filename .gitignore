@@ -38,4 +38,4 @@ gradle-app.setting
 .gradletasknamecache
 
 #Lib
-lib/
+!opencv-331.jar
