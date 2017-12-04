@@ -13,3 +13,4 @@ include 'gen'
 //Training Projects
 includeTraining 'Gradle_Demo'
 includeTraining 'Opencv_Swing'
+includeTraining 'Opencv_BackgroundReduction'
