@@ -1,6 +1,8 @@
 # RobolabStatistics
 This is more like an Opencv-Laboratory than an actual project. 
 
+To see the whole definition (in German see) see: [Pflichtenheft](docs/pflichtenheft/Pflichtenheft.md)
+
 ## File Structure
 ### SRC
 The src folder contains useable applications.
