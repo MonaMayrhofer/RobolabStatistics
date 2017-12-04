@@ -83,11 +83,13 @@ Jede Person, die Zutrittsauthorisierung hat, wird eingetragen mit:
 * Name
 * Klasse
 * Gesichtsdaten
+Zutrittsberechtigung wird vermutlich in etwa an 100 Personen vergeben.
 
 Für jedes Eintrittsereignis wird mitprotokolliert:
 * Uhrzeit und Datum
 * Vermutete Person
 * Erkennungssicherheit
+Wir rechnen mit max. 20 Eintrittsereignissen pro Tag.
 
 ## Schnittstellenübersicht
 Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer Kamera auf. Die Kamera ist möglicherweise infrarot- oder weitwinkelfähig.
