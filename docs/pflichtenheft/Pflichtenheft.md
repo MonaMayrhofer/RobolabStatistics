@@ -10,6 +10,19 @@
 
 Dieses Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von Herrn Professor Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
 
+## Inhaltsverzeichnis
+* Ausgangslage und Ist-Zustand
+    * Problembereich
+    * Glossar
+* Aufgabenstellung
+* Zielsetzung
+* Sollzustand
+    * Funktionale Anforderungen
+    * RobolabStatistics Use-Case-Diagramm
+    * Nicht-Funktionale Anforderungen
+* Mengengerüst
+* Schnittstellenübersicht
+
 ## Ausgangslage und Ist-Zustand
 
 ### Problembereich
@@ -32,15 +45,15 @@ Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast j
 | Erkennungssicherheit | Wert zur Bestimmung, wie sehr ein erkanntes Gesicht mit einem der Vergleichsbildern übereinstimmt
 | Erkennungsgenauigkeit | Erfolgschance, ein Gesicht richtig zuzuordnen
 
-### Robolab Use-Case-Diagramm
-
-![Use-Case-Diagramm des Robolabs](./images/Use-Case-Diagram-Before.jpg "Use-Case-Diagramm des Robolabs ohne Sicherheitssystem")
+## Aufgabenstellung
+Unsere Aufgabe als Projektteam ist es, uns mit Gesichtserkennung zu beschäftigen und ein Programm zu entwickeln, das auf einem Raspberry Pi mit entsprechenden Kameras lauffähig ist. In diesem Programm sind zum einen die Gesichtserkennung zu implementieren, zum anderen die Möglichkeit, daraus Statistiken über den Aufenthalt von Personen im Raum zu generieren und diese den Robolab-Admins zur Verfügung zu stellen. Eine Galerie der geschossenen und verwendeten Fotos soll auch einsehbar sein.
+Damit die Erkennung möglichst oft und in möglichst kurzer Zeit gelingt, müssen wir uns entscheiden, wie genau das Verhältnis Genauigkeit zu Zeit aussehen soll.
 
 ## Zielsetzung
 
 Die Sicherheit im Robolab soll durch Installation einer Kamera mit Gesichtserkennung erhöht werden. Es sollen Daten über den Aufenthalt von Personen im Raum gesammelt werden. Zu verwenden sind die in der Ausstattung enthaltenen Kameras sowie der Raspberry Pi.
 
-Verwendet wird das System bzw. dessen generiertes Protokoll nur von den Betreibern des Robolabs, die die Aufenthaltsdaten brauchen.
+Verwendet wird das System bzw. dessen generiertes Protokoll nur von den Admins des Robolabs, die die Aufenthaltsdaten brauchen.
 
 ## Sollzustand
 
@@ -53,9 +66,9 @@ ID: Anf02: Gesichter zuordnen\
 ID: Anf03: Protokoll erstellen\
 ID: Anf04: Protokolle über Fileserver zugänglich machen
 
-### Robolab Soll-Use-Case-Diagramm
+### RobolabStatistics Use-Case-Diagramm
 
-![Use-Case-Diagramm des Robolabs](./images/Use-Case-Diagram-After.jpg "Use-Case-Diagramm des Robolabs mit Sicherheitssystem")
+![Use-Case-Diagramm von RobolabStatistics](./images/Use-Case-Diagram.jpg "Use-Case-Diagramm von RobolabStatistics")
 
 ### Nicht-Funktionale Anforderungen
 Die Erkennungsgenauigkeit soll möglichst hoch sein, als Mindestzielwert wird 90% in Betracht gezogen.
@@ -70,11 +83,13 @@ Jede Person, die Zutrittsauthorisierung hat, wird eingetragen mit:
 * Name
 * Klasse
 * Gesichtsdaten
+Zutrittsberechtigung wird vermutlich in etwa an 100 Personen vergeben.
 
 Für jedes Eintrittsereignis wird mitprotokolliert:
 * Uhrzeit und Datum
 * Vermutete Person
 * Erkennungssicherheit
+Wir rechnen mit max. 20 Eintrittsereignissen pro Tag.
 
 ## Schnittstellenübersicht
 Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer Kamera auf. Die Kamera ist möglicherweise infrarot- oder weitwinkelfähig.
