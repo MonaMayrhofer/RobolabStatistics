@@ -57,6 +57,22 @@ public class App {
             Core.multiply(rawImg, Scalar.all(0.1), currImg);
             Core.add(currImg, oldImg, oldImg);
 
+            long start = System.currentTimeMillis();
+
+            ConcurrentMatMath m = new ConcurrentMatMath(3);
+
+            m.mutateMat((x, y, ci) -> {
+                double[] curr = ci[0].get(y,x);
+                double[] old = ci[1].get(y,x);
+
+                for(int i = 0; i < curr.length; i++){
+                    if(Math.abs(curr[i] - old[i]) > thresh){
+                        ci[2].put(y,x,ci[3].get(y,x));
+                    }
+                }
+            }, oldImg, oldestImg, actImg, rawestImg);
+
+            /*
             for(int x = 0; x < currImg.width(); x++){
                 for(int y = 0; y < currImg.height(); y++){
                     double[] curr = oldImg.get(y,x);
@@ -68,7 +84,10 @@ public class App {
                         }
                     }
                 }
-            }
+            }*/
+
+
+            System.out.println("Took: "+(System.currentTimeMillis()-start));
             panel.setImage(actImg);
         }
         capt.release();
