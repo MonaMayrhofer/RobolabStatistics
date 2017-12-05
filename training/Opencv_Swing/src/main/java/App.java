@@ -47,6 +47,7 @@ public class App {
             }
         });
         RoboGui.getInstance().addWindowListener("MotionFrame", new WindowAdapter() {
+
             @Override
             public void windowClosing(WindowEvent e) {
                 running = false;
@@ -60,6 +61,7 @@ public class App {
         capt.read(oldImg);
         RoboGui.getInstance().setFrameSize("NormalFrame", oldImg.width(), oldImg.height());
         RoboGui.getInstance().setFrameSize("MotionFrame", oldImg.width(), oldImg.height());
+
 
         while(running){
             capt.read(currImg);

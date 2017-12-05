@@ -47,6 +47,7 @@ public class ImagePanel extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponents(g);
         System.out.println("PC");
+
         if(getImage() == null) return;
 
         MatOfByte matOfByte = new MatOfByte();
@@ -63,6 +64,5 @@ public class ImagePanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }
