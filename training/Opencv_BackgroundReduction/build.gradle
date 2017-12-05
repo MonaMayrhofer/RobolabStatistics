@@ -2,4 +2,9 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'opencv'
 
+dependencies{
+    compile project(":lib_robogui")
+}
+
 mainClassName = 'App'
+

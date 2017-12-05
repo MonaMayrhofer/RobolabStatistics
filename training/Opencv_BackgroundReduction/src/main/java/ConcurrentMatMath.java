@@ -12,7 +12,7 @@ public class ConcurrentMatMath {
     private ExecutorService exec;
     private int maxThreads;
     public ConcurrentMatMath(int maxThreads) {
-        exec = Executors.newFixedThreadPool(maxThreads);
+        exec = Executors.newFixedThreadPool(Math.min(Runtime.getRuntime().availableProcessors(), maxThreads));
         this.maxThreads = maxThreads;
     }
 
@@ -24,18 +24,13 @@ public class ConcurrentMatMath {
                 throw new IllegalArgumentException("All Mats must be equal in width and height");
         }
 
-
-        //exec.execute(new MatMutatorService(0, width, 0, height, m, muator));
-
-
         int currX = 0;
         for(int i = 0; i < maxThreads; i++){
             int nextX = currX + width/maxThreads;
-            exec.execute(new MatMutatorService(currX, i+width/maxThreads, 0, height, m, muator));
+            exec.execute(new MatMutatorService(currX, nextX, 0, height, m, muator));
             currX = nextX;
 
         }
-
 
         exec.shutdown();
         try {

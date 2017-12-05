@@ -41,7 +41,7 @@ public class RoboGui {
     public void show(String name, Mat m){
         ImagePanel panel = panels.get(name);
         if(panel == null){
-            createPanel(name);
+            panel = createPanel(name);
         }
         panel.setImage(m);
     }

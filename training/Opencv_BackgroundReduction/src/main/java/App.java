@@ -2,14 +2,17 @@
 Erik Mayrhofer - Proof Of Concept of Background-Reduction
  */
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+import robogui.RoboGui;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.Field;
 
 public class App {
 
@@ -21,15 +24,12 @@ public class App {
 
     public static void main(String[] args) throws InterruptedException{
         int thresh = 3; //Play around with this value
-        JFrame frame = new JFrame("TestJFrame");
-        ImagePanel panel = new ImagePanel();
-        frame.add(panel);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
 
         VideoCapture capt = new VideoCapture();
         capt.open(0);
 
-        frame.addWindowListener(new WindowAdapter() {
+        RoboGui.getInstance().addWindowListener("Image", new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) { running = false; }
         });
@@ -41,10 +41,15 @@ public class App {
         Mat oldestImg;
 
         capt.read(oldImg);
+
+        //oldImg = new Mat(1000,1000, CvType.CV_8UC3);
+        RoboGui.getInstance().setFrameSize("Image", oldImg.width(), oldImg.height());
         Mat actImg = new Mat(oldImg.height(), oldImg.width(), oldImg.type(), Scalar.all(0));
         Imgproc.cvtColor(oldImg, oldImg, Imgproc.COLOR_RGB2GRAY);
-        frame.setSize(oldImg.width(),oldImg.height());
-        frame.setVisible(true);
+
+        long min = 100;
+        long max = 0;
+        double avg = 0.0;
 
         while(running){
             actImg.setTo(Scalar.all(255));
@@ -58,8 +63,8 @@ public class App {
             Core.add(currImg, oldImg, oldImg);
 
             long start = System.currentTimeMillis();
+            ConcurrentMatMath m = new ConcurrentMatMath(8); //Anzahl der Threads hier einfügen
 
-            ConcurrentMatMath m = new ConcurrentMatMath(3);
 
             m.mutateMat((x, y, ci) -> {
                 double[] curr = ci[0].get(y,x);
@@ -72,23 +77,13 @@ public class App {
                 }
             }, oldImg, oldestImg, actImg, rawestImg);
 
-            /*
-            for(int x = 0; x < currImg.width(); x++){
-                for(int y = 0; y < currImg.height(); y++){
-                    double[] curr = oldImg.get(y,x);
-                    double[] old = oldestImg.get(y,x);
-
-                    for(int i = 0; i < curr.length; i++){
-                        if(Math.abs(curr[i] - old[i]) > thresh){
-                            actImg.put(y,x,rawestImg.get(y,x));
-                        }
-                    }
-                }
-            }*/
-
-
-            System.out.println("Took: "+(System.currentTimeMillis()-start));
-            panel.setImage(actImg);
+            long delta = (System.currentTimeMillis()-start);
+            avg += (double)delta;
+            avg /= 2.0;
+            min = Math.min(delta, min);
+            max = Math.max(delta, max);
+            System.out.println("Took: "+delta+" Max: "+max+" Min: "+min+" Avg: "+avg);
+            RoboGui.getInstance().show("Image",actImg);
         }
         capt.release();
     }
