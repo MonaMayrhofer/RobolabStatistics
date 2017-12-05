@@ -35,18 +35,19 @@ public class App {
         mc5.setTo(new Scalar(5));
         System.out.println("OpenCV Mat data:\n" + m.dump());
 
-        JFrame frame = new JFrame("TestJFrame");
-        ImagePanel panel = new ImagePanel();
-        frame.add(panel);
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
         VideoCapture capt = new VideoCapture();
         System.out.println("Opening Capture");
         capt.open(0);
         System.out.println("Opened Capture");
 
-        frame.addWindowListener(new WindowAdapter() {
+        RoboGui.getInstance().addWindowListener("NormalFrame", new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                running = false;
+            }
+        });
+        RoboGui.getInstance().addWindowListener("MotionFrame", new WindowAdapter() {
+
             @Override
             public void windowClosing(WindowEvent e) {
                 running = false;
@@ -58,16 +59,19 @@ public class App {
         Mat actImg = new Mat();
 
         capt.read(oldImg);
-        frame.setSize(oldImg.width(),oldImg.height());
-        panel.setImage(oldImg);
+        RoboGui.getInstance().setFrameSize("NormalFrame", oldImg.width(), oldImg.height());
+        RoboGui.getInstance().setFrameSize("MotionFrame", oldImg.width(), oldImg.height());
+
 
         while(running){
             capt.read(currImg);
             Core.subtract(currImg, oldImg, actImg);
             oldImg = currImg.clone();
-            panel.setImage(actImg);
+            RoboGui.getInstance().show("NormalFrame", currImg);
+            RoboGui.getInstance().show("MotionFrame", actImg);
         }
 
         capt.release();
+        RoboGui.getInstance().close();
     }
 }
