@@ -1,6 +1,7 @@
 /*
 Erik Mayrhofer - Proof Of Concept of Background-Reduction
  */
+import matmath.ConcurrentMatMath;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;

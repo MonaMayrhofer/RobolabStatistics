@@ -21,5 +21,7 @@ includeTraining 'Gradle_Demo'
 includeTraining 'Opencv_Swing'
 includeTraining 'Robogui_Test'
 includeTraining 'Opencv_BackgroundReduction'
+includeTraining 'ConcurrentMatMath_Test'
 
 includeLibrary 'robogui'
+includeLibrary 'matmath'

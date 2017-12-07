@@ -1,11 +1,10 @@
+package matmath;
+
 import org.opencv.core.Mat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ConcurrentMatMath {
 

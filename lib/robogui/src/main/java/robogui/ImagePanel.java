@@ -48,7 +48,6 @@ public class ImagePanel extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponents(g);
-        System.out.println("PC");
 
         if(getImage() == null) return;
 
