@@ -1,24 +1,4 @@
-/*
-Mat m;
-
---Kein Fenster offen
-
-RoboGui.gi().show("F1", m);
---Fenster öffnet sich und zeigt m an
-
-Mat g;
-RoboGui.gi().show("F1", g);
---Selbes fenster zeigt jetzt g an
-
-RoboGui.gi().show("F2", m);
---Neues Fenster geht jetzt auf mit f2
-
-RoboGui.gi().close();
-
-RoboGui.gi().get("F1");
---gibt f zrück
-
- */
+package robogui;
 
 import org.opencv.core.Mat;
 
