@@ -24,7 +24,7 @@ public class App {
     }
 
     public static void main(String[] args) throws InterruptedException{
-        int thresh = 3; //Play around with this value
+        int thresh = 2; //Play around with this value
 
 
         VideoCapture capt = new VideoCapture();
