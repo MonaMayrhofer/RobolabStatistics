@@ -14,6 +14,8 @@ public class ImagePanel extends JPanel {
 
     private Mat image;
     private JFrame frame;
+    private int width;
+    private int height;
 
     public synchronized Mat getImage() {
         return image;
@@ -31,22 +33,37 @@ public class ImagePanel extends JPanel {
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
+    /**
+     * Closes the JPanel.
+     */
     public void close(){
         frame.dispose();
     }
 
+    /**
+     * Adds a WindowListener to the JPanel.
+     * @param listener
+     */
     public void addWindowListener(WindowListener listener){
         frame.addWindowListener(listener);
     }
 
+    /**
+     * Sets the size of the JPanel.
+     * @param width
+     * @param height
+     */
     public void setFrameSize(int width, int height){
-        frame.setSize(width, height);
+        if(this.width != width || this.height != height){
+            this.width = width;
+            this.height = height;
+            frame.setSize(width, height);
+        }
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponents(g);
-        System.out.println("PC");
 
         if(getImage() == null) return;
 

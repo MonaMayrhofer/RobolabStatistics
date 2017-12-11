@@ -40,17 +40,20 @@ public class App {
         capt.open(0);
         System.out.println("Opened Capture");
 
+        RoboGui.getInstance().setAllClosed(() -> running = false);
+        RoboGui.debug = true;
+
         RoboGui.getInstance().addWindowListener("NormalFrame", new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                running = false;
+                RoboGui.getInstance().close("NormalFrame");
             }
         });
         RoboGui.getInstance().addWindowListener("MotionFrame", new WindowAdapter() {
 
             @Override
             public void windowClosing(WindowEvent e) {
-                running = false;
+                RoboGui.getInstance().close("MotionFrame");
             }
         });
 
@@ -59,16 +62,13 @@ public class App {
         Mat actImg = new Mat();
 
         capt.read(oldImg);
-        RoboGui.getInstance().setFrameSize("NormalFrame", oldImg.width(), oldImg.height());
-        RoboGui.getInstance().setFrameSize("MotionFrame", oldImg.width(), oldImg.height());
-
-
         while(running){
             capt.read(currImg);
             Core.subtract(currImg, oldImg, actImg);
+            Core.bitwise_not(currImg, actImg);
             oldImg = currImg.clone();
-            RoboGui.getInstance().show("NormalFrame", currImg);
-            RoboGui.getInstance().show("MotionFrame", actImg);
+            RoboGui.getInstance().showExists("NormalFrame", currImg);
+            RoboGui.getInstance().showExists("MotionFrame", actImg);
         }
 
         capt.release();
