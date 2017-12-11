@@ -59,13 +59,22 @@ public class App {
 
         Mat currImg = new Mat();
         Mat oldImg = new Mat();
+        Mat partImg = new Mat();
         Mat actImg = new Mat();
 
         capt.read(oldImg);
         while(running){
             capt.read(currImg);
-            Core.subtract(currImg, oldImg, actImg);
-            Core.bitwise_not(currImg, actImg);
+            int width = currImg.width() / 10;
+            int height = currImg.height() / 10;
+            for(int i = 0; i < 10; i++){
+                for(int j = 0; j < 10; j++){
+                    if((i + j) % 2 == 0){
+                        partImg = currImg.submat(width * i, width * i + width, height * j, height * j + height);
+                        Core.bitwise_not(partImg, partImg);
+                    }
+                }
+            }
             oldImg = currImg.clone();
             RoboGui.getInstance().showExists("NormalFrame", currImg);
             RoboGui.getInstance().showExists("MotionFrame", actImg);
