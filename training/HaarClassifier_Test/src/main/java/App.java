@@ -24,16 +24,15 @@ public class App {
         Mat video = new Mat();
         capt.read(video);
 
-        RoboGui.getInstance().show("Video",video);
-        RoboGui.getInstance().get("Video").setFrameSize(video.width(),video.height());
-        RoboGui.getInstance().get("Video").addWindowListener(new WindowAdapter() {
+        RoboGui.getInstance().show("Faces",video);
+        RoboGui.getInstance().get("Faces").addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
                 super.windowClosed(e);
                 running = false;
+                RoboGui.getInstance().close();
             }
         });
-        RoboGui.getInstance().show("Faces",video);
         RoboGui.getInstance().get("Faces").setFrameSize(video.width(),video.height());
 
 
@@ -46,15 +45,19 @@ public class App {
         Imgproc.cvtColor(video,gray, Imgproc.COLOR_RGB2GRAY);
 
 
+        Mat heatMap = new Mat( video.width(), video.height(), CvType.CV_32FC1, Scalar.all(0));
+
         while(running) {
             capt.read(video);
-            RoboGui.getInstance().show("Video", video);
+            Imgproc.cvtColor(video,gray, Imgproc.COLOR_RGB2GRAY);
+            RoboGui.getInstance().show("Gray",gray);
+
             MatOfRect faces = new MatOfRect();
             classifier.detectMultiScale(gray, faces);
             List<Rect> rects = faces.toList();
             rects.forEach((rect) -> {
                 Imgproc.rectangle(
-                        video,
+                        heatMap,
                         new Point(rect.x, rect.y),
                         new Point(rect.x + rect.width, rect.y + rect.height), Scalar.all(0),
                         2
