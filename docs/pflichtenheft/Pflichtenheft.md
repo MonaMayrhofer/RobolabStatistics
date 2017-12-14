@@ -8,7 +8,7 @@
 
 ## Motivation
 
-Dieses Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von Herrn Professor Stütz, in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
+Dieses Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von Herrn Professor Stütz in Auftrag gegeben. Wir sollen uns mit Objekt- bzw. Gesichtserkennung auseinandersetzen und somit das Robolab der HTL-Leonding ein Stück sicherer machen.
 
 ## Inhaltsverzeichnis
 * Ausgangslage und Ist-Zustand
@@ -22,12 +22,14 @@ Dieses Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von He
     * Nicht-Funktionale Anforderungen
 * Mengengerüst
 * Schnittstellenübersicht
+* Lieferumfang
+* Abnahmekriterien
 
 ## Ausgangslage und Ist-Zustand
 
 ### Problembereich
 
-In der HTL-Leonding gibt es im Untergeschoss das Robolab. Dort drinnen arbeiten Schüler und Lehrer zum einen an den NAO's (Humanoide Roboter) und zum anderen - unter der Aufsicht von Professor Stütz - an Raspberries und anderen ähnlichen Projekten.
+In der HTL-Leonding gibt es im Untergeschoss das Robolab. Darin arbeiten Schüler und Lehrer zum einen an den NAO's (Humanoide Roboter) und zum anderen - unter der Aufsicht von Professor Stütz - an Raspberries und anderen ähnlichen Projekten.
 
 ![Plan des Robolabs](./images/Robolab-Plan.jpg "Relevanter Bereich des Robolabs (nicht maßstabsgetreu)")
 
@@ -57,7 +59,7 @@ Verwendet wird das System bzw. dessen generiertes Protokoll nur von den Admins d
 
 ## Sollzustand
 
-Die Software auf dem Raspberry Pi soll Gesichter erkennen und sowohl Daten über die Person, als auch Zeitpunkt der Registrierung in eine Datei speichern. Die Gesichter werden nicht zwingend frontal aufgenommen, demnach muss Winkelagnostizität gegeben sein.
+Die Software auf dem Raspberry Pi erkennt Gesichter und speichert sowohl Daten über die Person, als auch Zeitpunkt des Eintrittsereignisses in eine Datei. Die Gesichter werden nicht zwingend frontal aufgenommen, demnach muss Winkelagnostizität gegeben sein.
 
 ### Funktionale Anforderungen
 
@@ -72,9 +74,9 @@ ID: Anf04: Protokolle über Fileserver zugänglich machen
 
 ### Nicht-Funktionale Anforderungen
 Die Erkennungsgenauigkeit soll möglichst hoch sein, als Mindestzielwert wird 90% in Betracht gezogen.
-Das System soll nicht überlastet werden, wenn es viele Personen gleichzeitig erkennt und zuordnen muss. Es muss nicht zwingend in Echtzeit die Gesichter zuordnen können.
+Das System darf nicht überlastet werden, wenn es viele Personen gleichzeitig erkennt und zuordnen muss. Es muss nicht zwingend in Echtzeit die Gesichter zuordnen können.
 Auch bei ungünstigen Lichtverhältnissen soll die 90%-Quote eingehalten werden.
-Nichterkennungen sollen auch mitprotokolliert werden.
+Nichterkennungen werden auch mitprotokolliert.
 
 ## Mengengerüst
 Folgende Stammdaten werden sich ergeben:
@@ -83,7 +85,7 @@ Jede Person, die Zutrittsauthorisierung hat, wird eingetragen mit:
 * Name
 * Klasse
 * Gesichtsdaten
-Zutrittsberechtigung wird vermutlich in etwa an 100 Personen vergeben.
+Zutrittsberechtigung wird vermutlich an etwa 100 Personen vergeben.
 
 Für jedes Eintrittsereignis wird mitprotokolliert:
 * Uhrzeit und Datum
@@ -92,4 +94,10 @@ Für jedes Eintrittsereignis wird mitprotokolliert:
 Wir rechnen mit max. 20 Eintrittsereignissen pro Tag.
 
 ## Schnittstellenübersicht
-Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer Kamera auf. Die Kamera ist möglicherweise infrarot- oder weitwinkelfähig.
+Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer oder mehreren Kameras auf, eventuell sind die Kameras infrarot- oder weitwinkelfähig.
+
+## Lieferumfang
+Der Lieferumfang umfasst die Software auf dem Git-Repository und die Installation auf einem Raspberry Pi, an dem die Kameras, für die wir uns entscheiden, angeschlossen sind. Welche verwendet werden, wird im Laufe des Projekts bestimmt.
+
+## Abnahmekriterien
+Die Punkte, die in den funktionalen und nicht-funktionalen Anforderungen beschrieben wurden, müssen erreicht werden.
