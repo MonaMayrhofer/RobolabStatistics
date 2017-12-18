@@ -22,6 +22,7 @@ includeTraining 'Opencv_Swing'
 includeTraining 'Robogui_Test'
 includeTraining 'Opencv_BackgroundReduction'
 includeTraining 'ConcurrentMatMath_Test'
+includeTraining 'Tensorflow_Test'
 
 includeLibrary 'robogui'
 includeLibrary 'matmath'
