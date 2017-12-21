@@ -45,22 +45,68 @@ public class App {
             }
         });
 
-        Mat currImg = new Mat();
-        Mat oldImg = new Mat();
-        Mat actImg;
+        Mat img = new Mat();
+        Mat shiftImg;
+        Mat filterImg;
         ConcurrentMatMath cmm;
-
-        capt.read(oldImg);
+        int shift = 0;
+        capt.read(img);
+        shiftImg = img.clone();
+        filterImg = img.clone();
         while(running){
             cmm = new ConcurrentMatMath(8);
-            capt.read(currImg);
-            actImg = currImg.clone();
-
+            capt.read(img);
+            final int currShift = shift += 2;
+            if(shift == img.width()){
+                shift = 0;
+            }
+            cmm.mutateMat((x, y, ci) ->
+                    ci[1].put(y, x, ci[0].get(y, (x + currShift) % ci[0].width()))
+                    , img, shiftImg);
+            cmm = new ConcurrentMatMath(8);
+            /*cmm.mutateMat((x, y, ci) ->
+            {
+                if(x != 0 && x != ci[0].width() - 1 && y != 0 && y != ci[0].height() - 1) {
+                    double[] pixel = ci[0].get(y, x);
+                    boolean bright = true;
+                    for (double c : pixel) {
+                        if (c < 200) {
+                            bright = false;
+                        }
+                    }
+                    if (!bright) {
+                        bright = false;
+                        for (int a = -1; a < 2; a += 2) {
+                            for (int b = -1; b < 2; b += 2) {
+                                pixel = ci[0].get(y + b, x + a);
+                                for (double c : pixel) {
+                                    if (c > 200) {
+                                        bright = true;
+                                    }
+                                }
+                            }
+                        }
+                        if (bright) {
+                            ci[1].put(y, x, new double[]{255.0, 64.0, 64.0});
+                        } else {
+                            ci[1].put(y, x, ci[0].get(y, x));
+                        }
+                    } else {
+                        ci[1].put(y, x, ci[0].get(y, x));
+                    }
+                }else{
+                    ci[1].put(y, x, ci[0].get(y, x));
+                }
+            }, shiftImg, filterImg);*/
             cmm.mutateMat((x, y, ci) -> {
-
-            }, currImg, actImg);
-
-            RoboGui.getInstance().showExists("MotionFrame", actImg);
+                double[] pixel = ci[0].get(y, x);
+                double sum = 0;
+                for(double c : pixel){
+                    sum += c;
+                }
+                ci[0].put(y, x, new double[]{sum / 3, sum / 3, sum / 3});
+            }, shiftImg);
+            RoboGui.getInstance().showExists("MotionFrame", shiftImg);
         }
 
         capt.release();
