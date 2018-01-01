@@ -1,5 +1,5 @@
 @echo off
-set "VIRTUAL_ENV=D:\Dokumente\Schule\SYP\RoboLabStatistics\python\TensorFlow\venv"
+set "VIRTUAL_ENV=C:\Users\Admin\Documents\Schule\SYP\RobolabStatistics\python\Tensorflow\venv"
 
 if defined _OLD_VIRTUAL_PROMPT (
     set "PROMPT=%_OLD_VIRTUAL_PROMPT%"

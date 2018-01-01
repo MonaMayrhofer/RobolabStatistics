@@ -40,7 +40,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="$(if [ "$OSTYPE" "==" "cygwin" ]; then cygpath -u 'D:\Dokumente\Schule\SYP\RoboLabStatistics\python\TensorFlow\venv'; else echo '/D/Dokumente/Schule/SYP/RoboLabStatistics/python/TensorFlow/venv'; fi;)"
+VIRTUAL_ENV="$(if [ "$OSTYPE" "==" "cygwin" ]; then cygpath -u 'C:\Users\Admin\Documents\Schule\SYP\RobolabStatistics\python\Tensorflow\venv'; else echo '/C/Users/Admin/Documents/Schule/SYP/RobolabStatistics/python/Tensorflow/venv'; fi;)"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
