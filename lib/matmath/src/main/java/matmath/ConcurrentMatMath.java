@@ -15,7 +15,7 @@ public class ConcurrentMatMath {
         this.maxThreads = maxThreads;
     }
 
-    public void mutateMat(MatMutator muator, Mat... m){
+    public void mutateMat(MatMutator mutator, Mat... m){
         int width = m[0].width();
         int height = m[0].height();
         for(int i = 1; i < m.length; i++){
@@ -26,7 +26,7 @@ public class ConcurrentMatMath {
         int currX = 0;
         for(int i = 0; i < maxThreads; i++){
             int nextX = currX + width/maxThreads;
-            exec.execute(new MatMutatorService(currX, nextX, 0, height, m, muator));
+            exec.execute(new MatMutatorService(currX, nextX, 0, height, m, mutator));
             currX = nextX;
 
         }
@@ -48,7 +48,7 @@ public class ConcurrentMatMath {
         Mat[] mats;
         MatMutator mutator;
 
-        public MatMutatorService(int startX, int endX, int startY, int endY, Mat[] mats, MatMutator mutator) {
+        private MatMutatorService(int startX, int endX, int startY, int endY, Mat[] mats, MatMutator mutator) {
             this.startX = startX;
             this.endX = endX;
             this.startY = startY;
