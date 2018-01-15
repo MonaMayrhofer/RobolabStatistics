@@ -1,11 +1,7 @@
-## Title like: Filename: Short bug description
+### Location of the bug if found
 
-## Body like:
+### How the program should have behaved
 
-### Describe where the bug is located if you have found it
+### How the program actually behaved
 
-### Describe how the program should have behaved
-
-### Describe how the program actually behaved
-
-### Describe how you made the bug happen
+### How the bug happened

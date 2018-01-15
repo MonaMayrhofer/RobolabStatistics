@@ -5,10 +5,26 @@ def includeTraining(name) {
     project(":"+name).name = "training_"+project(":"+name).name
 }
 
+def includeLibrary(name) {
+    include name
+    project(":"+name).projectDir = file("lib/"+name)
+    project(":"+name).name = "lib_"+project(":"+name).name
+}
+
 rootProject.name = 'RobolabStatistics'
 
 //ThirdParty
-include 'thirdparty'
+include 'gen'
 
 //Training Projects
 includeTraining 'Gradle_Demo'
+includeTraining 'Opencv_Swing'
+includeTraining 'Robogui_Test'
+includeTraining 'Opencv_BackgroundReduction'
+includeTraining 'ConcurrentMatMath_Test'
+includeTraining 'Tensorflow_Test'
+includeTraining 'HaarClassifier_Test'
+includeTraining 'Tensorflow_Training_Mayrhofer'
+
+includeLibrary 'robogui'
+includeLibrary 'matmath'
