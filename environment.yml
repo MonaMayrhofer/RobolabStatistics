@@ -1,0 +1,9 @@
+name: RobolabStatisticsEnv
+channels:
+  - conda-forge
+dependencies:
+  - python=3.6
+  - numpy=1.14.0
+  - opencv=3.3.0
+  - keras=2.0.9
+  - tensorflow=1.4.0
