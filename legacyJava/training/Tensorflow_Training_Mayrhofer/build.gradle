@@ -1,0 +1,12 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies{
+    compile 'org.tensorflow:tensorflow:1.4.0'
+}
+
+mainClassName = 'App'
