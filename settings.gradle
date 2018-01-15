@@ -23,6 +23,8 @@ includeTraining 'Robogui_Test'
 includeTraining 'Opencv_BackgroundReduction'
 includeTraining 'ConcurrentMatMath_Test'
 includeTraining 'Tensorflow_Test'
+includeTraining 'HaarClassifier_Test'
+includeTraining 'Tensorflow_Training_Mayrhofer'
 
 includeLibrary 'robogui'
 includeLibrary 'matmath'
