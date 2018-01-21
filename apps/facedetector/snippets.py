@@ -3,7 +3,7 @@ import numpy as np
 import os.path
 from urllib.request import urlretrieve
 from threading import Thread
-
+import random
 
 def download_xml(url, filename):
     if os.path.isfile(filename):
@@ -24,8 +24,6 @@ download_xml(FRONTALFACE_URL, FRONTALFACE_FILENAME)
 face_cascades = cv2.CascadeClassifier(FRONTALFACE_FILENAME)
 
 cap = cv2.VideoCapture(0)
-
-heatMap = np.zeros((10, 10, 1), dtype=np.uint8)
 
 divSpeed = 5
 frameCount = 0
@@ -49,7 +47,6 @@ def updateCamera():
     while True:
         ret, img = cap.read()
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        heatMap.resize(gray.shape)
         oldFaces = faces
         faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, minSize, maxSize, True)
         if len(faces) != 2:
@@ -59,7 +56,6 @@ def updateCamera():
             else:
                 paused = True
         else:
-            print(len(faces))
             if timeout < 10:
                 timeout += 1
             paused = False
@@ -68,34 +64,41 @@ def updateCamera():
 t = Thread(target=updateCamera)
 t.start()
 
-direction = (1., 1.)
+directX = random.uniform(-0., 0.9)
+direction = (directX, (1-directX) ** 0.5)
 speed = 3
-ballPos = (100., 100.)
+ballPos = (img.shape[1]/2, img.shape[0]/2)
 
 while True:
     if not paused:
         x1, y1, w1, h1 = faces[0]
         x2, y2, w2, h2 = faces[1]
-        if(x1 > x2):
-            face = faces[0]
-            faces[0] = faces[1]
-            faces[1] = face
-        print(ballPos[0], x1 + w1, x2, ballPos[1], y1 + h1, y1, y2 + h2, y2)
-        if (ballPos[0] - 20 < x1 + w1 and ballPos[1] < y1 + h1 and ballPos[1] > y1 and direction[0] < 0)\
-                and (ballPos[0] + 20 > x2 and ballPos[1] < y2 + h2 and ballPos[1] > y2 and direction[0] > 0):
-            direction = (-direction[0], direction[1])
+        if x1 > x2:
+            x1, y1, w1, h1 = faces[1]
+            x2, y2, w2, h2 = faces[0]
+        z1 = x1 + w1
+        t1 = y1 + h1
+        z2 = x2 + w2
+        t2 = y2 + h2
+        if (ballPos[0] - 20 < z1 and ballPos[1] < t1 and ballPos[1] > y1 and direction[0] < 0 and ballPos[0] + 40 > z1)\
+                or (ballPos[0] + 20 > x2 and ballPos[1] < t2 and ballPos[1] > y2 and direction[0] > 0\
+                    and ballPos[0] - 40 < z2):
+            direction = (-direction[0] + random.uniform(-0.1, 0.1), direction[1] + random.uniform(-0.1, 0.1))
         if (ballPos[0] + 20 > img.shape[1] and direction[0] > 0) or (ballPos[0] < 20 and direction[0] < 0):
-            direction = (-direction[0], direction[1])
+            directX = random.uniform(-0., 0.9)
+            direction = (directX, (1 - directX) ** 0.5)
+            speed = 3
+            ballPos = (img.shape[1] / 2, img.shape[0] / 2)
         if (ballPos[1] + 20 > img.shape[0] and direction[1] > 0) or (ballPos[1] < 20 and direction[1] < 0):
             direction = (direction[0], -direction[1])
         ballPos = (ballPos[0] + direction[0]*speed, ballPos[1] + direction[1]*speed)
     realBallPos = (int(ballPos[0]), int(ballPos[1]))
-    cv2.circle(img, realBallPos, 20, (0, 0, 0), 5)
+    cv2.circle(img, realBallPos, 20, (0, 0, 255), 5)
+    cv2.circle(img, realBallPos, 10, (255, 0, 0), 5)
 
+    speed *= 1.001
     cv2.imshow('img', img)
 
-    val, heatThresh = cv2.threshold(heatMap, 128, 255, cv2.THRESH_BINARY)
-    cv2.imshow('heatMap', heatThresh)
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
