@@ -56,15 +56,26 @@ def updateCamera():
             else:
                 paused = True
         else:
-            if timeout < 10:
-                timeout += 1
-            paused = False
+            if faces[0][0] > faces[1][0]:
+                face = faces[0]
+                faces[0] = faces[1]
+                faces[1] = face
+            if faces[0][0] > img.shape[1]/3 or faces[1][0] + faces[1][2] < img.shape[1]/3*2:
+                if timeout > 0:
+                    timeout -= 1
+                    faces = oldFaces
+                else:
+                    paused = True
+            else:
+                if timeout < 10:
+                    timeout += 1
+                paused = False
 
 
 t = Thread(target=updateCamera)
 t.start()
 
-directX = random.uniform(-0., 0.9)
+directX = random.uniform(-0.9, 0.9)
 direction = (directX, (1-directX) ** 0.5)
 speed = 3
 ballPos = (img.shape[1]/2, img.shape[0]/2)
@@ -73,9 +84,6 @@ while True:
     if not paused:
         x1, y1, w1, h1 = faces[0]
         x2, y2, w2, h2 = faces[1]
-        if x1 > x2:
-            x1, y1, w1, h1 = faces[1]
-            x2, y2, w2, h2 = faces[0]
         z1 = x1 + w1
         t1 = y1 + h1
         z2 = x2 + w2
@@ -95,8 +103,9 @@ while True:
     realBallPos = (int(ballPos[0]), int(ballPos[1]))
     cv2.circle(img, realBallPos, 20, (0, 0, 255), 5)
     cv2.circle(img, realBallPos, 10, (255, 0, 0), 5)
-
-    speed *= 1.001
+    cv2.line(img, (int(img.shape[1] / 3), 0), (int(img.shape[1] / 3), img.shape[0]), (0, 0, 0))
+    cv2.line(img, (int(img.shape[1] / 3 * 2), 0), (int(img.shape[1] / 3 * 2), img.shape[0]), (0, 0, 0))
+    speed *= 1.005
     cv2.imshow('img', img)
 
     k = cv2.waitKey(30) & 0xff
