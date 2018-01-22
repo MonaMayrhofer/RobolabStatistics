@@ -97,16 +97,18 @@ while True:
         if (ballPos[1] + 20 > img.shape[0] and direction[1] > 0) or (ballPos[1] < 20 and direction[1] < 0):
             direction = (direction[0], -direction[1])
         ballPos = (ballPos[0] + direction[0] * speed, ballPos[1] + direction[1] * speed)
+        if speed < 20:
+            speed *= 1.005
     realBallPos = (int(ballPos[0]), int(ballPos[1]))
     cv2.circle(img, realBallPos, 20, (0, 0, 255), 5)
     cv2.circle(img, realBallPos, 10, (255, 0, 0), 5)
     cv2.line(img, (int(img.shape[1] / 3), 0), (int(img.shape[1] / 3), img.shape[0]), (0, 0, 0), 2)
     cv2.line(img, (int(img.shape[1] / 3 * 2), 0), (int(img.shape[1] / 3 * 2), img.shape[0]), (0, 0, 0), 2)
-    if speed < 10:
-        speed *= 1.005
 
-    cv2.putText(img, "Paused: {} {}".format(paused, timeout), (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0))
-
+    textPos = int(img.shape[1] / 2) - 100
+    cv2.putText(img, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(img, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(img, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     cv2.imshow('img', img)
     cv2.resizeWindow('img', 900, 300)
 
