@@ -15,30 +15,32 @@ WINDOW_NAME = 'img'
 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_KEEPRATIO)
 fullscreen = False
 
+# ==OPENCV==
 cap = cv2.VideoCapture(0)
-
-divSpeed = 5
-frameCount = 0
-
-minSize = (50, 50)
-maxSize = (200, 200)
-
 _, img = cap.read()
-paused = True
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, minSize, maxSize, True)
+faces = []
+minSize = (50, 50)
+# maxSize = (150, 150)
+maxSize = (300, 300)
 
+# ==GameStats==
+frameCount = 0
+paused = True
+timeout = 10
+
+# ==Ball Stats==
+divSpeed = 5
 directY = random.uniform(-0.9, 0.9)
 direction = ((1 - directY) ** 0.5, directY)
 speed = 3
 ballPos = (img.shape[1] / 2, img.shape[0] / 2)
 
-timeout = 10
 while True:
+    # == Read Image ==
     _, img = cap.read()
     cv2.flip(img, 1, img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    oldFaces = faces
 
     field_size = int(img.shape[1] / 3)
 
@@ -57,18 +59,21 @@ while True:
         faces[1][0] += 2 * field_size
     else:
         if len(facesLeft) == 0 and timeout == 0:
-            cv2.rectangle(img, (0, 0), (field_size, img.shape[0]), (0, 255, 0), 5)
+            cv2.rectangle(img, (0, 0), (field_size, img.shape[0]), (0, 0, 255), 5)
         if len(facesRight) == 0 and timeout == 0:
-            cv2.rectangle(img, (2 * field_size, 0), (3 * field_size, img.shape[0]), (0, 255, 0), 5)
+            cv2.rectangle(img, (2 * field_size, 0), (3 * field_size, img.shape[0]), (0, 0, 255), 5)
         if timeout > 0:
             timeout -= 1
         else:
             paused = True
 
-    for (x, y, w, h) in faces:
+    # == Show detected faces ==
+    for (x, y, w, h) in facesLeft:
         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    for (x, y, w, h) in facesRight:
+        cv2.rectangle(img, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 255, 0), 2)
 
-    # Game Data
+    # == Game Loop ==
     if not paused:
         x1, y1, w1, h1 = faces[0]
         x2, y2, w2, h2 = faces[1]
@@ -91,18 +96,24 @@ while True:
         ballPos = (ballPos[0] + direction[0] * speed, ballPos[1] + direction[1] * speed)
         if speed < 30:
             speed *= 1.005
+
+    # == Draw Ball ==
     realBallPos = (int(ballPos[0]), int(ballPos[1]))
     cv2.circle(img, realBallPos, 20, (0, 0, 255), 5)
     cv2.circle(img, realBallPos, 10, (255, 0, 0), 5)
+
+    # == Draw Fieldlines ==
     cv2.line(img, (int(img.shape[1] / 3), 0), (int(img.shape[1] / 3), img.shape[0]), (0, 0, 0), 2)
     cv2.line(img, (int(img.shape[1] / 3 * 2), 0), (int(img.shape[1] / 3 * 2), img.shape[0]), (0, 0, 0), 2)
 
+    # == Debug Data ==
     textPos = int(img.shape[1] / 2) - 100
     cv2.putText(img, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     cv2.putText(img, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     cv2.putText(img, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     cv2.imshow(WINDOW_NAME, img)
 
+    # == Key-Controls ==
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
