@@ -36,7 +36,7 @@ ballPos = (img.shape[1] / 2, img.shape[0] / 2)
 
 timeout = 10
 while True:
-    ret, img = cap.read()
+    _, img = cap.read()
     cv2.flip(img, 1, img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     oldFaces = faces
