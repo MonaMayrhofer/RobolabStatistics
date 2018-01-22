@@ -2,6 +2,7 @@ import random
 
 import cv2
 import numpy as np
+import time
 
 import robolib.modelmanager.downloader as downloader
 
@@ -30,16 +31,25 @@ paused = True
 timeout = 10
 
 # ==Ball Stats==
-divSpeed = 5
 directY = random.uniform(-0.9, 0.9)
 direction = ((1 - directY) ** 0.5, directY)
-speed = 3
+speed = 30 # Pixel/Sec
 ballPos = (img.shape[1] / 2, img.shape[0] / 2)
 
+# ==FPS==
+lastLoop = time.time()
+
 while True:
+    # == Calc FPS
+    currentTime = time.time()
+    delta = currentTime-lastLoop
+    lastLoop = currentTime
+    fps = 1/delta
+
     # == Read Image ==
     _, img = cap.read()
     cv2.flip(img, 1, img)
+    debug = img.copy()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     field_size = int(img.shape[1] / 3)
@@ -77,24 +87,30 @@ while True:
     if not paused:
         x1, y1, w1, h1 = faces[0]
         x2, y2, w2, h2 = faces[1]
-        z1 = x1 + w1
-        t1 = y1 + h1
-        z2 = x2 + w2
-        t2 = y2 + h2
-        if (ballPos[0] - 20 < z1 and t1 > ballPos[1] > y1 and direction[0] < 0 and ballPos[
-            0] + w1 / 2 > z1) \
-                or (ballPos[0] + 20 > x2 and t2 > ballPos[1] > y2 and direction[0] > 0
-                    and ballPos[0] - w2 / 2 < z2):
+        z1, z2 = x1 + w1, x2 + w2
+        t1, t2 = y1 + h1, y2 + h2
+
+        # Collision detection [Faces]
+        if (ballPos[0] - 20 < z1 and t1 > ballPos[1] > y1 and direction[0] < 0 and ballPos[0] + w1 / 2 > z1) \
+                or (ballPos[0] + 20 > x2 and t2 > ballPos[1] > y2 and direction[0] > 0 and ballPos[0] - w2 / 2 < z2):
             direction = (-direction[0] + random.uniform(-0.1, 0.1), direction[1] + random.uniform(-0.1, 0.1))
+
+        # Goal collision
         if (ballPos[0] + 20 > img.shape[1] and direction[0] > 0) or (ballPos[0] < 20 and direction[0] < 0):
             directX = random.uniform(-0.9, 0.9)
             direction = (directX, (1 - directX) ** 0.5)
-            speed = 3
+            speed = 30
             ballPos = (img.shape[1] / 2, img.shape[0] / 2)
+
+        # Border collision
         if (ballPos[1] + 20 > img.shape[0] and direction[1] > 0) or (ballPos[1] < 20 and direction[1] < 0):
             direction = (direction[0], -direction[1])
-        ballPos = (ballPos[0] + direction[0] * speed, ballPos[1] + direction[1] * speed)
-        if speed < 30:
+
+        # Move ball
+        ballPos = (ballPos[0] + direction[0] * speed * delta, ballPos[1] + direction[1] * speed * delta)
+
+        # Speed increase
+        if speed < 300:
             speed *= 1.005
 
     # == Draw Ball ==
@@ -108,10 +124,12 @@ while True:
 
     # == Debug Data ==
     textPos = int(img.shape[1] / 2) - 100
-    cv2.putText(img, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(img, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(img, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(debug, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.imshow(WINDOW_NAME, img)
+    cv2.imshow('debugwindow', debug)
 
     # == Key-Controls ==
     k = cv2.waitKey(30) & 0xff
