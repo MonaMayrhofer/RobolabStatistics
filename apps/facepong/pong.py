@@ -32,6 +32,7 @@ maxSize = (300, 300)
 frameCount = 0
 paused = True
 timeout = 10
+lastFaces = [(0, 0), (0, 0)]
 
 # ==Ball Stats==
 directY = random.uniform(-0.9, 0.9)
@@ -43,41 +44,73 @@ ballPos = (img.shape[1] / 2, img.shape[0] / 2)
 lastLoop = time.time()
 
 
+def reset():
+    ballBody.position = (width / 2, height / 2)
+    ballBody.velocity = (50, 0)
+
+
 # == Pymunk ==
 pymunkSpace = pymunk.Space()
 pymunkSpace.gravity = (0.0, 0.0)
-pymunkSpace.damping = 0
+pymunkSpace.damping = 0.8
 
-ballBody = pymunk.Body(10, 25)
-ballShape = pymunk.Circle(ballBody, 20, (0, 0))
-
-# ballBody.position = (img.shape[1] / 2, img.shape[0] / 2)
-
-ballBody.position = 100, 100
+mass = 10
+radius = 25
+inertia = pymunk.moment_for_circle(mass, 0, radius, (0, 0))
+ballBody = pymunk.Body(mass, inertia)
+ballShape = pymunk.Circle(ballBody, radius, (0, 0))
+ballShape.elasticity = 0.95
+ballShape.friction = 0.9
 
 pymunkSpace.add(ballBody, ballShape)
 
 faceOneBody = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-faceOneShape = pymunk.Circle(faceOneBody, 20, (0, 0))
+faceOneShape = pymunk.Circle(faceOneBody, 50, (0, 0))
 faceOneShape.elasticity = 1.0
 faceTwoBody = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-faceTwoShape = pymunk.Circle(faceTwoBody, 20, (0, 0))
+faceTwoShape = pymunk.Circle(faceTwoBody, 50, (0, 0))
 faceTwoShape.elasticity = 1.0
 
 faceOneBody.position = (0, 0)
 faceTwoBody.position = (0, 0)
 
+width = img.shape[1]
+height = img.shape[0]
+
 pymunkSpace.add(faceOneBody, faceOneShape)
 pymunkSpace.add(faceTwoBody, faceTwoShape)
 
-static_lines = [pymunk.Segment(pymunkSpace.static_body, (0, 0), (0, img.shape[0]), 2),
-                pymunk.Segment(pymunkSpace.static_body, (0, img.shape[0]), (img.shape[1], img.shape[0]), 2),
-                pymunk.Segment(pymunkSpace.static_body, (img.shape[1], img.shape[0]), (img.shape[1], 0), 2),
-                pymunk.Segment(pymunkSpace.static_body, (img.shape[1], 0), (0, 0), 2)]
-for line in static_lines:
-    line.elasticity = 1.0
+borderThickness = 100
 
-pymunkSpace.add(static_lines)
+bottomBody = pymunk.Body(body_type=pymunk.Body.STATIC)
+bottomShape = pymunk.Poly(bottomBody, [(0, 0), (0, borderThickness), (width, borderThickness), (width, 0)])
+bottomShape.elasticity = 1.0
+bottomBody.position = 0, height
+pymunkSpace.add(bottomBody, bottomShape)
+
+topBody = pymunk.Body(body_type=pymunk.Body.STATIC)
+topShape = pymunk.Poly(topBody, [(0, -borderThickness), (0, 0), (width, 0), (width, -borderThickness)])
+topShape.elasticity = 1.0
+topBody.position = 0, 0
+pymunkSpace.add(topBody, topShape)
+
+leftBody = pymunk.Body(body_type=pymunk.Body.STATIC)
+leftShape = pymunk.Poly(leftBody, [(-borderThickness, -borderThickness), (-borderThickness, height+borderThickness),
+                                   (0, height+borderThickness), (0, -borderThickness)])
+leftShape.elasticity = 1.0
+leftBody.position = 0, 0
+pymunkSpace.add(leftBody, leftShape)
+
+rightBody = pymunk.Body(body_type=pymunk.Body.STATIC)
+rightShape = pymunk.Poly(rightBody, [(0, -borderThickness), (0, height+borderThickness),
+                                     (borderThickness, height+borderThickness), (borderThickness, -borderThickness)])
+rightShape.elasticity = 1.0
+rightBody.position = width, 0
+pymunkSpace.add(rightBody, rightShape)
+
+slowdown = 1
+
+reset()
 
 while True:
     # == Calc FPS
@@ -118,57 +151,45 @@ while True:
             paused = True
 
     # == Show detected faces ==
-    for (x, y, w, h) in facesLeft:
-        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-    for (x, y, w, h) in facesRight:
-        cv2.rectangle(img, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 255, 0), 2)
+    # for (x, y, w, h) in facesLeft:
+    #     cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    # for (x, y, w, h) in facesRight:
+    #     cv2.rectangle(img, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 255, 0), 2)
 
     # == Game Loop ==
     if not paused:
-        if delta != 0:
-            pymunkSpace.step(delta)
 
         x1, y1, w1, h1 = faces[0]
         x2, y2, w2, h2 = faces[1]
 
-        # faceOneBody.position = (x1+w1/2, y1+h1/2)
-        # faceTwoBody.position = (x2+w2/2, y2+h2/2)
-        '''
-        z1, z2 = x1 + w1, x2 + w2
-        t1, t2 = y1 + h1, y2 + h2
-        # Collision detection [Faces]
-        if (ballPos[0] - 20 < z1 and t1 > ballPos[1] > y1 and direction[0] < 0 and ballPos[0] + w1 / 2 > z1) \
-                or (ballPos[0] + 20 > x2 and t2 > ballPos[1] > y2 and direction[0] > 0 and ballPos[0] - w2 / 2 < z2):
-            direction = (-direction[0] + random.uniform(-0.1, 0.1), direction[1] + random.uniform(-0.1, 0.1))
+        currFaces = [(x1 + w1 / 2, y1 + h1 / 2), (x2 + w2 / 2, y2 + h2 / 2)]
+        faceVelocities = np.divide(np.subtract(currFaces, lastFaces), max(delta, 0.00001))
+        lastFaces = currFaces
 
-        # Goal collision
-        if (ballPos[0] + 20 > img.shape[1] and direction[0] > 0) or (ballPos[0] < 20 and direction[0] < 0):
-            directX = random.uniform(-0.9, 0.9)
-            direction = (directX, (1 - directX) ** 0.5)
-            speed = 30
-            ballPos = (img.shape[1] / 2, img.shape[0] / 2)
+        faceOneBody.velocity = faceVelocities[0]*slowdown
+        faceTwoBody.velocity = faceVelocities[1]*slowdown
 
-        # Border collision
-        if (ballPos[1] + 20 > img.shape[0] and direction[1] > 0) or (ballPos[1] < 20 and direction[1] < 0):
-            direction = (direction[0], -direction[1])
-        '''
+        if delta != 0:
+            pymunkSpace.step(delta/slowdown)
+
         # Move ball
-        # ballPos = (ballPos[0] + direction[0] * speed * delta, ballPos[1] + direction[1] * speed * delta)
         ballPos = ballBody.position
-        print(ballPos)
+
+        if ballPos[0] < -20 or ballPos[1] < -20 or ballPos[0] > width+20 or ballPos[1] > height+20:
+            # RESET
+            reset()
+
         # Speed increase
         if speed < 300:
             speed *= 1.005
-
-    ballPos = ballBody.position
 
     # == Draw Ball ==
     realBallPos = (int(ballPos[0]), int(ballPos[1]))
     cv2.circle(img, realBallPos, 20, (0, 0, 255), 5)
     cv2.circle(img, realBallPos, 10, (255, 0, 0), 5)
 
-    cv2.circle(img, (int(faceOneBody.position.x), int(faceOneBody.position.y)), 20, (255, 0, 0), 3)
-    cv2.circle(img, (int(faceTwoBody.position.x), int(faceTwoBody.position.y)), 20, (255, 0, 0), 3)
+    cv2.circle(img, (int(faceOneBody.position.x), int(faceOneBody.position.y)), 50, (255, 0, 0), 3)
+    cv2.circle(img, (int(faceTwoBody.position.x), int(faceTwoBody.position.y)), 50, (255, 0, 0), 3)
 
     # == Draw Fieldlines ==
     cv2.line(img, (int(img.shape[1] / 3), 0), (int(img.shape[1] / 3), img.shape[0]), (0, 0, 0), 2)
