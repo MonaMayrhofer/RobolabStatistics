@@ -46,9 +46,14 @@ def updateCamera():
     timeout = 10
     while True:
         ret, img = cap.read()
+        cv2.flip(img,1,img)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         oldFaces = faces
         faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, minSize, maxSize, True)
+
+        for (x, y, w, h) in faces:
+            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0))
+
         if len(faces) != 2:
             if timeout > 0:
                 timeout -= 1
@@ -61,11 +66,8 @@ def updateCamera():
                 faces[0] = faces[1]
                 faces[1] = face
             if faces[0][0] > img.shape[1]/3 or faces[1][0] + faces[1][2] < img.shape[1]/3*2:
-                if timeout > 0:
-                    timeout -= 1
-                    faces = oldFaces
-                else:
-                    paused = True
+                paused = True
+                timeout = 10
             else:
                 if timeout < 10:
                     timeout += 1
