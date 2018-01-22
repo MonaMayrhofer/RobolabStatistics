@@ -16,6 +16,7 @@ face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 # ==WINDOW==
 WINDOW_NAME = 'img'
 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_KEEPRATIO)
+cv2.resizeWindow(WINDOW_NAME, 1000, 800)
 fullscreen = False
 
 # ==OPENCV==
@@ -44,7 +45,8 @@ lastLoop = time.time()
 
 # == Pymunk ==
 pymunkSpace = pymunk.Space()
-pymunkSpace.gravity = (0.0, 10.0)
+pymunkSpace.gravity = (0.0, 0.0)
+pymunkSpace.damping = 0
 
 ballBody = pymunk.Body(10, 25)
 ballShape = pymunk.Circle(ballBody, 20, (0, 0))
@@ -55,16 +57,27 @@ ballBody.position = 100, 100
 
 pymunkSpace.add(ballBody, ballShape)
 
-faceOneBody = pymunk.Body(body_type=pymunk.Body.STATIC)
+faceOneBody = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
 faceOneShape = pymunk.Circle(faceOneBody, 20, (0, 0))
-faceTwoBody = pymunk.Body(body_type=pymunk.Body.STATIC)
+faceOneShape.elasticity = 1.0
+faceTwoBody = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
 faceTwoShape = pymunk.Circle(faceTwoBody, 20, (0, 0))
+faceTwoShape.elasticity = 1.0
 
 faceOneBody.position = (0, 0)
 faceTwoBody.position = (0, 0)
 
 pymunkSpace.add(faceOneBody, faceOneShape)
 pymunkSpace.add(faceTwoBody, faceTwoShape)
+
+static_lines = [pymunk.Segment(pymunkSpace.static_body, (0, 0), (0, img.shape[0]), 2),
+                pymunk.Segment(pymunkSpace.static_body, (0, img.shape[0]), (img.shape[1], img.shape[0]), 2),
+                pymunk.Segment(pymunkSpace.static_body, (img.shape[1], img.shape[0]), (img.shape[1], 0), 2),
+                pymunk.Segment(pymunkSpace.static_body, (img.shape[1], 0), (0, 0), 2)]
+for line in static_lines:
+    line.elasticity = 1.0
+
+pymunkSpace.add(static_lines)
 
 while True:
     # == Calc FPS
@@ -118,8 +131,8 @@ while True:
         x1, y1, w1, h1 = faces[0]
         x2, y2, w2, h2 = faces[1]
 
-        faceOneBody.position = (x1+w1/2, y1+h1/2)
-        faceTwoBody.position = (x2+w2/2, y2+h2/2)
+        # faceOneBody.position = (x1+w1/2, y1+h1/2)
+        # faceTwoBody.position = (x2+w2/2, y2+h2/2)
         '''
         z1, z2 = x1 + w1, x2 + w2
         t1, t2 = y1 + h1, y2 + h2
