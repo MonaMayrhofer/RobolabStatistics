@@ -1,27 +1,20 @@
-import cv2
-import numpy as np
-import os.path
-from urllib.request import urlretrieve
-from threading import Thread
 import random
 
+import cv2
+import numpy as np
 
-def download_xml(url, filename):
-    if os.path.isfile(filename):
-        print("{} already present, to re-download it remove the file.".format(filename))
-    else:
-        print("{} not found, downloading it from: {} ".format(filename, url))
-        urlretrieve(url, filename)
+import robolib.modelmanager.downloader as downloader
+
+MODEL_FILE = 'FrontalFace.xml'
+downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_DEFAULT, MODEL_FILE)
 
 
-FRONTALFACE_URL = \
-    'https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml'
-FRONTALFACE_FILENAME = 'FrontalFace.xml'
-EYE_URL = 'https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_eye.xml'
+WINDOW_NAME = 'img'
+cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_KEEPRATIO)
 
-download_xml(FRONTALFACE_URL, FRONTALFACE_FILENAME)
+fullscreen = False
 
-face_cascades = cv2.CascadeClassifier(FRONTALFACE_FILENAME)
+face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
 cap = cv2.VideoCapture(0)
 
@@ -109,12 +102,14 @@ while True:
     cv2.putText(img, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     cv2.putText(img, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     cv2.putText(img, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.imshow('img', img)
-    cv2.resizeWindow('img', 900, 300)
+    cv2.imshow(WINDOW_NAME, img)
 
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
+    elif k == 200:
+        cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
+        fullscreen = not fullscreen
 
 cap.release()
 cv2.destroyAllWindows()
