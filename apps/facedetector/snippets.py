@@ -54,41 +54,26 @@ while True:
     facesLeft, rejectLevelsLeft, levelWeightsLeft = face_cascades.detectMultiScale3(gray[0:img.shape[0], 0:fieldsize], 1.3, 5, 0, minSize, maxSize, True)
     facesRight, rejectLevelsRight, levelWeightsRight = face_cascades.detectMultiScale3(gray[0:img.shape[0], 2*fieldsize:3*fieldsize], 1.3, 5, 0, minSize, maxSize, True)
 
-    # TODO Wichtigstes gesicht ermitteln
+    # TODO Wichtigstes Gesicht ermitteln
 
 
     if len(facesLeft) != 0 and len(facesRight) != 0:
+        paused = False
+        timeout = 10
         leftInd = np.argmax(levelWeightsLeft)
         rightInd = np.argmax(levelWeightsRight)
 
         faces = [facesLeft[leftInd], facesRight[rightInd]]
         faces[1][0] += 2*fieldsize
-
+    else:
+        if timeout > 0:
+            timeout -= 1
+        else:
+            paused = True
 
     for (x, y, w, h) in faces:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-
-
-
-    if len(faces) != 2:
-        if timeout > 0:
-            timeout -= 1
-            faces = oldFaces
-        else:
-            paused = True
-    else:
-        if faces[0][0] > faces[1][0]:
-            face = faces[0]
-            faces[0] = faces[1]
-            faces[1] = face
-        if faces[0][0] > img.shape[1]/3 or faces[1][0] + faces[1][2] < img.shape[1]/3*2:
-            paused = True
-            timeout = 10
-        else:
-            if timeout < 10:
-                timeout += 1
-            paused = False
     # Game Data
     if not paused:
         x1, y1, w1, h1 = faces[0]
