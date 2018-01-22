@@ -5,16 +5,15 @@ import numpy as np
 
 import robolib.modelmanager.downloader as downloader
 
+# ==MODEL==
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_DEFAULT, MODEL_FILE)
+face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
-
+# ==WINDOW==
 WINDOW_NAME = 'img'
 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_KEEPRATIO)
-
 fullscreen = False
-
-face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
 cap = cv2.VideoCapture(0)
 
@@ -24,7 +23,7 @@ frameCount = 0
 minSize = (50, 50)
 maxSize = (200, 200)
 
-ret, img = cap.read()
+_, img = cap.read()
 paused = True
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, minSize, maxSize, True)
