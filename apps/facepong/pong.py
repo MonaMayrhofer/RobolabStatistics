@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import time
 
+import pymunk
+
 import robolib.modelmanager.downloader as downloader
 
 # ==MODEL==
@@ -33,11 +35,36 @@ timeout = 10
 # ==Ball Stats==
 directY = random.uniform(-0.9, 0.9)
 direction = ((1 - directY) ** 0.5, directY)
-speed = 30 # Pixel/Sec
+speed = 30  # Pixel/Sec
 ballPos = (img.shape[1] / 2, img.shape[0] / 2)
 
 # ==FPS==
 lastLoop = time.time()
+
+
+# == Pymunk ==
+pymunkSpace = pymunk.Space()
+pymunkSpace.gravity = (0.0, 10.0)
+
+ballBody = pymunk.Body(10, 25)
+ballShape = pymunk.Circle(ballBody, 20, (0, 0))
+
+# ballBody.position = (img.shape[1] / 2, img.shape[0] / 2)
+
+ballBody.position = 100, 100
+
+pymunkSpace.add(ballBody, ballShape)
+
+faceOneBody = pymunk.Body(body_type=pymunk.Body.STATIC)
+faceOneShape = pymunk.Circle(faceOneBody, 20, (0, 0))
+faceTwoBody = pymunk.Body(body_type=pymunk.Body.STATIC)
+faceTwoShape = pymunk.Circle(faceTwoBody, 20, (0, 0))
+
+faceOneBody.position = (0, 0)
+faceTwoBody.position = (0, 0)
+
+pymunkSpace.add(faceOneBody, faceOneShape)
+pymunkSpace.add(faceTwoBody, faceTwoShape)
 
 while True:
     # == Calc FPS
@@ -85,11 +112,17 @@ while True:
 
     # == Game Loop ==
     if not paused:
+        if delta != 0:
+            pymunkSpace.step(delta)
+
         x1, y1, w1, h1 = faces[0]
         x2, y2, w2, h2 = faces[1]
+
+        faceOneBody.position = (x1+w1/2, y1+h1/2)
+        faceTwoBody.position = (x2+w2/2, y2+h2/2)
+        '''
         z1, z2 = x1 + w1, x2 + w2
         t1, t2 = y1 + h1, y2 + h2
-
         # Collision detection [Faces]
         if (ballPos[0] - 20 < z1 and t1 > ballPos[1] > y1 and direction[0] < 0 and ballPos[0] + w1 / 2 > z1) \
                 or (ballPos[0] + 20 > x2 and t2 > ballPos[1] > y2 and direction[0] > 0 and ballPos[0] - w2 / 2 < z2):
@@ -105,18 +138,24 @@ while True:
         # Border collision
         if (ballPos[1] + 20 > img.shape[0] and direction[1] > 0) or (ballPos[1] < 20 and direction[1] < 0):
             direction = (direction[0], -direction[1])
-
+        '''
         # Move ball
-        ballPos = (ballPos[0] + direction[0] * speed * delta, ballPos[1] + direction[1] * speed * delta)
-
+        # ballPos = (ballPos[0] + direction[0] * speed * delta, ballPos[1] + direction[1] * speed * delta)
+        ballPos = ballBody.position
+        print(ballPos)
         # Speed increase
         if speed < 300:
             speed *= 1.005
+
+    ballPos = ballBody.position
 
     # == Draw Ball ==
     realBallPos = (int(ballPos[0]), int(ballPos[1]))
     cv2.circle(img, realBallPos, 20, (0, 0, 255), 5)
     cv2.circle(img, realBallPos, 10, (255, 0, 0), 5)
+
+    cv2.circle(img, (int(faceOneBody.position.x), int(faceOneBody.position.y)), 20, (255, 0, 0), 3)
+    cv2.circle(img, (int(faceTwoBody.position.x), int(faceTwoBody.position.y)), 20, (255, 0, 0), 3)
 
     # == Draw Fieldlines ==
     cv2.line(img, (int(img.shape[1] / 3), 0), (int(img.shape[1] / 3), img.shape[0]), (0, 0, 0), 2)
