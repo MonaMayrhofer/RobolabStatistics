@@ -95,7 +95,7 @@ while True:
         if (ballPos[1] + 20 > img.shape[0] and direction[1] > 0) or (ballPos[1] < 20 and direction[1] < 0):
             direction = (direction[0], -direction[1])
         ballPos = (ballPos[0] + direction[0] * speed, ballPos[1] + direction[1] * speed)
-        if speed < 20:
+        if speed < 25:
             speed *= 1.005
     realBallPos = (int(ballPos[0]), int(ballPos[1]))
     cv2.circle(img, realBallPos, 20, (0, 0, 255), 5)
