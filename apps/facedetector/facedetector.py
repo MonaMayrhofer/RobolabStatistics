@@ -1,28 +1,16 @@
 import cv2
 import numpy as np
-import os.path
-from urllib.request import urlretrieve
 
+import robolib.modelmanager.downloader as downloader
 
-def download_xml(url, filename):
-    if os.path.isfile(filename):
-        print("{} already present, to re-download it remove the file.".format(filename))
-    else:
-        print("{} not found, downloading it from: {} ".format(filename, url))
-        urlretrieve(url, filename)
-
-
-FRONTALFACE_URL = \
-    'https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml'
-FRONTALFACE_FILENAME = 'FrontalFace.xml'
-EYE_URL = 'https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_eye.xml'
+FRONTAL_FACE_FILENAME = 'FrontalFace.xml'
 EYE_FILENAME = 'Eye.xml'
 
-download_xml(FRONTALFACE_URL, FRONTALFACE_FILENAME)
-download_xml(EYE_URL, EYE_FILENAME)
+downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_DEFAULT, FRONTAL_FACE_FILENAME)
+downloader.get_model(downloader.HAARCASCADE_EYE, EYE_FILENAME)
 
 
-face_cascades = cv2.CascadeClassifier(FRONTALFACE_FILENAME)
+face_cascades = cv2.CascadeClassifier(FRONTAL_FACE_FILENAME)
 eye_cascades = cv2.CascadeClassifier(EYE_FILENAME)
 
 cap = cv2.VideoCapture(0)
