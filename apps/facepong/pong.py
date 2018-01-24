@@ -46,7 +46,11 @@ lastLoop = time.time()
 
 def reset():
     ballBody.position = (width / 2, height / 2)
-    ballBody.velocity = (50, 0)
+    dir = random.randint(0, 1)
+    if(dir == 0):
+        ballBody.velocity = (50, 0)
+    else:
+        ballBody.velocity = (-50, 0)
 
 
 # == Pymunk ==
@@ -110,6 +114,9 @@ pymunkSpace.add(rightBody, rightShape)
 
 slowdown = 1
 
+pointsLeft = 0
+pointsRight = 0
+
 reset()
 
 while True:
@@ -121,8 +128,8 @@ while True:
 
     # == Read Image ==
     _, img = cap.read()
+    debug = np.zeros(img.shape)
     cv2.flip(img, 1, img)
-    debug = img.copy()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     field_size = int(img.shape[1] / 3)
@@ -151,10 +158,10 @@ while True:
             paused = True
 
     # == Show detected faces ==
-    # for (x, y, w, h) in facesLeft:
-    #     cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-    # for (x, y, w, h) in facesRight:
-    #     cv2.rectangle(img, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 255, 0), 2)
+    for (x, y, w, h) in facesLeft:
+        cv2.rectangle(debug, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    for (x, y, w, h) in facesRight:
+        cv2.rectangle(debug, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 255, 0), 2)
 
     # == Game Loop ==
     if not paused:
@@ -175,8 +182,14 @@ while True:
         # Move ball
         ballPos = ballBody.position
 
-        if ballPos[0] < -20 or ballPos[1] < -20 or ballPos[0] > width+20 or ballPos[1] > height+20:
+        # Detect goal
+        if ballPos[0] < 25:
             # RESET
+            pointsRight += 1
+            reset()
+        elif ballPos[0] + 25 > width:
+            # RESET
+            pointsLeft += 1
             reset()
 
         # Speed increase
@@ -201,6 +214,14 @@ while True:
     cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(debug, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+    # == Show Points ==
+    pointsPos = textPos + 75
+    if(pointsLeft > 9):
+        pointsPos -= 25
+    cv2.putText(img, "{}:{}".format(pointsLeft, pointsRight), (pointsPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+    # == Update Windows
     cv2.imshow(WINDOW_NAME, img)
     cv2.imshow('debugwindow', debug)
 
@@ -211,6 +232,8 @@ while True:
     elif k == 200:
         cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
         fullscreen = not fullscreen
+    elif k == 114:
+        reset()
 
 cap.release()
 cv2.destroyAllWindows()
