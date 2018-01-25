@@ -55,6 +55,7 @@ def resize(l_tuple, l_new_len):
 
 
 def reset():
+    global speed
     speed = 300
     ballBody.position = (width / 2, height / 2)
     l_dir = random.randint(0, 1)
