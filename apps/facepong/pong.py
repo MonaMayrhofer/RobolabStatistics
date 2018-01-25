@@ -20,7 +20,7 @@ cv2.resizeWindow(WINDOW_NAME, 1000, 800)
 fullscreen = False
 
 # ==OPENCV==
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 _, img = cap.read()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces = []
@@ -142,6 +142,7 @@ def findOneAndOnlyFace(faces):
     return largest
 
 # == Performance ==
+# == Better Faces ==
 
 while True:
     # == Calc FPS
@@ -215,7 +216,7 @@ while True:
             reset()
 
         # Speed increase
-        if speed < 500:
+        if speed < 400:
             speed *= 1.005
 
     # == Draw Ball ==
@@ -237,6 +238,9 @@ while True:
     cv2.putText(debug, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
+    for (x, y, w, h) in faces:
+        cv2.putText(debug, "W{}H{}".format(w, h), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
     # == Show Points
     pointsPos = textPos + 75
     if pointsLeft > 9:
@@ -255,7 +259,8 @@ while True:
         cv2.rectangle(debug, (x, y), (x + w, y + h), (0, 0, 0), 2)
     for (x, y, w, h) in facesRight:
         cv2.rectangle(debug, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 0, 0), 2)
-
+    for (x, y, w, h) in faces:
+        cv2.putText(debug, "W{}H{}".format(w, h), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
 
     # == Key-Controls ==
     k = cv2.waitKey(30) & 0xff
