@@ -66,7 +66,7 @@ def reset():
 
 
 # == Pymunk ==
-insets = (80, 0)  # Top, Bottom
+insets = (80, 20)  # Top, Bottom
 
 pymunkSpace = pymunk.Space()
 pymunkSpace.gravity = (0.0, 0.0)
@@ -264,7 +264,11 @@ while True:
     # == Draw Fieldlines ==
     cv2.line(img, (int(img.shape[1] / 3), 0), (int(img.shape[1] / 3), img.shape[0]), (0, 0, 0), 2)
     cv2.line(img, (int(img.shape[1] / 3 * 2), 0), (int(img.shape[1] / 3 * 2), img.shape[0]), (0, 0, 0), 2)
-    cv2.line(img, (0, insets[0]), (width, insets[0]), (0, 0, 0), 2)
+    # cv2.line(img, (0, insets[0]), (width, insets[0]), (0, 0, 0), 2)
+    # cv2.line(img, (0, height-insets[1]), (width, height-insets[1]), (0, 0, 0), 2)
+
+    cv2.rectangle(img, (0, 0), (width, insets[0]), (255, 255, 255), -1)
+    cv2.rectangle(img, (0, height-insets[1]), (width, height), (255, 255, 255), -1)
 
     # == Debug Data ==
     textPos = int(img.shape[1] / 2) - 100
