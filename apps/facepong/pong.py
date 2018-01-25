@@ -55,6 +55,7 @@ def resize(l_tuple, l_new_len):
 
 
 def reset():
+    speed = 300
     ballBody.position = (width / 2, height / 2)
     l_dir = random.randint(0, 1)
     if l_dir == 0:
@@ -227,7 +228,7 @@ while True:
 
         # Speed increase
         if speed < 400:
-            speed *= 1.005
+            speed *= 1.001
 
     # == Detect win ==
     if winTime == 0 and pointsLeft == 10:
