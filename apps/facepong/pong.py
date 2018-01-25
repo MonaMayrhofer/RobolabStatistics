@@ -129,6 +129,17 @@ pointsRight = 0
 reset()
 debug = np.zeros(img.shape)
 
+def findOneAndOnlyFace(faces):
+    largest = None
+    largestSize = 0
+
+    for (x, y, w, h) in faces:
+        if y > largestSize:
+            largestSize = y
+            largest = [x, y, w, h]
+
+    print(largest)
+    return largest
 
 # ==Performane
 
