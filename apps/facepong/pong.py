@@ -62,6 +62,7 @@ def reset():
     global speed
     speed = 300
     ballBody.position = (width / 2, height / 2)
+    ballPos = ballBody.position
     l_dir = random.randint(0, 1)
     if l_dir == 0:
         ballBody.velocity = (50, 0)
