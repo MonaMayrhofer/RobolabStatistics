@@ -141,7 +141,7 @@ def findOneAndOnlyFace(faces):
     print(largest)
     return largest
 
-# ==Performane
+# == Performance ==
 
 while True:
     # == Calc FPS
