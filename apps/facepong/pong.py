@@ -232,10 +232,10 @@ while True:
             speed *= 1.001
 
     # == Detect win ==
-    if winTime == 0 and pointsLeft == 10:
+    if winTime == 0 and pointsLeft == 5:
         winTime = time.time()
         winPaused = True
-    elif winTime == 0 and pointsRight == 10:
+    elif winTime == 0 and pointsRight == 5:
         winTime = time.time()
         winPaused = True
 
