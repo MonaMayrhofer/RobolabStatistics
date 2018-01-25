@@ -7,6 +7,7 @@ import time
 import pymunk
 
 import robolib.modelmanager.downloader as downloader
+import apps.facepong.camOpener as cam
 
 # ==MODEL==
 MODEL_FILE = 'FrontalFace.xml'
@@ -20,7 +21,7 @@ cv2.resizeWindow(WINDOW_NAME, 1000, 800)
 fullscreen = False
 
 # ==OPENCV==
-cap = cv2.VideoCapture(0)
+cap = cam.openCam()
 _, img = cap.read()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces = []
