@@ -60,6 +60,7 @@ def resize(l_tuple, l_new_len):
 
 def reset():
     global speed
+    global ballPos
     speed = 300
     ballBody.position = (width / 2, height / 2)
     ballPos = ballBody.position
