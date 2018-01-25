@@ -129,10 +129,10 @@ pointsLeft = 0
 pointsRight = 0
 
 reset()
-debug = np.zeros(img.shape)
+debug: debug = np.zeros(img.shape)
 
 winTime = 0
-
+shouldDebug = True
 
 def find_one_and_only_face(l_faces):
 
@@ -265,14 +265,15 @@ while True:
 
     # == Debug Data ==
     textPos = int(img.shape[1] / 2) - 100
-    cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(debug, "WinPaused: {}".format(winPaused), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(debug, "Speed: {}".format(speed), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 125), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    if shouldDebug:
+        cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(debug, "WinPaused: {}".format(winPaused), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(debug, "Speed: {}".format(speed), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 125), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-    for (x, y, w, h) in faces:
-        cv2.putText(debug, "W{}H{}".format(w, h), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        for (x, y, w, h) in faces:
+            cv2.putText(debug, "W{}H{}".format(w, h), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     # == Show Points
     pointsPos = textPos + 75
@@ -282,20 +283,20 @@ while True:
                 (pointsPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     # == Update Windows ==
-    cv2.imshow("Debug", debug)
     cv2.imshow(WINDOW_NAME, img)
-
-    cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(debug, "WinPaused: {}".format(winPaused), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(debug, "Speed: {}".format(speed), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 125), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    for (x, y, w, h) in facesLeft:
-        cv2.rectangle(debug, (x, y), (x + w, y + h), (0, 0, 0), 2)
-    for (x, y, w, h) in facesRight:
-        cv2.rectangle(debug, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 0, 0), 2)
-    for (x, y, w, h) in faces:
-        cv2.putText(debug, "W{}H{}".format(w, h), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    if shouldDebug:
+        cv2.imshow("Debug", debug)
+        cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        cv2.putText(debug, "WinPaused: {}".format(winPaused), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        cv2.putText(debug, "Speed: {}".format(speed), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 125), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        for (x, y, w, h) in facesLeft:
+            cv2.rectangle(debug, (x, y), (x + w, y + h), (0, 0, 0), 2)
+        for (x, y, w, h) in facesRight:
+            cv2.rectangle(debug, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 0, 0), 2)
+        for (x, y, w, h) in faces:
+            cv2.putText(debug, "W{}H{}".format(w, h), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
 
     # == Key-Controls ==
     k = cv2.waitKey(30) & 0xff
@@ -305,6 +306,8 @@ while True:
         pointsLeft += 1
     elif k == 50:
         pointsRight += 1
+    elif k == 100:
+        shouldDebug = not shouldDebug
     elif k == 114:
         reset()
     elif k == 112:
