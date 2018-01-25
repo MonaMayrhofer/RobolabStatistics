@@ -24,7 +24,7 @@ cap = cv2.VideoCapture(1)
 _, img = cap.read()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces = []
-minSize = (50, 50)
+minSize = (20, 20)
 # maxSize = (150, 150)
 maxSize = (300, 300)
 
@@ -62,6 +62,8 @@ def reset():
 
 
 # == Pymunk ==
+insets = (80, 0) #Top, Bottom
+
 pymunkSpace = pymunk.Space()
 pymunkSpace.gravity = (0.0, 0.0)
 
@@ -96,13 +98,13 @@ borderThickness = 100
 bottomBody = pymunk.Body(body_type=pymunk.Body.STATIC)
 bottomShape = pymunk.Poly(bottomBody, [(0, 0), (0, borderThickness), (width, borderThickness), (width, 0)])
 bottomShape.elasticity = 1.0
-bottomBody.position = 0, height
+bottomBody.position = 0, height-insets[1]
 pymunkSpace.add(bottomBody, bottomShape)
 
 topBody = pymunk.Body(body_type=pymunk.Body.STATIC)
 topShape = pymunk.Poly(topBody, [(0, -borderThickness), (0, 0), (width, 0), (width, -borderThickness)])
 topShape.elasticity = 1.0
-topBody.position = 0, 0
+topBody.position = 0, insets[0]
 pymunkSpace.add(topBody, topShape)
 
 leftBody = pymunk.Body(body_type=pymunk.Body.STATIC)
