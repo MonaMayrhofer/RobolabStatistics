@@ -7,7 +7,7 @@ import time
 import pymunk
 
 import robolib.modelmanager.downloader as downloader
-import apps.facepong.camOpener as cam
+import apps.facepong.camOpener as camOpener
 
 # ==MODEL==
 MODEL_FILE = 'FrontalFace.xml'
@@ -20,8 +20,8 @@ cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_KEEPRATIO)
 cv2.resizeWindow(WINDOW_NAME, 1000, 800)
 fullscreen = False
 
-# ==OPENCV==
-cap = cam.openCam()
+# ==OPEN CV==
+cap = camOpener.open_cam()
 _, img = cap.read()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces = []
@@ -34,7 +34,6 @@ frameCount = 0
 paused = True
 timeout = 10
 lastFaces = [(0, 0), (0, 0)]
-debug = False
 
 # ==Ball Stats==
 directY = random.uniform(-0.9, 0.9)
@@ -45,25 +44,27 @@ ballPos = (img.shape[1] / 2, img.shape[0] / 2)
 # ==FPS==
 lastLoop = time.time()
 
-def resize(tuple, newlen):
-    length = (tuple[0]**2+tuple[1]**2)**0.5
-    if length > newlen:
-        normal = (tuple[0]/length*newlen, tuple[1]/length*newlen)
+
+def resize(l_tuple, l_new_len):
+    length = (l_tuple[0]**2+l_tuple[1]**2)**0.5
+    if length > l_new_len:
+        normal = (l_tuple[0]/length*l_new_len, l_tuple[1]/length*l_new_len)
     else:
-        normal = tuple
+        normal = l_tuple
     return normal
+
 
 def reset():
     ballBody.position = (width / 2, height / 2)
-    dir = random.randint(0, 1)
-    if(dir == 0):
+    l_dir = random.randint(0, 1)
+    if l_dir == 0:
         ballBody.velocity = (50, 0)
     else:
         ballBody.velocity = (-50, 0)
 
 
 # == Pymunk ==
-insets = (80, 0) #Top, Bottom
+insets = (80, 0)  # Top, Bottom
 
 pymunkSpace = pymunk.Space()
 pymunkSpace.gravity = (0.0, 0.0)
@@ -130,21 +131,22 @@ pointsRight = 0
 reset()
 debug = np.zeros(img.shape)
 
-def findOneAndOnlyFace(faces):
-    largest = None
-    largestSize = 0
 
-    for (x, y, w, h) in faces:
-        if y > largestSize:
-            largestSize = y
-            largest = [x, y, w, h]
+def find_one_and_only_face(l_faces):
+    largest = None
+    largest_size = 0
+
+    for (lx, ly, lw, lh) in l_faces:
+        if y > largest_size:
+            largest_size = y
+            largest = [lx, ly, lw, lh]
 
     print(largest)
     return largest
 
+
 # == Performance ==
 # == Better Faces ==
-
 while True:
     # == Calc FPS
     currentTime = time.time()
@@ -213,7 +215,8 @@ while True:
             pointsLeft += 1
             reset()
 
-        if ballPos[0] < -borderThickness or ballPos[1] < -borderThickness or ballPos[0] > width+borderThickness or ballPos[1] > height+borderThickness:
+        if ballPos[0] < -borderThickness or ballPos[1] < -borderThickness or ballPos[0] > width+borderThickness or \
+                ballPos[1] > height+borderThickness:
             reset()
 
         # Speed increase
@@ -246,10 +249,11 @@ while True:
     pointsPos = textPos + 75
     if pointsLeft > 9:
         pointsPos -= 25
-    cv2.putText(img, "{}:{}".format(pointsLeft, pointsRight), (pointsPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(img, "{}:{}".format(pointsLeft, pointsRight),
+                (pointsPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     # == Update Windows ==
-    cv2.imshow("Debug",debug)
+    cv2.imshow("Debug", debug)
     cv2.imshow(WINDOW_NAME, img)
 
     cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
@@ -273,7 +277,8 @@ while True:
         pointsLeft = 0
         pointsRight = 0
     elif k == 200:
-        cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
+        cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN,
+                              cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
         fullscreen = not fullscreen
 cap.release()
 cv2.destroyAllWindows()
