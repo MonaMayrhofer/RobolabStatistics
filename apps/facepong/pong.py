@@ -20,7 +20,7 @@ cv2.resizeWindow(WINDOW_NAME, 1000, 800)
 fullscreen = False
 
 # ==OPENCV==
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 _, img = cap.read()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces = []
@@ -231,6 +231,7 @@ while True:
     cv2.putText(img, "{}:{}".format(pointsLeft, pointsRight), (pointsPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     # == Update Windows ==
+    cv2.imshow("Debug",debug)
     cv2.imshow(WINDOW_NAME, img)
 
     cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
@@ -241,6 +242,7 @@ while True:
         cv2.rectangle(debug, (x, y), (x + w, y + h), (0, 0, 0), 2)
     for (x, y, w, h) in facesRight:
         cv2.rectangle(debug, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 0, 0), 2)
+
 
     # == Key-Controls ==
     k = cv2.waitKey(30) & 0xff
@@ -254,8 +256,5 @@ while True:
     elif k == 200:
         cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
         fullscreen = not fullscreen
-    elif k == 98:
-        debug = not debug
-
 cap.release()
 cv2.destroyAllWindows()
