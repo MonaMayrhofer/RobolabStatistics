@@ -129,6 +129,9 @@ pointsRight = 0
 reset()
 debug = np.zeros(img.shape)
 
+winTime = 0
+
+
 def findOneAndOnlyFace(faces):
     largest = None
     largestSize = 0
@@ -143,6 +146,8 @@ def findOneAndOnlyFace(faces):
 
 # == Performance ==
 # == Better Faces ==
+
+winPaused = False
 
 while True:
     # == Calc FPS
@@ -182,7 +187,7 @@ while True:
             paused = True
 
     # == Game Loop ==
-    if not paused:
+    if not paused and not winPaused:
 
         x1, y1, w1, h1 = faces[0]
         x2, y2, w2, h2 = faces[1]
@@ -219,6 +224,28 @@ while True:
         if speed < 400:
             speed *= 1.005
 
+    # == Detect win ==
+    if winTime == 0 and pointsLeft == 10:
+        winTime = time.time()
+        winPaused = True
+    elif winTime == 0 and pointsRight == 10:
+        winTime = time.time()
+        winPaused = True
+
+    if pointsLeft == 10:
+        cv2.putText(img, "Spieler links gewinnt!", (int(width / 2) - 200, int(height / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (0, 255, 0), 2)
+    elif pointsRight == 10:
+        cv2.putText(img, "Spieler rechts gewinnt!", (int(width / 2) - 200, int(height / 2)), cv2.FONT_HERSHEY_SIMPLEX,
+                    1, (0, 255, 0), 2)
+
+    # == Reset on win ==
+    if winTime != 0 and time.time() - winTime > 3:
+        winPaused = False
+        pointsLeft = 0
+        pointsRight = 0
+        winTime = 0
+
     # == Draw Ball ==
     realBallPos = (int(ballPos[0]), int(ballPos[1]))
     cv2.circle(img, realBallPos, 20, (0, 0, 255), 5)
@@ -234,9 +261,10 @@ while True:
     # == Debug Data ==
     textPos = int(img.shape[1] / 2) - 100
     cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(debug, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(debug, "WinPaused: {}".format(winPaused), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(debug, "Speed: {}".format(speed), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 125), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     for (x, y, w, h) in faces:
         cv2.putText(debug, "W{}H{}".format(w, h), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
@@ -252,9 +280,10 @@ while True:
     cv2.imshow(WINDOW_NAME, img)
 
     cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(debug, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(debug, "WinPaused: {}".format(winPaused), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(debug, "Speed: {}".format(speed), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 125), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     for (x, y, w, h) in facesLeft:
         cv2.rectangle(debug, (x, y), (x + w, y + h), (0, 0, 0), 2)
     for (x, y, w, h) in facesRight:
@@ -266,6 +295,10 @@ while True:
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
+    elif k == 49:
+        pointsLeft += 1
+    elif k == 50:
+        pointsRight += 1
     elif k == 114:
         reset()
     elif k == 112:
