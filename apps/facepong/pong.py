@@ -118,6 +118,7 @@ pointsLeft = 0
 pointsRight = 0
 
 reset()
+debug = np.zeros(img.shape)
 
 while True:
     # == Calc FPS
@@ -129,7 +130,6 @@ while True:
     # == Read Image ==
     _, img = cap.read()
     cv2.flip(img, 1, img)
-    debug = np.zeros(img.shape)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     field_size = int(img.shape[1] / 3)
@@ -225,12 +225,24 @@ while True:
     cv2.imshow(WINDOW_NAME, img)
     cv2.imshow('debugwindow', debug)
 
+    cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(debug, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    for (x, y, w, h) in facesLeft:
+        cv2.rectangle(debug, (x, y), (x + w, y + h), (0, 0, 0), 2)
+    for (x, y, w, h) in facesRight:
+        cv2.rectangle(debug, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 0, 0), 2)
+
     # == Key-Controls ==
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
     elif k == 114:
         reset()
+    elif k == 112:
+        pointsLeft = 0
+        pointsRight = 0
     elif k == 200:
         cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
         fullscreen = not fullscreen
