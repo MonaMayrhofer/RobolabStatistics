@@ -33,16 +33,24 @@ frameCount = 0
 paused = True
 timeout = 10
 lastFaces = [(0, 0), (0, 0)]
+debug = False
 
 # ==Ball Stats==
 directY = random.uniform(-0.9, 0.9)
 direction = ((1 - directY) ** 0.5, directY)
-speed = 30  # Pixel/Sec
+speed = 300  # Pixel/Sec
 ballPos = (img.shape[1] / 2, img.shape[0] / 2)
 
 # ==FPS==
 lastLoop = time.time()
 
+def resize(tuple, newlen):
+    length = (tuple[0]**2+tuple[1]**2)**0.5
+    if length > newlen:
+        normal = (tuple[0]/length*newlen, tuple[1]/length*newlen)
+    else:
+        normal = tuple
+    return normal
 
 def reset():
     ballBody.position = (width / 2, height / 2)
@@ -56,7 +64,6 @@ def reset():
 # == Pymunk ==
 pymunkSpace = pymunk.Space()
 pymunkSpace.gravity = (0.0, 0.0)
-pymunkSpace.damping = 0.8
 
 mass = 10
 radius = 25
@@ -70,10 +77,10 @@ pymunkSpace.add(ballBody, ballShape)
 
 faceOneBody = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
 faceOneShape = pymunk.Circle(faceOneBody, 50, (0, 0))
-faceOneShape.elasticity = 1.0
+faceOneShape.elasticity = 0.8
 faceTwoBody = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
 faceTwoShape = pymunk.Circle(faceTwoBody, 50, (0, 0))
-faceTwoShape.elasticity = 1.0
+faceTwoShape.elasticity = 0.8
 
 faceOneBody.position = (0, 0)
 faceTwoBody.position = (0, 0)
@@ -120,6 +127,9 @@ pointsRight = 0
 reset()
 debug = np.zeros(img.shape)
 
+
+# ==Performane
+
 while True:
     # == Calc FPS
     currentTime = time.time()
@@ -157,12 +167,6 @@ while True:
         else:
             paused = True
 
-    # == Show detected faces ==
-    for (x, y, w, h) in facesLeft:
-        cv2.rectangle(debug, (x, y), (x + w, y + h), (255, 0, 0), 2)
-    for (x, y, w, h) in facesRight:
-        cv2.rectangle(debug, (x+2 * field_size, y), (x + w + 2 * field_size, y + h), (0, 255, 0), 2)
-
     # == Game Loop ==
     if not paused:
 
@@ -175,6 +179,8 @@ while True:
 
         faceOneBody.velocity = faceVelocities[0]*slowdown
         faceTwoBody.velocity = faceVelocities[1]*slowdown
+
+        ballBody.velocity = resize(ballBody.velocity, speed)
 
         if delta != 0:
             pymunkSpace.step(delta/slowdown)
@@ -192,8 +198,11 @@ while True:
             pointsLeft += 1
             reset()
 
+        if ballPos[0] < -borderThickness or ballPos[1] < -borderThickness or ballPos[0] > width+borderThickness or ballPos[1] > height+borderThickness:
+            reset()
+
         # Speed increase
-        if speed < 300:
+        if speed < 500:
             speed *= 1.005
 
     # == Draw Ball ==
@@ -223,7 +232,6 @@ while True:
 
     # == Update Windows ==
     cv2.imshow(WINDOW_NAME, img)
-    cv2.imshow('debugwindow', debug)
 
     cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
@@ -246,6 +254,8 @@ while True:
     elif k == 200:
         cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
         fullscreen = not fullscreen
+    elif k == 98:
+        debug = not debug
 
 cap.release()
 cv2.destroyAllWindows()
