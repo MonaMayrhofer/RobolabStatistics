@@ -283,11 +283,11 @@ while True:
             cv2.putText(debug, "W{}H{}".format(w, h), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     # == Show Points
-    pointsPos = textPos + 75
+    pointsPos = textPos + 55
     if pointsLeft > 9:
         pointsPos -= 25
     cv2.putText(img, "{}:{}".format(pointsLeft, pointsRight),
-                (pointsPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                (pointsPos, insets[0]-5), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 2)
 
     # == Update Windows ==
     cv2.imshow(WINDOW_NAME, img)
