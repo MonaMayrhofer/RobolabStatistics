@@ -132,6 +132,8 @@ reset()
 debug = np.zeros(img.shape)
 
 winTime = 0
+
+
 def find_one_and_only_face(l_faces):
 
     largest = None
