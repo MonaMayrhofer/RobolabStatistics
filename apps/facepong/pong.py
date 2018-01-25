@@ -4,10 +4,14 @@ import cv2
 import numpy as np
 import time
 
+import os
 import pymunk
 
 import robolib.modelmanager.downloader as downloader
 import apps.facepong.camOpener as camOpener
+
+# ==Win==
+pointsToWin = camOpener.get_wins()
 
 # ==MODEL==
 MODEL_FILE = 'FrontalFace.xml'
@@ -150,6 +154,14 @@ def find_one_and_only_face(l_faces):
     return largest
 
 
+def win():
+    print("Hallo")
+    r = random.uniform(0, 9999999)
+    d = os.path.dirname(__file__)
+    filename = os.path.join(d, '/winFaces/Test0.png')
+    print(filename)
+    # cv2.imwrite(filename, img)
+
 # == Performance ==
 # == Better Faces ==
 
@@ -229,20 +241,18 @@ while True:
 
         # Speed increase
         if speed < 400:
-            speed *= 1.001
+            speed = int(speed * 1.001)
 
     # == Detect win ==
-    if winTime == 0 and pointsLeft == 10:
+    if winTime == 0 and (pointsLeft == pointsToWin or pointsRight == pointsToWin):
         winTime = time.time()
         winPaused = True
-    elif winTime == 0 and pointsRight == 10:
-        winTime = time.time()
-        winPaused = True
+        win()
 
-    if pointsLeft == 10:
+    if pointsLeft == pointsToWin:
         cv2.putText(img, "Spieler links gewinnt!", (int(width / 2) - 200, int(height / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1,
                     (0, 255, 0), 2)
-    elif pointsRight == 10:
+    elif pointsRight == pointsToWin:
         cv2.putText(img, "Spieler rechts gewinnt!", (int(width / 2) - 200, int(height / 2)), cv2.FONT_HERSHEY_SIMPLEX,
                     1, (0, 255, 0), 2)
 
