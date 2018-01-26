@@ -362,5 +362,9 @@ while True:
         cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN,
                               cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
         fullscreen = not fullscreen
+    elif k == 98:
+        reset()
+        pointsRight = 0
+        pointsLeft = 0
 cap.release()
 cv2.destroyAllWindows()
