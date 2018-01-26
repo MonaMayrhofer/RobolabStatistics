@@ -6,7 +6,6 @@ import time
 
 import os
 import pymunk
-
 import robolib.modelmanager.downloader as downloader
 import apps.facepong.camOpener as camOpener
 
@@ -15,7 +14,7 @@ pointsToWin = camOpener.get_wins()
 
 # ==MODEL==
 MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_DEFAULT, MODEL_FILE)
+downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, True)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
 # ==WINDOW==
@@ -268,7 +267,7 @@ while True:
 
         # Speed increase
         if speed < max_speed():
-            speed = int(speed * 1.001)
+            speed = speed * 1.001
 
     # == Detect win ==
     if winTime == 0 and (pointsLeft == pointsToWin or pointsRight == pointsToWin):
@@ -313,7 +312,7 @@ while True:
         cv2.putText(debug, "Paused: {}".format(paused), (textPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.putText(debug, "WinPaused: {}".format(winPaused), (textPos, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.putText(debug, "Timeout: {}".format(timeout), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.putText(debug, "Speed: {}".format(speed), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(debug, "Speed: {}".format(int(speed)), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 125), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         for (x, y, w, h) in faces:
