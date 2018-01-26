@@ -13,3 +13,12 @@ def get_model(url, filename):
 HAARCASCADE_FRONTALFACE_DEFAULT = \
     'https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml'
 HAARCASCADE_EYE = 'https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_eye.xml'
+
+HAARCASCADE_FRONTALFACE_ALT = \
+    "https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_alt.xml"
+
+HAARCASCADE_FRONTALFACE_ALT2 = \
+    "https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_alt2.xml"
+
+HAARCASCADE_FRONTALFACE_ALT_TREE = \
+    "https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_alt_tree.xml"
