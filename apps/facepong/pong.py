@@ -29,8 +29,8 @@ WINDOW_NAME = 'img'
 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_KEEPRATIO)
 cv2.resizeWindow(WINDOW_NAME, 1000, 800)
 cv2.namedWindow('Debug', cv2.WINDOW_KEEPRATIO)
-cv2.createTrackbar("MinWidth", 'Debug', 20, 200, nothing)
-cv2.createTrackbar("MinHeight", 'Debug', 20, 200, nothing)
+cv2.createTrackbar("MinWidth", 'Debug', 45, 200, nothing)
+cv2.createTrackbar("MinHeight", 'Debug', 45, 200, nothing)
 cv2.createTrackbar("MaxWidth", 'Debug', 300, 600, nothing)
 cv2.createTrackbar("MaxHeight", 'Debug', 300, 600, nothing)
 fullscreen = False
@@ -321,6 +321,7 @@ while True:
         pointsPos -= 25
     cv2.putText(img, "{}:{}".format(pointsLeft, pointsRight),
                 (pointsPos, insets[0]-5), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 2)
+    cv2.putText(img, "Auf {} Punkte".format(pointsToWin), (0, insets[0]-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
 
     # == Update Windows ==
     cv2.imshow(WINDOW_NAME, img)
