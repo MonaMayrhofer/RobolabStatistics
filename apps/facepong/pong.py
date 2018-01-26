@@ -33,6 +33,7 @@ cv2.createTrackbar("MinWidth", 'Debug', 45, 200, nothing)
 cv2.createTrackbar("MinHeight", 'Debug', 45, 200, nothing)
 cv2.createTrackbar("MaxWidth", 'Debug', 300, 600, nothing)
 cv2.createTrackbar("MaxHeight", 'Debug', 300, 600, nothing)
+cv2.createTrackbar("MaxSpeed", 'Debug', 400, 1000, nothing)
 fullscreen = False
 
 
@@ -42,6 +43,10 @@ def min_size():
 
 def max_size():
     return cv2.getTrackbarPos("MaxWidth", 'Debug'), cv2.getTrackbarPos("MaxHeight", 'Debug')
+
+
+def max_speed():
+    return cv2.getTrackbarPos("MaxSpeed", 'Debug')
 
 
 # ==OPEN CV==
@@ -162,8 +167,8 @@ debug = np.zeros(img.shape)
 winTime = 0
 shouldDebug = True
 
-def find_one_and_only_face(l_faces):
 
+def find_one_and_only_face(l_faces):
     largest = None
     largest_size = 0
 
@@ -263,7 +268,7 @@ while True:
             reset()
 
         # Speed increase
-        if speed < 400:
+        if speed < max_speed():
             speed = int(speed * 1.001)
 
     # == Detect win ==
