@@ -2,7 +2,10 @@ import os.path
 from urllib.request import urlretrieve
 
 
-def get_model(url, filename):
+def get_model(url, filename, delete=False):
+    if delete and os.path.isfile(filename):
+        print("Delete-Mode is on. Deleting file")
+        os.remove(filename)
     if os.path.isfile(filename):
         print("{} already present, to re-download it remove the file.".format(filename))
     else:
