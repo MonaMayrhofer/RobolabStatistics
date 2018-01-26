@@ -182,7 +182,6 @@ def find_one_and_only_face(l_faces):
 
 
 def win():
-    print("Hallo")
     r = random.uniform(0, 9999999)
     d = os.path.dirname(__file__)
     filename = os.path.join(d, '/winFaces/Test0.png')
