@@ -19,19 +19,38 @@ downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_DEFAULT, MODEL_FILE)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
 # ==WINDOW==
+
+
+def nothing(a):
+    pass
+
+
 WINDOW_NAME = 'img'
-cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_KEEPRATIO)
-cv2.resizeWindow(WINDOW_NAME, 1000, 800)
+cv2.namedWindow('Debug', cv2.WINDOW_KEEPRATIO)
+cv2.resizeWindow('Debug', 1000, 800)
+cv2.createTrackbar("MinWidth", 'Debug', 20, 200, nothing)
+cv2.createTrackbar("MinHeight", 'Debug', 20, 200, nothing)
+cv2.createTrackbar("MaxWidth", 'Debug', 300, 600, nothing)
+cv2.createTrackbar("MaxHeight", 'Debug', 300, 600, nothing)
 fullscreen = False
+
+
+def min_size():
+    return cv2.getTrackbarPos("MinWidth", 'Debug'), cv2.getTrackbarPos("MinHeight", 'Debug')
+
+
+def max_size():
+    return cv2.getTrackbarPos("MaxWidth", 'Debug'), cv2.getTrackbarPos("MaxHeight", 'Debug')
+
 
 # ==OPEN CV==
 cap = camOpener.open_cam()
 _, img = cap.read()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces = []
-minSize = (20, 20)
+# minSize = (20, 20)
 # maxSize = (150, 150)
-maxSize = (300, 300)
+# maxSize = (300, 300)
 
 # ==GameStats==
 frameCount = 0
@@ -169,6 +188,7 @@ def win():
 
 winPaused = False
 
+
 while True:
     # == Calc FPS
     currentTime = time.time()
@@ -184,9 +204,9 @@ while True:
     field_size = int(img.shape[1] / 3)
 
     facesLeft, rejectLevelsLeft, levelWeightsLeft = face_cascades.detectMultiScale3(gray[0:img.shape[0], 0:field_size],
-                                                                                    1.3, 5, 0, minSize, maxSize, True)
+                                                                                    1.3, 5, 0, min_size(), max_size(), True)
     facesRight, rejectLevelsRight, levelWeightsRight = face_cascades.detectMultiScale3(
-        gray[0:img.shape[0], 2 * field_size:3 * field_size], 1.3, 5, 0, minSize, maxSize, True)
+        gray[0:img.shape[0], 2 * field_size:3 * field_size], 1.3, 5, 0, min_size(), max_size(), True)
 
     if len(facesLeft) != 0 and len(facesRight) != 0:
         paused = False
