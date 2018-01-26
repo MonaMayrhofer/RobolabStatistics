@@ -26,8 +26,9 @@ def nothing(a):
 
 
 WINDOW_NAME = 'img'
+cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_KEEPRATIO)
+cv2.resizeWindow(WINDOW_NAME, 1000, 800)
 cv2.namedWindow('Debug', cv2.WINDOW_KEEPRATIO)
-cv2.resizeWindow('Debug', 1000, 800)
 cv2.createTrackbar("MinWidth", 'Debug', 20, 200, nothing)
 cv2.createTrackbar("MinHeight", 'Debug', 20, 200, nothing)
 cv2.createTrackbar("MaxWidth", 'Debug', 300, 600, nothing)
