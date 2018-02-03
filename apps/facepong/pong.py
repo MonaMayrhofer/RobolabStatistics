@@ -130,6 +130,7 @@ while True:
     _, img = cap.read()
     debug = np.zeros(img.shape)
     cv2.flip(img, 1, img)
+    debug = np.zeros(img.shape)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     field_size = int(img.shape[1] / 3)
@@ -182,7 +183,7 @@ while True:
         # Move ball
         ballPos = ballBody.position
 
-        # Detect goal
+        # Detect goals
         if ballPos[0] < 25:
             # RESET
             pointsRight += 1
@@ -215,13 +216,13 @@ while True:
     cv2.putText(debug, "Speed: {}".format(speed), (textPos, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(debug, "FPS: {:.2f}".format(fps), (textPos, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-    # == Show Points ==
+    # == Show Points
     pointsPos = textPos + 75
-    if(pointsLeft > 9):
+    if pointsLeft > 9:
         pointsPos -= 25
     cv2.putText(img, "{}:{}".format(pointsLeft, pointsRight), (pointsPos, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-    # == Update Windows
+    # == Update Windows ==
     cv2.imshow(WINDOW_NAME, img)
     cv2.imshow('debugwindow', debug)
 
@@ -229,6 +230,8 @@ while True:
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
+    elif k == 114:
+        reset()
     elif k == 200:
         cv2.setWindowProperty(WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL if fullscreen else cv2.WINDOW_FULLSCREEN)
         fullscreen = not fullscreen
