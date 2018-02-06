@@ -202,6 +202,7 @@ while True:
 
     # == Read Image ==
     _, img = cap.read()
+    debug = np.zeros(img.shape)
     cv2.flip(img, 1, img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -365,5 +366,7 @@ while True:
         reset()
         pointsRight = 0
         pointsLeft = 0
+
+
 cap.release()
 cv2.destroyAllWindows()
