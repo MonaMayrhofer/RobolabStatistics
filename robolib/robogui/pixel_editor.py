@@ -6,8 +6,9 @@ def get_pixel_input(rows, cols, name="Edit Image"):
     """Get a small image drawn by the user."""
 
     def draw_circle(event, x, y, flags, param):
-        if event == cv2.EVENT_MOUSEMOVE and flags & cv2.EVENT_FLAG_LBUTTON:
-            img[y, x] = 0 if flags & cv2.EVENT_FLAG_SHIFTKEY else 1
+        if 0 <= x < img.shape[1] and 0 <= y < img.shape[0]:
+            if event in [cv2.EVENT_MOUSEMOVE, cv2.EVENT_LBUTTONDOWN] and flags & cv2.EVENT_FLAG_LBUTTON:
+                img[y, x] = 0 if flags & cv2.EVENT_FLAG_SHIFTKEY else 1
 
     img = np.zeros((rows, cols, 1), np.float32)
     cv2.namedWindow(name, cv2.WINDOW_KEEPRATIO)

@@ -25,7 +25,7 @@ for la, d in zip(labels, data):
             d[1] = 1.0
             d[3] = 1.0
 
-#MACHINE LEARNING STUFF
+# MACHINE LEARNING STUFF
 
 model = Sequential()
 model.add(Dense(4, activation='relu', input_dim=4))
