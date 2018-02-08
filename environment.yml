@@ -9,6 +9,7 @@ dependencies:
   - keras=2.0.9
   - tensorflow=1.4.0
   - tensorflow-tensorboard=0.4.0
+  - matplotlib=2.1.1
   - pip:
     - pymunk
 

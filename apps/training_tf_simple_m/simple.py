@@ -1,5 +1,6 @@
 import tensorflow as tf
 from random import randint
+import matplot
 
 
 def generate_inputs():
@@ -7,8 +8,15 @@ def generate_inputs():
         0.0, 0.0,
         0.0, 0.0
     ]
-    label = randint(0, 3)
-    data[label] = 1.0
+    label = randint(0, 1)
+
+    if label == 0:
+        data[0] = 1.0
+        data[1] = 1.0
+    elif label == 1:
+        data[0] = 1.0
+        data[2] = 1.0
+
     return data, label
 
 
@@ -67,16 +75,22 @@ def model_function(features, labels, mode):
     flat = tf.reshape(features, [4, 1])
 
     class_a = tf.layers.dense(inputs=flat, units=4, name="dense_A_layer", activation=tf.nn.relu)
-    print(class_a)
-    class_b = tf.layers.dense(inputs=class_a, units=1, name="dense_B_layer")
-    print(class_b)
+    class_b = tf.layers.dense(inputs=class_a, units=2, name="dense_B_layer", activation=tf.nn.relu)
+    collector = tf.layers.dense(inputs=class_b, units=1, name="collector_layer")
 
-    final_prediction = tf.argmax(class_b, axis=0, name="prediction_tensor", output_type=tf.int32)
+    final_prediction = tf.argmax(collector, axis=1, name="prediction_tensor")
+
+    if mode == tf.estimator.ModeKeys.PREDICT:
+        print("PredictModel")
+        print("Return")
+        return tf.estimator.EstimatorSpec(mode=mode, predictions=final_prediction)
+
+    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=collector)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         print("TrainModel")
-        loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=class_b)
-        train_op = tf.train.GradientDescentOptimizer(learning_rate=0.001, name="optimizer").minimize(
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+        train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step())
         print("Return")
@@ -84,47 +98,33 @@ def model_function(features, labels, mode):
 
     if mode == tf.estimator.ModeKeys.EVAL:
         print("EvalModel")
-        loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=class_b)
         eval_metric_ops = {
             "accuracy": tf.metrics.accuracy(labels=labels, predictions=final_prediction)
         }
         print("Return")
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
-    if mode == tf.estimator.ModeKeys.PREDICT:
-        print("PredictModel")
-        print("Return")
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=final_prediction)
-
     print("Not a known mode")
     return None
 
 
 def main():
-    tf.logging.set_verbosity(tf.logging.DEBUG)
+    tf.logging.set_verbosity(tf.logging.INFO)
 
     estimator = tf.estimator.Estimator(model_fn=model_function, model_dir="tmp/simplemodel")
 
-    tensors_to_log = {"predictions": "prediction_tensor"}
-    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
-
     print("Training...")
-    estimator.train(input_fn=create_inputs, hooks=[logging_hook], steps=10000)
+    estimator.train(input_fn=create_inputs, hooks=[], steps=200000)
     print("Trained!")
 
-
-    # print("Evaluating...")
-    # evaluation_results = estimator.evaluate(input_fn=create_inputs)
-    # print("Evaluated with")
-    # print(evaluation_results)
     while True:
         print("Predicting...")
 
         data, expected = generate_inputs()
 
-        dataList = [data]
+        data_list = [data]
 
-        predictions = estimator.predict(input_fn=lambda: create_inputs_from(dataList))
+        predictions = estimator.predict(input_fn=lambda: create_inputs_from(data_list))
         for predict in predictions:
             print("{}, expected: {}".format(predict, expected))
             if predict != expected:
