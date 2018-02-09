@@ -14,20 +14,20 @@ DEBUG = False
 # DATA STUFF
 label_labels = ["Horizontal", "Vertikal"]
 labels = np.random.randint(0, 2, size=(1000, 1))
-data = np.zeros(shape=(1000, 4, 4, 1))
+data = np.zeros(shape=(1000, 8, 8, 1))
 
 for la, d in zip(labels, data):
-    img = np.zeros((4, 4))
-    lineZ = np.random.randint(0, 4)
-    endLineZ = np.clip(lineZ + np.random.randint(-1, 2), 0, 4)
+    img = np.zeros((8, 8))
+    lineZ = np.random.randint(0, 8)
+    endLineZ = np.clip(lineZ + np.random.randint(-1, 2), 0, 8)
 
     if la == 0:
-        cv2.line(img, (0, lineZ), (4, endLineZ), 1.0)
+        cv2.line(img, (0, lineZ), (8, endLineZ), 1.0)
     else:
-        cv2.line(img, (lineZ, 0), (endLineZ, 4), 1.0)
+        cv2.line(img, (lineZ, 0), (endLineZ, 8), 1.0)
 
     # d[:] = np.reshape(img, (4*4, ))
-    d[:, :, :] = np.reshape(img, (4, 4, 1))
+    d[:, :, :] = np.reshape(img, (8, 8, 1))
 
     if DEBUG:
         print(label_labels[la[0]])
@@ -38,11 +38,11 @@ for la, d in zip(labels, data):
 # MACHINE LEARNING STUFF
 
 model = Sequential()
-model.add(Conv2D(4, (2, 2), activation='relu', input_shape=(4, 4, 1)))
-model.add(Conv2D(4, (2, 2), activation='relu'))
+model.add(Conv2D(20, (3, 3), activation='relu', input_shape=(8, 8, 1)))
+model.add(Conv2D(10, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
-model.add(Dense(4, activation='relu', input_dim=4))
+model.add(Dense(8*8, activation='relu'))
 model.add(Dense(4, activation='relu'))
 model.add(Dense(2, activation='relu'))
 model.add(Dense(2, activation='softmax'))
@@ -51,10 +51,10 @@ model.compile(optimizer='rmsprop',
               metrics=['accuracy'])
 
 one_hot_labels = keras.utils.to_categorical(labels, num_classes=2)
-model.fit(data, one_hot_labels, epochs=400, batch_size=50)
+model.fit(data, one_hot_labels, epochs=400, batch_size=100)
 
 while True:
-    predict_data = [pixel_editor.get_pixel_input(4, 4)]
+    predict_data = [pixel_editor.get_pixel_input(8, 8)]
     if all(1.0 not in row for row in predict_data):
         break
 
