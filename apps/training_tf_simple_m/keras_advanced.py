@@ -14,20 +14,21 @@ DEBUG = False
 # DATA STUFF
 label_labels = ["Horizontal", "Vertikal"]
 labels = np.random.randint(0, 2, size=(1000, 1))
-data = np.zeros(shape=(1000, 8, 8, 1))
+size = 8
+data = np.zeros(shape=(1000, size, size, 1))
 
 for la, d in zip(labels, data):
-    img = np.zeros((8, 8))
-    lineZ = np.random.randint(0, 8)
-    endLineZ = np.clip(lineZ + np.random.randint(-1, 2), 0, 8)
+    img = np.zeros((size, size))
+    lineZ = np.random.randint(0, size)
+    endLineZ = np.clip(lineZ + np.random.randint(-1, 2), 0, size)
 
     if la == 0:
-        cv2.line(img, (0, lineZ), (8, endLineZ), 1.0)
+        cv2.line(img, (0, lineZ), (size, endLineZ), 1.0)
     else:
-        cv2.line(img, (lineZ, 0), (endLineZ, 8), 1.0)
+        cv2.line(img, (lineZ, 0), (endLineZ, size), 1.0)
 
     # d[:] = np.reshape(img, (4*4, ))
-    d[:, :, :] = np.reshape(img, (8, 8, 1))
+    d[:, :, :] = np.reshape(img, (size, size, 1))
 
     if DEBUG:
         print(label_labels[la[0]])
@@ -38,11 +39,11 @@ for la, d in zip(labels, data):
 # MACHINE LEARNING STUFF
 
 model = Sequential()
-model.add(Conv2D(20, (3, 3), activation='relu', input_shape=(8, 8, 1)))
+model.add(Conv2D(20, (3, 3), activation='relu', input_shape=(size, size, 1)))
 model.add(Conv2D(10, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
-model.add(Dense(8*8, activation='relu'))
+model.add(Dense(size*size, activation='relu'))
 model.add(Dense(4, activation='relu'))
 model.add(Dense(2, activation='relu'))
 model.add(Dense(2, activation='softmax'))
@@ -51,7 +52,7 @@ model.compile(optimizer='rmsprop',
               metrics=['accuracy'])
 
 one_hot_labels = keras.utils.to_categorical(labels, num_classes=2)
-model.fit(data, one_hot_labels, epochs=400, batch_size=100)
+model.fit(data, one_hot_labels, epochs=300, batch_size=100)
 
 while True:
     predict_data = [pixel_editor.get_pixel_input(8, 8)]
@@ -61,6 +62,8 @@ while True:
     if DEBUG:
         print(predict_data)
     output = model.predict(np.array(predict_data), 1, 3)
+    if all(all(n < 0.9 for n in m) for m in output):
+        print("Don't know, will guess: ")
     print(label_labels[np.argmax(output)])
     if DEBUG:
-        print(np.around(output, 1))
+        print(np.around(output, 5))
