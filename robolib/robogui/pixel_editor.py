@@ -1,11 +1,15 @@
 import cv2
 import numpy as np
-from robolib.images.feature_extraction import crop_image_to_info
+from robolib.images.feature_extraction import resize_image_to_info
 
 __DEFAULT_CONTINUE_KEYS = [27, 13, 32]
 
 
-def get_pixel_input(rows, cols, name="Edit Image", dtype=np.float32, low=-1, high=1, continue_keys=None):
+def get_pixel_input_raw(rows, cols, name="Edit Image", dtype=np.float32, low=-1, high=1, continue_keys=None):
+    return np.array(_get_pixel_input_raw(rows, cols, name, dtype, low, high, continue_keys)[:, :])
+
+
+def _get_pixel_input_raw(rows, cols, name="Edit Image", dtype=np.float32, low=-1, high=1, continue_keys=None):
     """Get a small image drawn by the user."""
 
     if continue_keys is None:
@@ -28,7 +32,7 @@ def get_pixel_input(rows, cols, name="Edit Image", dtype=np.float32, low=-1, hig
             break
     cv2.destroyAllWindows()
 
-    return np.asarray(img[:, :])
+    return img
 
 
 def get_drawing_input(dst_rows, dst_cols, inp_rows=None, inp_cols=None, name="Input Drawing", dtype=np.float32, low=-1, high=1, continue_keys=None):
@@ -36,12 +40,10 @@ def get_drawing_input(dst_rows, dst_cols, inp_rows=None, inp_cols=None, name="In
         inp_rows = dst_rows * 2
     if inp_cols is None:
         inp_cols = dst_cols * 2
-    img = get_pixel_input(inp_rows, inp_cols, name, dtype, low, high, continue_keys)
+    img = _get_pixel_input_raw(inp_rows, inp_cols, name, dtype, low, high, continue_keys)
 
-    img = crop_image_to_info(img)
-    img = cv2.resize(src=img, dst=None, dsize=(dst_rows, dst_cols), interpolation=cv2.INTER_NEAREST)
-
-    return img
+    img = resize_image_to_info(img, dst_rows, dst_cols, low, high)
+    return np.array(img[:, :]).reshape((9, 9, 1))
 
 
 def show_image(mat, name="Image", end_key=27, continue_keys=None):

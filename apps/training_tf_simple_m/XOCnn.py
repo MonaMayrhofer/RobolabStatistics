@@ -7,6 +7,7 @@ from keras.layers import MaxPooling2D
 from keras.layers import Flatten
 import robolib.robogui.pixel_editor as pe
 import cv2
+import robolib.images.feature_extraction as extr
 
 DEBUG = True
 
@@ -20,7 +21,7 @@ for la, d in zip(labels, data):
     img.fill(-1)
 
     if la == 0:
-        cv2.ellipse(img, (4, 4), (np.random.randint(1, 4), np.random.randint(1, 4)), 0, 360, 0, 1)
+        cv2.ellipse(img, (4, 4), (np.random.randint(2, 5), np.random.randint(2, 5)), 0, 360, 0, 1)
     else:
         randPointStart = np.random.randint(0, 16)
         randPointEnd = np.random.randint(0, 16)
@@ -29,11 +30,13 @@ for la, d in zip(labels, data):
         randPointEnd = np.random.randint(0, 16)
         cv2.line(img, (8 - int(randPointStart / 4), randPointStart % 4), (int(randPointEnd / 4), 8 - randPointEnd % 4), 1)
 
+    img = extr.resize_image_to_info(img, size, size)
+
     d[:, :, :] = np.reshape(img, (size, size, 1))
 
     if DEBUG:
         if pe.show_image(img):
-            break
+            DEBUG = False
 
 model = Sequential()
 model.add(Conv2D(9, (3, 3), activation='relu', input_shape=(size, size, 1)))
@@ -50,16 +53,18 @@ model.compile(optimizer='rmsprop',
               metrics=['accuracy'])
 
 one_hot_labels = keras.utils.to_categorical(labels, num_classes=2)
-model.fit(data, one_hot_labels, epochs=300, batch_size=100)
+model.fit(data, one_hot_labels, epochs=250, batch_size=80)
 
 while True:
-    predict_data = [pe.get_pixel_input(size, size)]
+    predict_data = pe.get_drawing_input(size, size, size*3, size*3)
+
     if all(1.0 not in row for row in predict_data):
         break
 
-    if DEBUG:
-        print(predict_data)
-    output = model.predict(np.array(predict_data), 1, 3)
+    #    if DEBUG:
+    pe.show_image(predict_data)
+
+    output = model.predict(np.array([predict_data]), 1, 3)
     if all(all(n < 0.9 for n in m) for m in output):
         print("Don't know, will guess: ")
     print(label_labels[np.argmax(output)])
