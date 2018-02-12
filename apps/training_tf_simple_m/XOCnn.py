@@ -8,7 +8,7 @@ from keras.layers import Flatten
 import robolib.robogui.pixel_editor as pe
 import cv2
 
-DEBUG = False
+DEBUG = True
 
 label_labels = ["O", "X"]
 labels = np.random.randint(0, 2, size=(1000, 1))
