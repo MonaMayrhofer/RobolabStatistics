@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from robolib.images.feature_extraction import crop_image_to_info
 
 __DEFAULT_CONTINUE_KEYS = [27, 13, 32]
 
@@ -30,7 +31,20 @@ def get_pixel_input(rows, cols, name="Edit Image", dtype=np.float32, low=-1, hig
     return np.asarray(img[:, :])
 
 
-def show_image(mat, name="Image", end_key=27 , continue_keys=None):
+def get_drawing_input(dst_rows, dst_cols, inp_rows=None, inp_cols=None, name="Input Drawing", dtype=np.float32, low=-1, high=1, continue_keys=None):
+    if inp_rows is None:
+        inp_rows = dst_rows * 2
+    if inp_cols is None:
+        inp_cols = dst_cols * 2
+    img = get_pixel_input(inp_rows, inp_cols, name, dtype, low, high, continue_keys)
+
+    img = crop_image_to_info(img)
+    img = cv2.resize(src=img, dst=None, dsize=(dst_rows, dst_cols), interpolation=cv2.INTER_NEAREST)
+
+    return img
+
+
+def show_image(mat, name="Image", end_key=27, continue_keys=None):
     if continue_keys is None:
         continue_keys = __DEFAULT_CONTINUE_KEYS
 
