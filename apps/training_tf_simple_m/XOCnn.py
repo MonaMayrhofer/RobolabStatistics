@@ -52,8 +52,10 @@ model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
+tbCallback = keras.callbacks.TensorBoard(log_dir="./logs", write_images=True)
+
 one_hot_labels = keras.utils.to_categorical(labels, num_classes=2)
-model.fit(data, one_hot_labels, epochs=250, batch_size=80)
+model.fit(data, one_hot_labels, epochs=250, batch_size=80, callbacks=[tbCallback])
 
 while True:
     predict_data = pe.get_drawing_input(size, size, size*3, size*3)

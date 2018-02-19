@@ -158,3 +158,9 @@ venv.bak/
 exec\.sh
 
 apps/training_tf_simple_m/FrontalFace\.xml
+
+# Model-Extract
+*ModelData*
+
+# Tensorflow
+logs/
