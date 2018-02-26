@@ -164,3 +164,6 @@ apps/training_tf_simple_m/FrontalFace\.xml
 
 # Tensorflow
 logs/
+
+# Trained Keras Models
+*.model
