@@ -40,7 +40,7 @@ one_hot_labels = keras.utils.to_categorical(labels, num_classes=2)
 model.fit(data, one_hot_labels, epochs=400, batch_size=50)
 
 while True:
-    predict_data = np.reshape(pixel_editor.get_pixel_input(2, 2), (4, ))
+    predict_data = np.reshape(pixel_editor.get_pixel_input_raw(2, 2), (4, ))
     if 1.0 not in predict_data:
         break
     print(predict_data)

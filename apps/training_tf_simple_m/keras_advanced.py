@@ -67,7 +67,7 @@ print("Saving model to {}".format(MODEL_FILENAME))
 model.save(MODEL_FILENAME)
 
 while True:
-    predict_data = [pixel_editor.get_pixel_input(size, size)]
+    predict_data = [pixel_editor.get_pixel_input_raw(size, size)]
     if all(1.0 not in row for row in predict_data):
         break
 
