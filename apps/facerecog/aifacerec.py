@@ -128,7 +128,7 @@ siamese_dataset = SiameseNetworkDataset(image_folder_dataset=folder_dataset_trai
 
 test_dataloader = DataLoader(siamese_dataset, num_workers=6, batch_size=1, shuffle=True)
 
-net = SiameseNetwork().cuda()
+net = SiameseNetwork()
 criterion = ContrastiveLoss()
 optimizer = optim.Adam(net.parameters(), lr=0.0005)
 
@@ -139,7 +139,7 @@ iteration_number = 0
 for epoch in range(0, 100):
     for i, data in enumerate(test_dataloader, 0):
         i0, i1, label = data
-        i0, i1, label = Variable(i0).cuda(), Variable(i1).cuda(), Variable(label).cuda()
+        i0, i1, label = Variable(i0), Variable(i1), Variable(label)
         out1, out2 = net(i0, i1)
         optimizer.zero_grad()
         loss_contrastive = criterion(out1, out2, label)
