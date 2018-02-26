@@ -10,19 +10,19 @@ class PlotWindowThread(Thread):
         print("InitS")
         self.is_changed = Event()
         super().__init__()
+
         plt.ion()
+
         self.loss_callback_obj = loss_callback_obj
         fig = plt.figure()
         self.ax = fig.add_subplot(111)
-
-        self.xdata = []
         self.ydata = []
 
-        self.line, = self.ax.plot(self.ydata, 'r-')  # Returns a tuple of line objects, thus the comma
+        self.ax.plot(self.ydata, 'r-')
         self.ax.set_autoscale_on(True)
+
         self.should_run = True
         fig.show()
-        plt.pause(1)
         print("InitE")
 
     def run(self):
@@ -34,8 +34,9 @@ class PlotWindowThread(Thread):
                 continue
             print("Redrawing")
             print(self.ydata)
-            self.ax.plot(self.ydata, 'r-')
-            self.ax.set_xlim(0, len(self.ydata))
+            #self.ax.plot(self.ydata, 'r-')
+            #self.ax.set_xlim(0, len(self.ydata))
+            plt.plot(self.ydata)
             plt.draw()
             plt.pause(1)
             print("Redrawing done")
