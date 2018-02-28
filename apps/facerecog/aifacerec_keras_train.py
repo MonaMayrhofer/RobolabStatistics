@@ -14,7 +14,7 @@ RELEARN = False
 MODEL_FILENAME = "atnt4.model"
 LOSS_PLOT = False
 TENSORBOARD = True
-EPOCHS = 100
+EPOCHS = 1000
 
 
 def euclidean_distance(vects):
@@ -45,7 +45,7 @@ def create_base_network(input_d, hidden_layer_size):
 # get the data
 samp_f = 3
 total_to_samp = 10000
-x, y = gen_data_new(samp_f, total_to_samp)
+x, y = gen_data_new(samp_f, total_to_samp, classes=40)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.25)
 # x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=.30)
 
