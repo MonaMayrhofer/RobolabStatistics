@@ -2,6 +2,11 @@ import keras.backend as K
 import numpy as np
 import os
 import re
+import robolib.datamanager.atntfaces as data
+
+
+def get_data():
+    data.get_data("AtnTFaces", True)
 
 
 def contrastive_loss(y_true, y_pred):

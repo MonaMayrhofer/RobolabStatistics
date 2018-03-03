@@ -7,8 +7,10 @@ from keras.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
 from os import path
 from robolib.kerasplot.plot_callbacks import LossPlotCallback
-from apps.facerecog.aifacerec_keras import contrastive_loss, gen_data_new
+from apps.facerecog.aifacerec_keras import contrastive_loss, gen_data_new, get_data
 import keras.backend as K
+
+get_data()
 
 RELEARN = False
 MODEL_FILENAME = "atnt4.model"

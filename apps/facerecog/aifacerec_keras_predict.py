@@ -1,11 +1,9 @@
 import numpy as np
 from keras.models import load_model
 
-import robolib.datamanager.atntfaces as data
-from apps.facerecog.aifacerec_keras import contrastive_loss, read_pgm
-import matplotlib.pyplot as plt
+from apps.facerecog.aifacerec_keras import contrastive_loss, read_pgm, get_data
 
-data.get_data("AtnTFaces", True)
+get_data()
 
 MODEL_FILENAME = "atnt4.model"
 CLASS = 6
