@@ -15,10 +15,7 @@ while True:
     for i in range(len(faces)):
         x, y, w, h = faces[i]
         face = img[y-10:y+h+11, x-10:x+w+11]
-        if i == 0:
-            resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
-        else:
-            resImg = cv2.hconcat([cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR), resImg])
+        resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
     if len(faces) > 0:
         cv2.imshow('img', resImg)
     k = cv2.waitKey(30) & 0xff
