@@ -2,3 +2,4 @@ MNIST-data
 MNIST_data
 tmp
 KerasAdvancedModel
+*.xml
