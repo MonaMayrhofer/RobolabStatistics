@@ -156,3 +156,14 @@ venv.bak/
 # mypy
 .mypy_cache/
 exec\.sh
+
+apps/training_tf_simple_m/FrontalFace\.xml
+
+# Model-Extract
+*ModelData*
+
+# Tensorflow
+logs/
+
+# Trained Keras Models
+*.model
