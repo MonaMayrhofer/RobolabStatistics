@@ -7,7 +7,7 @@ def get_3bhif_names():
     return next(os.walk("3BHIF"))[1]
 
 
-def load_wurscht_model(name):
+def load_erianet_model(name):
     return load_model(name, custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
 
 
@@ -26,7 +26,7 @@ def contrastive_loss(y_true, y_pred):
     return backend.mean(y_true * backend.square(y_pred) + (1 - y_true) * backend.square(backend.maximum(margin - y_pred, 0)))
 
 
-def create_wurschtnet_base(input_d, hidden_layer_size):
+def create_erianet_base(input_d, hidden_layer_size):
     seq = Sequential()
     for i in range(len(hidden_layer_size)):
         if i == 0:
@@ -37,12 +37,12 @@ def create_wurschtnet_base(input_d, hidden_layer_size):
     return seq
 
 
-def create_wurschtnet(input_dim):
+def create_erianet(input_dim):
     input_size = input_dim[0]*input_dim[1]
     hidden_layer_sizes = [200, 100, 50]
     input_a = Input(shape=(input_size,))
     input_b = Input(shape=(input_size,))
-    base_network = create_wurschtnet_base(input_size, hidden_layer_sizes)
+    base_network = create_erianet_base(input_size, hidden_layer_sizes)
     processed_a = base_network(input_a)
     processed_b = base_network(input_b)
     distance = Lambda(euclidean_distance, output_shape=euclidean_dist_output_shape)([processed_a, processed_b])

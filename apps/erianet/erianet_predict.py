@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from apps.facerecog.aifacerec_keras import read_pgm, get_data
-from apps.wurschtnet.wurschtnet import load_wurscht_model, get_3bhif_names
+from apps.erianet.erianet_util import load_erianet_model, get_3bhif_names
 
 get_data()
 
@@ -39,7 +39,6 @@ def predict_face(input_img, ref_classes, ref_image_index=4):
 
 
 def predict_face_info(input_img, ref_classes, ref_image_index=4):
-    # [Candidates, Probabilities]
     probs = predict_face(input_img, ref_classes, ref_image_index)
     certainties = []
     biggestind = 0
@@ -51,7 +50,7 @@ def predict_face_info(input_img, ref_classes, ref_image_index=4):
     return certainties[0:biggestind+1]
 
 
-model = load_wurscht_model(MODEL_FILENAME)
+model = load_erianet_model(MODEL_FILENAME)
 
 
 name = input("Enter name:")
