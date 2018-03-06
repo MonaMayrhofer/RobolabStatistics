@@ -23,7 +23,7 @@ while True:
     if len(faces) == 1:
         x, y, w, h = faces[0]
         face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
-        resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
+        resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)  # HIER IMST BUGS "imgwarp.cpp:3483: error: (-215) ssize.width > 0 && ssize.height > 0 in function resize"
         if imgNumber == 1 or time.time() - lastTime > 3:
             print("Knips")
             cv2.imwrite(str(name) + "/" + str(imgNumber) + ".pgm", resImg)
