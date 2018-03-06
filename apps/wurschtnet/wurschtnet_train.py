@@ -1,18 +1,16 @@
 from os import path
-from keras import backend  # Needed for the loading of model
+
 from keras.callbacks import TensorBoard
-from keras.models import load_model
 from keras.optimizers import RMSprop
 from sklearn.model_selection import train_test_split
 
-from apps.wurschtnet.wurschtnet import create_wurschtnet, contrastive_loss, load_wurscht_model
+from apps.wurschtnet.wurschtnet import create_wurschtnet, contrastive_loss, load_wurscht_model, get_3bhif_names
 from robolib.datamanager.siamese_data_loader import gen_data_new
 
 MODEL_FILENAME = "TestModel.model"
 RELEARN = False
 
-x, y = gen_data_new(1000, ["Christian", "Joules", "Konstantin", "Maximilian"], "3BHIF", input_image_size=(128, 128),
-                    input_to_output_stride=2)
+x, y = gen_data_new(1000, get_3bhif_names(), "3BHIF", input_image_size=(128, 128), input_to_output_stride=2)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.25)
 input_dim = x_train.shape[2]
 

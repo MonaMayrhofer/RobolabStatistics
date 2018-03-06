@@ -1,9 +1,8 @@
-import numpy as np
-from apps.wurschtnet.wurschtnet import load_wurscht_model
-import cv2
 import matplotlib.pyplot as plt
+import numpy as np
 
 from apps.facerecog.aifacerec_keras import read_pgm, get_data
+from apps.wurschtnet.wurschtnet import load_wurscht_model, get_3bhif_names
 
 get_data()
 
@@ -59,8 +58,7 @@ name = input("Enter name:")
 img = int(input("Which image:"))
 
 image = load_image(name, img)
-names = ["Christian", "Joules", "Konstantin", "Maximilian"]
-
+names = get_3bhif_names()
 probs = predict_face_info(image, names)
 
 for pair in probs:

@@ -1,6 +1,10 @@
 from keras import backend
 from keras.models import Sequential, Model, load_model
 from keras.layers import Input, Dense, Dropout, Lambda
+import os
+
+def get_3bhif_names():
+    return next(os.walk("3BHIF"))[1]
 
 
 def load_wurscht_model(name):
