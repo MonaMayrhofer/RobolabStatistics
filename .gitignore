@@ -167,3 +167,4 @@ logs/
 
 # Trained Keras Models
 *.model
+*.pgm
