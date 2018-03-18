@@ -1,18 +1,5 @@
 import cv2
 import numpy as np
-<<<<<<< Updated upstream
-
-import robolib.modelmanager.downloader as downloader
-
-FRONTAL_FACE_FILENAME = 'FrontalFace.xml'
-EYE_FILENAME = 'Eye.xml'
-
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_DEFAULT, FRONTAL_FACE_FILENAME)
-downloader.get_model(downloader.HAARCASCADE_EYE, EYE_FILENAME)
-
-
-face_cascades = cv2.CascadeClassifier(FRONTAL_FACE_FILENAME)
-=======
 import os.path
 from urllib.request import urlretrieve
 
@@ -36,7 +23,6 @@ download_xml(EYE_URL, EYE_FILENAME)
 
 
 face_cascades = cv2.CascadeClassifier(FRONTALFACE_FILENAME)
->>>>>>> Stashed changes
 eye_cascades = cv2.CascadeClassifier(EYE_FILENAME)
 
 cap = cv2.VideoCapture(0)
