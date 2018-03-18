@@ -19,11 +19,11 @@ cv2.namedWindow('resImg')
 while True:
     ret, img = cap.read()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (100, 100), True)
+    faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (300, 300), True)
     if len(faces) == 1:
         x, y, w, h = faces[0]
         face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
-        resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
+        resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)  # HIER IMST BUGS "imgwarp.cpp:3483: error: (-215) ssize.width > 0 && ssize.height > 0 in function resize"
         if imgNumber == 1 or time.time() - lastTime > 3:
             print("Knips")
             cv2.imwrite(str(name) + "/" + str(imgNumber) + ".pgm", resImg)
