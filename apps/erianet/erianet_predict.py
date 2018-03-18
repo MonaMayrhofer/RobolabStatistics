@@ -1,10 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
-from apps.facerecog.aifacerec_keras import read_pgm, get_data
+from robolib.images.pgmtools import read_pgm
 from apps.erianet.erianet_util import load_erianet_model, get_3bhif_names
-
-get_data()
 
 MODEL_FILENAME = "TestModel.model"
 CLASS = 6
