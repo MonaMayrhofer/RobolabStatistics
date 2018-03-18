@@ -8,7 +8,7 @@ print("Train Finished!")
 name = input("Enter name:")
 img = int(input("Which image:"))
 
-image = load_one_image("3BHIF", name, img)
+image = load_one_image("3BHIF", name, img, True)
 probs = net.predict(image, "3BHIF")
 
 for pair in probs:
