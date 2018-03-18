@@ -1,7 +1,7 @@
 import os
 
 import numpy as np
-
+import matplotlib.pyplot as plt
 from robolib.images.pgmtools import read_pgm
 from robolib.util.random import random_different_numbers
 
@@ -55,3 +55,15 @@ def gen_data_new(train_set_size, class_folder_names, pic_dir, input_image_size=(
     y_train = np.concatenate([y_tr_positive, y_tr_negative], axis=0)
 
     return x_train.astype('float32'), y_train.astype('float32')
+
+
+def load_one_image(referenceimgpath, name, img, show=False, stride=2):
+    img = read_pgm(referenceimgpath + "/" + name + "/" + str(img) + ".pgm")
+    if show:
+        plt.figure(1)
+        plt.imshow(img, cmap='Greys_r')
+        plt.show()
+    img = img[::stride, ::stride]
+    img = img.reshape(img.shape[0] * img.shape[1])
+    img = img.astype("float32")
+    return np.array([img])

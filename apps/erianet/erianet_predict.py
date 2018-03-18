@@ -1,6 +1,5 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from robolib.images.pgmtools import read_pgm
+from robolib.datamanager.siamese_data_loader import load_one_image
 from apps.erianet.erianet_util import load_erianet_model, get_3bhif_names
 
 MODEL_FILENAME = "TestModel.model"
@@ -8,20 +7,8 @@ CLASS = 6
 IMAGE = 3
 
 
-def load_image(name, img, show=True, stride=2):
-    img = read_pgm("3BHIF/" + name + "/" + str(img) + ".pgm")
-    if show:
-        plt.figure(1)
-        plt.imshow(img, cmap='Greys_r')
-        plt.show()
-    img = img[::stride, ::stride]
-    img = img.reshape(img.shape[0] * img.shape[1])
-    img = img.astype("float32")
-    return np.array([img])
-
-
 def match_faces(input_img, ref_class, ref_image_index=4):
-    reference_img = load_image(ref_class, ref_image_index, False)
+    reference_img = load_one_image("3BHIF", ref_class, ref_image_index, False)
     return float(model.predict([input_img, reference_img]))
 
 
@@ -53,7 +40,7 @@ model = load_erianet_model(MODEL_FILENAME)
 name = input("Enter name:")
 img = int(input("Which image:"))
 
-image = load_image(name, img)
+image = load_one_image("3BHIF", name, img)
 names = get_3bhif_names()
 probs = predict_face_info(image, names)
 
