@@ -2,6 +2,7 @@ import cv2
 import time
 import robolib.modelmanager.downloader as downloader
 import os
+import shutil
 
 name = input("Name: ")
 if os.path.isdir(name):
@@ -9,7 +10,7 @@ if os.path.isdir(name):
     while ow != "Y" and ow != "N":
         ow = input("Directory exists. Overwrite it? (Y/N): ")
         if ow == "Y":
-            os.rmdir(name)
+            shutil.rmtree(name)
         elif ow == "N":
             exit(0)
 os.makedirs(name)
