@@ -49,7 +49,7 @@ Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast j
 | Erkennungsgenauigkeit | Erfolgschance, ein Gesicht richtig zuzuordnen
 
 ## Aufgabenstellung
-Die Aufgabe des Projektteams ist es, sich mit Gesichtserkennung zu beschäftigen und vorhandene Frameworks zu nutzen, um ein Programm zu entwickeln, das auf einem Raspberry Pi mit entsprechenden Kameras lauffähig ist. In diesem Programm sind zum einen die Gesichtserkennung zu implementieren, zum anderen die Möglichkeit, daraus Statistiken über den Aufenthalt von Personen im Raum zu generieren und diese den Robolab-Admins zur Verfügung zu stellen. Eine Galerie der geschossenen und verwendeten Fotos soll auch einsehbar sein.
+Die Aufgabe des Projektteams ist es, sich mit Gesichtserkennung zu beschäftigen und vorhandene Frameworks zu nutzen, um ein Programm zu entwickeln, das auf einem Raspberry Pi mit entsprechenden Kameras lauffähig ist. In diesem Programm sind zum einen die Gesichtserkennung zu implementieren, zum anderen die Möglichkeit, daraus Statistiken über den Aufenthalt von Personen im Raum zu generieren und diese den Robolab-Admins zur Verfügung zu stellen. Eine Galerie der geschossenen und verwendeten Fotos soll auch einsehbar sein.\
 Damit die Erkennung möglichst oft und in möglichst kurzer Zeit gelingt, müssen wir uns entscheiden, wie genau das Verhältnis Genauigkeit zu Zeit aussehen soll.
 
 ## Zielsetzung
@@ -60,14 +60,16 @@ Verwendet wird das System bzw. dessen generiertes Protokoll nur von den Admins d
 
 ## Sollzustand
 
-Die Software auf dem Raspberry Pi erkennt Gesichter und speichert sowohl Daten über die Person, als auch Zeitpunkt des Eintrittsereignisses in eine Datei. Die Gesichter werden nicht zwingend frontal aufgenommen, demnach muss Winkelagnostizität gegeben sein.
+Die Software auf dem Raspberry Pi erkennt Gesichter und speichert sowohl Daten über die Person, als auch Zeitpunkt des Eintrittsereignisses in eine Datei. Die Gesichter werden nicht zwingend frontal aufgenommen, demnach muss Winkelagnostizität gegeben sein.\
+Neue Personen können dem System hinzugefügt werden, ohne die Software darauf trainieren zu müssen.
 
 ### Funktionale Anforderungen
 
 ID: Req01: Gesichter erkennen\
 ID: Req02: Gesichter zuordnen\
 ID: Req03: Protokoll erstellen\
-ID: Req04: Protokolle über Fileserver zugänglich machen
+ID: Req04: Protokolle über Fileserver zugänglich machen\
+ID: Req05: Neue Personen dem System hinzufügen
 
 ### RobolabStatistics Use-Case-Diagramm
 
@@ -95,7 +97,7 @@ Für jedes Eintrittsereignis wird mitprotokolliert:
 * Vermutete Person
 * Erkennungssicherheit
 
-Wir rechnen mit max. 20 Eintrittsereignissen pro Tag.
+Es wird mit maximal 20 Eintrittsereignissen pro Tag gerechnet.
 
 ## Schnittstellenübersicht
 Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Raspberry nimmt die nötigen Bilder mit einer oder mehreren Kameras auf, eventuell sind die Kameras infrarot- oder weitwinkelfähig.
