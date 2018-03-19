@@ -26,7 +26,12 @@ class PongFaceDetector:
             elif mx > right_field_end:
                 if bestright is None or face[1] > bestright[1]:
                     bestright = face
-
         return bestleft, bestright
 
+    def get_face_positions(self, img, min_size, max_size, left_field_end, right_field_end):
+        left, right = self.get_faces(img, min_size, max_size, left_field_end, right_field_end)
 
+        left_middle = None if left is None else (left[0][0] + left[0][2]/2, left[0][1] + left[0][3]/2)
+        right_middle = None if right is None else (right[0][0] + right[0][2]/2, right[0][1] + right[0][3]/2)
+
+        return left_middle, right_middle

@@ -4,15 +4,14 @@ import cv2
 import os
 import numpy as np
 import sys
-from apps.facepong import camOpener
+# from apps.facepong import camOpener
 import random
 import time
 import pymunk
-
+from apps.facepong2.pongGame import PongGame
+from apps.facepong2.pongRenderer import PongRenderer
+"""
 #  ==PYGAME==
-pygame.init()
-pygame.display.set_caption("OpenCV camera stream on Pygame")
-screen = pygame.display.set_mode([1280, 720], pygame.FULLSCREEN & 0)
 
 
 # ==Win==
@@ -157,5 +156,8 @@ winPaused = False
 
 
 cv2.destroyAllWindows()
+"""
+
+PongGame(PongRenderer()).run()
 
 print("Goodbye!")
