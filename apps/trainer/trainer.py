@@ -27,6 +27,7 @@ cv2.namedWindow('img')
 cv2.namedWindow('resImg')
 
 taking = False
+series = False
 
 while True:
     ret, img = cap.read()
@@ -40,7 +41,8 @@ while True:
             face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
             resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
             if taking and (imgNumber == 1 or time.time() - lastTime > 3):
-                taking = False
+                if not series:
+                    taking = False
                 cv2.imwrite(str(name) + "/" + str(imgNumber) + ".pgm", resImg)
                 imgNumber = imgNumber + 1
                 lastTime = time.time()
@@ -53,7 +55,12 @@ while True:
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
-    if k == 112:
+    if not taking and k == 112:
         lastTime = time.time()
         taking = True
+    if k == 115:
+        series = not series
+        if not taking:
+            taking = True
+            lastTime = time.time()
 cv2.destroyAllWindows()
