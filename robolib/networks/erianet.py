@@ -17,7 +17,7 @@ class Erianet:
         self.model = None
         if not dont_init:
             if modelpath is None or not path.isfile(modelpath):
-                self.create()
+                self.create(input_image_size, input_to_output_stride)
             else:
                 self.load(modelpath)
 
@@ -36,8 +36,9 @@ class Erianet:
                        callbacks=callbacks)
 
     def create(self, input_image_size=(128, 128), input_to_output_stride=2):
-        self.model = self.__create_erianet(
-            (input_image_size[0] / input_to_output_stride * input_image_size[1] / input_to_output_stride, 1))
+        assert all(np.mod(input_image_size, input_to_output_stride) == (0, 0))
+        self.model = self.__create_erianet((
+            int(input_image_size[0] / input_to_output_stride) * int(input_image_size[1] / input_to_output_stride), 1))
         rms = RMSprop()
         self.model.compile(loss=contrastive_loss, optimizer=rms)
 
