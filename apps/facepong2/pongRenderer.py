@@ -20,7 +20,7 @@ class PongRenderer:
             return image[self.insets[0]:-self.insets[0], :]
         return image
 
-    def render(self, video, physics):
+    def render(self, video, physics, state):
         video = self.__crop_image(video)
         self.screen.fill([0, 0, 0])
         w, h = pygame.display.get_surface().get_size()
@@ -35,11 +35,11 @@ class PongRenderer:
         faceAPos = physics.faceOne.get_pos()
         faceBPos = physics.faceTwo.get_pos()
         # == Circles ==
-        pygame.draw.circle(self.screen, (255, 0, 0), (int(ballPos[0]), int(ballPos[1])), 50)
+        pygame.draw.circle(self.screen, (255, 0, 0), (int(ballPos[0]), int(ballPos[1])), physics.ball.radius)
         if faceAPos is not None:
-            pygame.draw.circle(self.screen, (0, 255, 0), (int(faceAPos[0]), int(faceAPos[1])), 50)
+            pygame.draw.circle(self.screen, (0, 255, 0), (int(faceAPos[0]), int(faceAPos[1])), physics.faceOne.radius)
         if faceBPos is not None:
-            pygame.draw.circle(self.screen, (0, 0, 255), (int(faceBPos[0]), int(faceBPos[1])), 50)
+            pygame.draw.circle(self.screen, (0, 0, 255), (int(faceBPos[0]), int(faceBPos[1])), physics.faceTwo.radius)
         pygame.draw.line(self.screen, (255, 0, 0), (int(video.shape[1] / 3), 0), (int(video.shape[1] / 3), video.shape[0]))
         pygame.draw.line(self.screen, (255, 0, 0), (int(video.shape[1] / 3 * 2), 0),
                          (int(video.shape[1] / 3 * 2), video.shape[0]))
