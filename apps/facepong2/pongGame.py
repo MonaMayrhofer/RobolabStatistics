@@ -5,6 +5,7 @@ from apps.facepong2.pongRenderer import PongRenderer
 from apps.facepong2.pongPhysics import PongPhysics
 import pygame
 import sys
+import time
 
 
 class PongGame:
@@ -20,6 +21,7 @@ class PongGame:
 
     def run(self):
         try:
+            last_tick = time.time()
             while True:
                 print("Loop")
                 # == Calc FPS
@@ -34,12 +36,20 @@ class PongGame:
                 right_face, left_face = self.faceDetector.get_face_positions(img, (30, 30),
                                                                              (300, 300), field_size, field_size*2)
 
+                curr_time = time.time()
+                dt = curr_time-last_tick
+                if right_face is not None:
+                    self.physics.faceOne.push_pos(right_face, dt)
+                if left_face is not None:
+                    self.physics.faceTwo.push_pos(left_face, dt)
+                self.physics.tick(dt)
+                last_tick = curr_time
                 # == Crop Image ==
 
                 # == Debug Data ==
 
                 # == Show Points
-                self.renderer.render(img, (0, 0), right_face, left_face)
+                self.renderer.render(img, self.physics)
 
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:

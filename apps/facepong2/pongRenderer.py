@@ -20,7 +20,7 @@ class PongRenderer:
             return image[self.insets[0]:-self.insets[0], :]
         return image
 
-    def render(self, video, ballPos, faceAPos, faceBPos):
+    def render(self, video, physics):
         video = self.__crop_image(video)
         self.screen.fill([0, 0, 0])
         w, h = pygame.display.get_surface().get_size()
@@ -31,6 +31,9 @@ class PongRenderer:
         frame = pygame.surfarray.make_surface(frame)
         self.screen.blit(frame, (0, 0))
 
+        ballPos = physics.ball.get_pos()
+        faceAPos = physics.faceOne.get_pos()
+        faceBPos = physics.faceTwo.get_pos()
         # == Circles ==
         pygame.draw.circle(self.screen, (255, 0, 0), (int(ballPos[0]), int(ballPos[1])), 50)
         if faceAPos is not None:

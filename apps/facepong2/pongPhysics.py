@@ -11,6 +11,12 @@ class PhysicsObject(metaclass=ABCMeta):
     def set_pos(self, pos):
         self.body.position = pos
 
+    def get_pos(self):
+        return self.body.position
+
+    def push_pos(self, pos, dt):
+        pass
+
 
 class Ball(PhysicsObject):
     def __init__(self):
@@ -66,12 +72,15 @@ class PongPhysics:
 
         pymunkSpace = pymunk.Space()
         pymunkSpace.gravity = (0.0, 0.0)
+        self.space = pymunkSpace
+        self.ball = Ball().add_to(pymunkSpace)
+        self.faceOne = Face().add_to(pymunkSpace)
+        self.faceTwo = Face().add_to(pymunkSpace)
 
-        Ball().add_to(pymunkSpace)
-        faceOne = Face().add_to(pymunkSpace)
-        faceTwo = Face().add_to(pymunkSpace)
-
-        faceOne.set_pos((0, 0))
-        faceTwo.set_pos((0, 0))
+        self.faceOne.set_pos((0, 0))
+        self.faceTwo.set_pos((0, 0))
 
         Borders(width, height).add_to(pymunkSpace)
+
+    def tick(self, delta):
+        self.space.step(delta)
