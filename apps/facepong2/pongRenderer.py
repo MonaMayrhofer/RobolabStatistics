@@ -4,10 +4,13 @@ import cv2
 
 
 class PongRenderer:
-    def __init__(self):
+    def __init__(self, camSize, windowSize):
         pygame.init()
         pygame.display.set_caption("OpenCV camera stream on Pygame")
-        self.screen = pygame.display.set_mode([1280, 720], pygame.FULLSCREEN & 0)
+        self.display = pygame.display.set_mode(windowSize, pygame.FULLSCREEN & 0)
+        self.camSize = camSize
+        self.windowSize = windowSize
+        self.screen = pygame.Surface(camSize)
         self.insets = (0, 0)
 
     def __crop_image(self, image):
@@ -28,20 +31,25 @@ class PongRenderer:
         frame = cv2.cvtColor(video, cv2.COLOR_BGR2RGB)
         frame = np.rot90(frame)
         frame = np.flip(frame, 0)
-        frame = pygame.surfarray.make_surface(frame)
-        self.screen.blit(frame, (0, 0))
 
-        ballPos = physics.ball.get_pos()
-        faceAPos = physics.faceOne.get_pos()
-        faceBPos = physics.faceTwo.get_pos()
-        # == Circles ==
-        pygame.draw.circle(self.screen, (255, 0, 0), (int(ballPos[0]), int(ballPos[1])), physics.ball.radius)
-        if faceAPos is not None:
-            pygame.draw.circle(self.screen, (0, 255, 0), (int(faceAPos[0]), int(faceAPos[1])), physics.faceOne.radius)
-        if faceBPos is not None:
-            pygame.draw.circle(self.screen, (0, 0, 255), (int(faceBPos[0]), int(faceBPos[1])), physics.faceTwo.radius)
-        pygame.draw.line(self.screen, (255, 0, 0), (int(video.shape[1] / 3), 0), (int(video.shape[1] / 3), video.shape[0]))
-        pygame.draw.line(self.screen, (255, 0, 0), (int(video.shape[1] / 3 * 2), 0),
-                         (int(video.shape[1] / 3 * 2), video.shape[0]))
+        state.render(self, frame, physics)
+
+        self.display.blit(self.screen, np.subtract(np.divide(self.windowSize, 2), np.divide(self.camSize, 2)))
 
         pygame.display.update()
+
+    def circle(self, color, center, radius, width=0):
+        pygame.draw.circle(self.screen, color, center, radius, width)
+
+    def line(self, color, start, end, width=1):
+        pygame.draw.line(self.screen, color, start, end, width)
+
+    def text(self, pos, color, msg):
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Helvetica', 30)
+        textsurface = myfont.render(msg, True, color)
+        self.screen.blit(textsurface, pos)
+
+    def draw_background(self, img):
+        frame = pygame.surfarray.make_surface(img)
+        self.screen.blit(frame, (0, 0))

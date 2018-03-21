@@ -23,6 +23,9 @@ class PhysicsObject(metaclass=ABCMeta):
     def nonify(self):
         self.was_none = True
 
+    def is_none(self):
+        return self.was_none
+
     def push_pos(self, pos, dt):
         if pos is None:
             self.nonify()
@@ -156,8 +159,8 @@ class PongPhysics:
     def get_win(self):
         pos = self.ball.get_pos()
         if pos[0] < 0:
-            return -1
-        if pos[0] > self.width():
             return 1
+        if pos[0] > self.width:
+            return -1
         return 0
 

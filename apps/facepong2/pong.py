@@ -158,6 +158,6 @@ winPaused = False
 cv2.destroyAllWindows()
 """
 
-PongGame(PongRenderer()).run()
+PongGame().run()
 
 print("Goodbye!")
