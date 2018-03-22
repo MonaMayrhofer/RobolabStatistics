@@ -160,7 +160,7 @@ class PlayingState(GameState):
         faceAPos = game.physics.faceOne.get_pos()
         faceBPos = game.physics.faceTwo.get_pos()
 
-        renderer.text((-10, None), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), True)
+        renderer.text((None, -30), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), True)
 
         # == Circles ==
         renderer.circle((255, 0, 0),
@@ -186,7 +186,7 @@ class PlayingState(GameState):
 
     def check_state(self, game):
         if game.physics.is_invalid_state():
-            game.reset() # TODO Animation here
+            game.reset()  # TODO Animation here
         self.check_win(game.physics.get_win(), game)
 
     def check_win(self, won_player, game):

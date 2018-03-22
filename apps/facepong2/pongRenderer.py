@@ -51,10 +51,16 @@ class PongRenderer:
         textsurface = myfont.render(msg, True, color)
 
         if pos[0] is None:
-            pos[0] = self.windowSize[0]/2-textsurface.shape.get_width()/2
+            pos = (self.windowSize[0]/2-textsurface.get_width()/2, pos[1])
+
+        if pos[1] < 0:
+            pos = (pos[0], pos[1]+self.screenStart[1])
+
+        if pos[0] < 0:
+            pos = (pos[0]+self.screenStart[0], pos[1])
 
         if out:
-            self.display.blit(textsurface, pos+self.screenStart)
+            self.display.blit(textsurface, pos)
         else:
             self.screen.blit(textsurface, pos)
 
