@@ -22,7 +22,7 @@ class PongGame:
         self.width = img.shape[1]
         self.height = img.shape[0]
         self.third_size = self.width / 3
-        self.renderer = PongRenderer((self.width, self.height), (1920, 1280))
+        self.renderer = PongRenderer((self.width, self.height), (1280, 720))
         self.physics = PongPhysics(self.width, self.height)
         self.state = 0
         self.last_tick = 0
@@ -38,7 +38,7 @@ class PongGame:
 
                 self.state.loop(self, img, delta)
 
-                self.renderer.render(img, self.physics, self.state)
+                self.renderer.render(img, self, self.state)
 
                 self.handle_events()
 
@@ -83,6 +83,9 @@ class PongGame:
         self.last_tick = curr_time
         return dt
 
+    def win(self, plr):
+        self.wins[(plr+1)/2] += 1
+
 
 class GameState(metaclass=ABCMeta):
     @abstractmethod
@@ -90,12 +93,12 @@ class GameState(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def render(self, renderer: PongRenderer, video, physics: PongPhysics):
+    def render(self, renderer: PongRenderer, video, game: PongGame):
         pass
 
 
 class WinState(GameState):
-    def render(self, renderer: PongRenderer, video, physics: PongPhysics):
+    def render(self, renderer: PongRenderer, video, game: PongGame):
         renderer.draw_background(video)
         renderer.text((0, 0), (255, 255, 255), "Won {0}".format(self.player))
 
@@ -111,7 +114,7 @@ class WinState(GameState):
 
 
 class ReadyState(GameState):
-    def render(self, renderer, video, physics):
+    def render(self, renderer, video, game: PongGame):
         mat = np.zeros(video.shape, dtype=np.float32)
         mat.fill(0.3)
 
@@ -150,22 +153,24 @@ class PlayingState(GameState):
     def __init__(self):
         self.timeout = 0
 
-    def render(self, renderer, video, physics):
+    def render(self, renderer: PongRenderer, video, game: PongGame):
         renderer.draw_background(video)
 
-        ballPos = physics.ball.get_pos()
-        faceAPos = physics.faceOne.get_pos()
-        faceBPos = physics.faceTwo.get_pos()
+        ballPos = game.physics.ball.get_pos()
+        faceAPos = game.physics.faceOne.get_pos()
+        faceBPos = game.physics.faceTwo.get_pos()
+
+        renderer.text((-10, None), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), True)
 
         # == Circles ==
         renderer.circle((255, 0, 0),
-                        (int(ballPos[0]), int(ballPos[1])), physics.ball.radius)
+                        (int(ballPos[0]), int(ballPos[1])), game.physics.ball.radius)
         if faceAPos is not None:
             renderer.circle((0, 255, 0),
-                            (int(faceAPos[0]), int(faceAPos[1])), physics.faceOne.radius)
+                            (int(faceAPos[0]), int(faceAPos[1])), game.physics.faceOne.radius)
         if faceBPos is not None:
             renderer.circle((0, 0, 255),
-                            (int(faceBPos[0]), int(faceBPos[1])), physics.faceTwo.radius)
+                            (int(faceBPos[0]), int(faceBPos[1])), game.physics.faceTwo.radius)
         renderer.line((255, 0, 0),
                       (int(video.shape[0] / 3), 0), (int(video.shape[0] / 3), video.shape[1]))
         renderer.line((255, 0, 0), (int(video.shape[0] / 3 * 2), 0),
@@ -186,6 +191,7 @@ class PlayingState(GameState):
 
     def check_win(self, won_player, game):
         if won_player != 0:
+            game.win(won_player)
             if won_player < 0:
                 game.state = WinState(won_player)
             else:

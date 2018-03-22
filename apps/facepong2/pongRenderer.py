@@ -12,6 +12,7 @@ class PongRenderer:
         self.windowSize = windowSize
         self.screen = pygame.Surface(camSize)
         self.insets = (0, 0)
+        self.screenStart = np.subtract(np.divide(self.windowSize, 2), np.divide(self.camSize, 2))
 
     def __crop_image(self, image):
         assert self.insets[0] >= 0 and self.insets[1] >= 0
@@ -23,7 +24,7 @@ class PongRenderer:
             return image[self.insets[0]:-self.insets[0], :]
         return image
 
-    def render(self, video, physics, state):
+    def render(self, video, game, state):
         video = self.__crop_image(video)
         self.screen.fill([0, 0, 0])
         w, h = pygame.display.get_surface().get_size()
@@ -32,9 +33,9 @@ class PongRenderer:
         frame = np.rot90(frame)
         frame = np.flip(frame, 0)
 
-        state.render(self, frame, physics)
+        state.render(self, frame, game)
 
-        self.display.blit(self.screen, np.subtract(np.divide(self.windowSize, 2), np.divide(self.camSize, 2)))
+        self.display.blit(self.screen, self.screenStart)
 
         pygame.display.update()
 
@@ -44,11 +45,18 @@ class PongRenderer:
     def line(self, color, start, end, width=1):
         pygame.draw.line(self.screen, color, start, end, width)
 
-    def text(self, pos, color, msg):
+    def text(self, pos, color, msg, out=False):
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 30)
         textsurface = myfont.render(msg, True, color)
-        self.screen.blit(textsurface, pos)
+
+        if pos[0] is None:
+            pos[0] = self.windowSize[0]/2-textsurface.shape.get_width()/2
+
+        if out:
+            self.display.blit(textsurface, pos+self.screenStart)
+        else:
+            self.screen.blit(textsurface, pos)
 
     def draw_background(self, img):
         frame = pygame.surfarray.make_surface(img)
