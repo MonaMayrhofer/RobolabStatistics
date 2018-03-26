@@ -75,4 +75,5 @@ while True:
         if not taking:
             taking = True
             lastTime = time.time()
+cap.release()
 cv2.destroyAllWindows()
