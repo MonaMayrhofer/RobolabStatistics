@@ -1,3 +1,15 @@
+"""
+How to use:
+Start script.
+Enter directory name of person.
+If the directory exists, you can either overwrite it or exit the program.
+When the 2 Windows appear, check if the grey one reacts to the face.
+When pressing 'P' a picture will be taken after the 3 seconds countdown.
+With 'S' you can toggle a series of pictures like you press 'P' constantly.
+After 10 pictures the program will finish.
+The pictures will be named like [1-10].pgm.
+The more different the faces are, the better.
+"""
 import cv2
 import time
 import robolib.modelmanager.downloader as downloader
@@ -40,10 +52,10 @@ while True:
         else:
             face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
             resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
-            if taking and (imgNumber == 1 or time.time() - lastTime > 3):
+            if taking and time.time() - lastTime > 3:
                 if not series:
                     taking = False
-                cv2.imwrite(str(name) + "/" + str(imgNumber) + ".pgm", resImg)
+                cv2.imwrite(name + "/" + str(imgNumber) + ".pgm", resImg)
                 imgNumber = imgNumber + 1
                 lastTime = time.time()
                 if imgNumber == 11:
