@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 import robolib.modelmanager.downloader as downloader
 
 MODEL_FILE = 'FrontalFace.xml'
@@ -8,56 +7,68 @@ face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
 cap = cv2.VideoCapture(0)
 facewindows = 0
+namelist = []
+timeoutlist = []
 
 
 def get_resized_faces(imgtoresize):
     gray = cv2.cvtColor(imgtoresize, cv2.COLOR_BGR2GRAY)
     faces, rejectlevels, levelleights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (480, 480), True)
-    facecount = 0
-    for _ in faces:
-        x, y, w, h = faces[0]
-        if not (int(y - h * 0.2) <= 0 or int(x - w * 0.2) <= 0 or int(y + h * 1.2) >= imgtoresize.shape[1] or int(x + w * 1.2) >= imgtoresize.shape[0]):
-            facecount += 1
-    print(facecount)
-    resfaces = np.zeros((facecount, 128, 128), dtype=np.uint8)
-    index = 0
+    resfaces = []
     for _ in faces:
         x, y, w, h = faces[0]
         if int(y - h * 0.2) <= 0 or int(x - w * 0.2) <= 0 or int(y + h * 1.2) >= imgtoresize.shape[1] or int(x + w * 1.2) >= imgtoresize.shape[0]:
             continue
         face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
-        resimg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
-        resfaces[index] = resimg
-        index += 1
+        resface = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
+        resfaces.append(resface)
     return resfaces
 
 
-def show_faces(facestoshow):
-    name = 0
-    for facetoshow in facestoshow:
-        print(facetoshow)
-        cv2.imshow(str(name), facetoshow)
-        name += 1
+def show_faces(faces):
+    for face in faces:
+        cv2.imshow(str(namelist[faces.index(face)]), face)
         cv2.waitKey(30)
 
 
-def recognise_faces(facestorecognise):
+def recognise_faces(faces):
     return
+
+
+def create_or_destroy_windows(names):
+    #Destroying windows of not recognised and timeouted people
+    for checkname in namelist:
+        exists = False
+        index = namelist.index(checkname)
+        for name in names:
+            if name == checkname:
+                exists = True
+                timeoutlist[index] = 3
+        if not exists:
+            if timeoutlist[index] == 0:
+                cv2.destroyWindow(checkname)
+                timeoutlist.remove(index)
+                namelist.remove(index)
+            else:
+                timeoutlist[index] -= 1
+    #Creating windows of newly recognised people
+    for name in names:
+        exists = False
+        for checkname in namelist:
+            if checkname == name:
+                exists = True
+        if not exists:
+            cv2.namedWindow(name)
+            timeoutlist.append(3)
+            namelist.append(name)
 
 
 cv2.namedWindow('img')
 while True:
     ret, img = cap.read()
     resizedfaces = get_resized_faces(img)
-    if facewindows > len(resizedfaces):
-        for i in range(facewindows - len(resizedfaces)):
-            print('Destroyed window ' + str(len(resizedfaces) + i))
-            cv2.destroyWindow(str(len(resizedfaces) + i))
-    elif facewindows < len(resizedfaces):
-        for i in range(len(resizedfaces) - facewindows):
-            print('Created window ' + str(facewindows + i))
-            cv2.namedWindow(str(facewindows + i))
-    facewindows = len(resizedfaces)
+    names = recognise_faces(resizedfaces)
+    create_or_destroy_windows(names)
     cv2.imshow('img', img)
     show_faces(resizedfaces)
     k = cv2.waitKey(30) & 0xff
