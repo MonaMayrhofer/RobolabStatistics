@@ -13,4 +13,3 @@ probs = net.predict(image, "3BHIF")
 
 for pair in probs:
     print(pair[0], str(pair[1]), str(pair[2]))
-

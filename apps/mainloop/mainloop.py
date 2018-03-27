@@ -1,5 +1,9 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
+from robolib.networks.erianet import Erianet
+
+net = Erianet("TestModel.model")
+net.train("3BHIF")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -32,7 +36,11 @@ def show_faces(faces):
 
 
 def recognise_faces(faces):
-    return
+    names = []
+    for face in faces:
+        print(net.predict(face, "3BHIF"))
+        #names.append(net.predict(face, "3BHIF"))
+    return names
 
 
 def create_or_destroy_windows(names):
