@@ -3,7 +3,8 @@ import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet
 
 net = Erianet("TestModel.model")
-net.train("3BHIF")
+#net.train("3BHIF")
+net.save("Testmodel.model")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -19,8 +20,8 @@ def get_resized_faces(imgtoresize):
     gray = cv2.cvtColor(imgtoresize, cv2.COLOR_BGR2GRAY)
     faces, rejectlevels, levelleights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (480, 480), True)
     resfaces = []
-    for _ in faces:
-        x, y, w, h = faces[0]
+    for face in faces:
+        x, y, w, h = face
         if int(y - h * 0.2) <= 0 or int(x - w * 0.2) <= 0 or int(y + h * 1.2) >= imgtoresize.shape[1] or int(x + w * 1.2) >= imgtoresize.shape[0]:
             continue
         face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
@@ -30,16 +31,19 @@ def get_resized_faces(imgtoresize):
 
 
 def show_faces(faces):
-    for face in faces:
-        cv2.imshow(str(namelist[faces.index(face)]), face)
+    for i in range(len(faces)):
+        cv2.imshow(namelist[i], faces[i])
         cv2.waitKey(30)
 
 
 def recognise_faces(faces):
     names = []
     for face in faces:
-        print(net.predict(face, "3BHIF"))
-        #names.append(net.predict(face, "3BHIF"))
+        predictface = face[::2, ::2]
+        predictface = predictface.reshape((1, 4096))
+        predictface = predictface.astype("float32")
+        names.append(net.predict(predictface, "3BHIF")[0][0])
+        print(names)
     return names
 
 
@@ -55,8 +59,8 @@ def create_or_destroy_windows(names):
         if not exists:
             if timeoutlist[index] == 0:
                 cv2.destroyWindow(checkname)
-                timeoutlist.remove(index)
-                namelist.remove(index)
+                timeoutlist.pop(index)
+                namelist.remove(checkname)
             else:
                 timeoutlist[index] -= 1
     #Creating windows of newly recognised people
@@ -75,8 +79,8 @@ cv2.namedWindow('img')
 while True:
     ret, img = cap.read()
     resizedfaces = get_resized_faces(img)
-    names = recognise_faces(resizedfaces)
-    create_or_destroy_windows(names)
+    recognisednames = recognise_faces(resizedfaces)
+    create_or_destroy_windows(recognisednames)
     cv2.imshow('img', img)
     show_faces(resizedfaces)
     k = cv2.waitKey(30) & 0xff
