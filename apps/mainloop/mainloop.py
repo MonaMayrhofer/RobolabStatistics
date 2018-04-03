@@ -1,10 +1,11 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet
+import time
 
-net = Erianet("TestModel.model")
+net = Erianet("3BHIF.model")
 #net.train("3BHIF")
-net.save("Testmodel.model")
+#net.save("Testmodel.model")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -22,9 +23,7 @@ def get_resized_faces(imgtoresize):
     resfaces = []
     for face in faces:
         x, y, w, h = face
-        if int(y - h * 0.2) <= 0 or int(x - w * 0.2) <= 0 or int(y + h * 1.2) >= imgtoresize.shape[1] or int(x + w * 1.2) >= imgtoresize.shape[0]:
-            continue
-        face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
+        face = gray[y:y+h, x:x+w]
         resface = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
         resfaces.append(resface)
     return resfaces
@@ -55,14 +54,12 @@ def create_or_destroy_windows(names):
         for name in names:
             if name == checkname:
                 exists = True
-                timeoutlist[index] = 3
+                timeoutlist[index] = time.time()
         if not exists:
-            if timeoutlist[index] == 0:
+            if time.time() - timeoutlist[index] > 3:
                 cv2.destroyWindow(checkname)
                 timeoutlist.pop(index)
                 namelist.remove(checkname)
-            else:
-                timeoutlist[index] -= 1
     #Creating windows of newly recognised people
     for name in names:
         exists = False
