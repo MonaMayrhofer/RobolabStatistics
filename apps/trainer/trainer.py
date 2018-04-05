@@ -65,7 +65,7 @@ while True:
     if k == 27:
         break
     if not taking and k == 112:
-        lastTime = time.time()
+        lastTime = time.time() - 3
         taking = True
     if k == 115:
         series = not series
