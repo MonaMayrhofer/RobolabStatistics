@@ -21,7 +21,7 @@ class Erianet:
             else:
                 self.load(modelpath)
 
-    def train(self, data_folder, data_selection=None, callbacks=None, test_percent=0):
+    def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0):
         if callbacks is None:
             callbacks = []
         if data_selection is None:
@@ -32,7 +32,7 @@ class Erianet:
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
 
         self.model.fit([x_train[:, 0], x_train[:, 1]], y_train, validation_split=.25, batch_size=128, verbose=2,
-                       epochs=100,
+                       epochs=epochs,
                        callbacks=callbacks)
 
     def create(self, input_image_size=(128, 128), input_to_output_stride=2):
@@ -79,23 +79,32 @@ class Erianet:
         return load_one_image(reference_path, name, img, show, stride)
 
     @staticmethod
-    def __create_erianet_base(input_d, hidden_layer_size):
+    def __create_erianet_base(input_d):
         seq = Sequential()
+        seq.add(Dense(600, input_shape=(input_d,), activation='linear'))
+        seq.add(Dropout(0.2))
+        seq.add(Dense(300, activation='linear'))
+        seq.add(Dense(200, activation='linear'))
+        seq.add(Dropout(0.1))
+        seq.add(Dense(100, activation='linear'))
+        seq.add(Dropout(0.2))
+        seq.add(Dense(50, activation='linear'))
+
+        """
         for i in range(len(hidden_layer_size)):
             if i == 0:
                 seq.add(Dense(hidden_layer_size[i], input_shape=(input_d,), activation='linear'))
             else:
                 seq.add(Dense(hidden_layer_size[i], activation='linear'))
-            seq.add(Dropout(0.2))
+            seq.add(Dropout(0.2))"""
         return seq
 
     @staticmethod
     def __create_erianet(input_dim):
         input_size = input_dim[0]*input_dim[1]
-        hidden_layer_sizes = [200, 100, 50]
         input_a = Input(shape=(input_size,))
         input_b = Input(shape=(input_size,))
-        base_network = Erianet.__create_erianet_base(input_size, hidden_layer_sizes)
+        base_network = Erianet.__create_erianet_base(input_size)
         processed_a = base_network(input_a)
         processed_b = base_network(input_b)
         distance = Lambda(euclidean_distance, output_shape=euclidean_dist_output_shape)([processed_a, processed_b])
