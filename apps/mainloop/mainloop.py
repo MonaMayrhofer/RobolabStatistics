@@ -5,7 +5,7 @@ import time
 
 net = Erianet("3BHIF.model")
 #net.train("3BHIF")
-#net.save("Testmodel.model")
+#net.save("3BHIF.model")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -41,8 +41,9 @@ def recognise_faces(faces):
         predictface = face[::2, ::2]
         predictface = predictface.reshape((1, 4096))
         predictface = predictface.astype("float32")
-        names.append(net.predict(predictface, "3BHIF")[0][0])
-        print(names)
+        person = net.predict(predictface, "3BHIF")
+        names.append(person[0][0])
+        print(person)
     return names
 
 
