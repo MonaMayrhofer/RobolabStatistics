@@ -3,7 +3,7 @@ import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet
 import time
 
-net = Erianet("3BHIF.model")
+net = Erianet(None, input_to_output_stride=4)
 #net.train("3BHIF", 100)
 #net.save("3BHIF.model")
 
@@ -38,10 +38,7 @@ def show_faces(faces, names):
 def recognise_faces(faces):
     names = []
     for face in faces:
-        predictface = face[::2, ::2]
-        predictface = predictface.reshape((1, 4096))
-        predictface = predictface.astype("float32")
-        person = net.predict(predictface, "3BHIF")
+        person = net.predict(face, "3BHIF", give_all=True)
         names.append(person[0][0])
         print(person)
     return names
@@ -81,7 +78,7 @@ while True:
     create_or_destroy_windows(recognisednames)
     if len(namelist) != len(resizedfaces):
         print("ERROR: Name count not same as facecount: ")
-        print("Names: " + namelist)
+        print("Names: " + str(namelist))
         print("Facecount: ", len(resizedfaces))
     cv2.imshow('img', img)
     show_faces(resizedfaces, recognisednames)

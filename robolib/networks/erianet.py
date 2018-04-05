@@ -50,32 +50,42 @@ class Erianet:
         print("Loading model from File {}".format(modelpath))
         self.model = load_model(modelpath, custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
 
-    def predict(self, input_img, reference_data_path, candidates=None):
+    def predict(self, input_img, reference_data_path, candidates=None, give_all=False):
+        input_img = input_img[::self.input_to_output_stride, ::self.input_to_output_stride]
+        input_img = input_img.reshape((1,
+                                       input_img.shape[0] * input_img.shape[1]))
+        input_img = input_img.astype("float32")
         if candidates is None:
             candidates = self.__get_names_of(reference_data_path)
         probabilities = np.array([], dtype=[('class', int), ('probability', float)])
         for i in range(0, len(candidates)):
-            reference_img = self.__load_image(reference_data_path, candidates[i], 1, False)  # TODO  REF IMAGE INDEX FOR
+            reference_img = self.load_image(reference_data_path, candidates[i], 1, False)  # TODO  REF IMAGE INDEX FOR
             probability = float(self.model.predict([input_img, reference_img]))
             pair = (i, probability)
             probabilities = np.append(probabilities, np.array(pair, dtype=probabilities.dtype))
-        probabilities = np.sort(probabilities, order='probability')
+        probabilities = np.sort(probabilities, order='probability')[::-1]
         probs = probabilities
         certainties = []
         biggestind = 0
-        for i in range(len(probs) - 1):
-            certainty = probs[i + 1][1] - probs[i][1]
+        for i in range(len(probs)):
+            if i != len(probs)-1:
+                certainty = probs[i + 1][1] - probs[i][1]
+            else:
+                certainty = 0
             certainties.append([candidates[probs[i][0]], probs[i][0], probs[i][1], certainty])
             if certainties[biggestind][2] < certainty:
                 biggestind = i
+        if give_all:
+            return certainties
         return certainties[0:biggestind + 1]
 
     @staticmethod
     def __get_names_of(folder):
         return next(os.walk(folder))[1]
 
-    @staticmethod
-    def __load_image(reference_path, name, img, show=False, stride=2):
+    def load_image(self, reference_path, name, img, show=False, stride=None):
+        if stride is None:
+            stride = self.input_to_output_stride
         return load_one_image(reference_path, name, img, show, stride)
 
     @staticmethod
@@ -101,7 +111,7 @@ class Erianet:
 
     @staticmethod
     def __create_erianet(input_dim):
-        input_size = input_dim[0]*input_dim[1]
+        input_size = input_dim[0] * input_dim[1]
         input_a = Input(shape=(input_size,))
         input_b = Input(shape=(input_size,))
         base_network = Erianet.__create_erianet_base(input_size)
