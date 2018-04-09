@@ -17,13 +17,21 @@ class Erianet:
         self.input_image_size = input_image_size
         self.input_to_output_stride = input_to_output_stride
         self.model = None
-        self.input_dim = (int(input_image_size[0] / input_to_output_stride), int(input_image_size[1] / input_to_output_stride), 1)
-        # self.input_dim = (int(input_image_size[0] / input_to_output_stride) * int(input_image_size[1] / input_to_output_stride), )
+        self.input_dim = self.__get_input_dim_for(input_image_size, input_to_output_stride, 2)
         if not dont_init:
             if modelpath is None or not path.isfile(modelpath):
                 self.create(input_image_size, input_to_output_stride)
             else:
                 self.load(modelpath)
+
+    @staticmethod
+    def __get_input_dim_for(input_image_size, input_to_output_stride, dims):
+        if dims == 1:
+            return (int(input_image_size[0] / input_to_output_stride) *
+                    int(input_image_size[1] / input_to_output_stride), )
+        elif dims == 2:
+            return (int(input_image_size[0] / input_to_output_stride),
+                    int(input_image_size[1] / input_to_output_stride), 1)
 
     def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0):
         if callbacks is None:
@@ -100,7 +108,7 @@ class Erianet:
         if stride is None:
             stride = self.input_to_output_stride
         image = image[::stride, ::stride]
-        image = image.reshape(1, image.shape[0], image.shape[1], 1)
+        image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
         image = image.astype("float32")
         return image
 
@@ -109,8 +117,8 @@ class Erianet:
         print("Creating")
         print(input_d)
         seq = Sequential()
-        seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
-        seq.add(Flatten())
+        #seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
+        #seq.add(Flatten())
         seq.add(Dense(200, activation='linear', input_shape=input_d))
         seq.add(Dense(100, activation='linear'))
         seq.add(Dropout(0.2))
