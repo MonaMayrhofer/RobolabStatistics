@@ -4,8 +4,8 @@ from robolib.networks.erianet import Erianet
 import time
 
 net = Erianet("3BHIF.model")
-#net.train("3BHIF", 100)
-#net.save("3BHIF.model")
+net.train("3BHIF", 60)
+net.save("3BHIF.model")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -79,9 +79,9 @@ while True:
     resizedfaces = get_resized_faces(img)
     recognisednames = recognise_faces(resizedfaces)
     create_or_destroy_windows(recognisednames)
-    if len(namelist) != len(resizedfaces):
+    if len(recognisednames) != len(resizedfaces):
         print("ERROR: Name count not same as facecount: ")
-        print("Names: " + namelist)
+        print("Names: " + str(namelist))
         print("Facecount: ", len(resizedfaces))
     cv2.imshow('img', img)
     show_faces(resizedfaces, recognisednames)
