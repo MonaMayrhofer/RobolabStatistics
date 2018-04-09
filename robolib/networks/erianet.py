@@ -4,7 +4,7 @@ import numpy as np
 from keras.optimizers import RMSprop
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Dropout, Lambda, Conv2D, Flatten
+from keras.layers import Input, Dense, Dropout, Lambda
 from robolib.datamanager.siamese_data_loader import load_one_image
 from robolib.networks.common import contrastive_loss, euclidean_dist_output_shape, euclidean_distance
 from robolib.util.random import random_different_numbers
@@ -13,16 +13,16 @@ from robolib.images.pgmtools import read_pgm
 
 
 class Erianet:
-    def __init__(self, modelpath, input_image_size=(128, 128), input_to_output_stride=2, dont_init=False):
+    def __init__(self, model_path, input_image_size=(128, 128), input_to_output_stride=2, do_not_init=False):
         self.input_image_size = input_image_size
         self.input_to_output_stride = input_to_output_stride
         self.model = None
         self.input_dim = self.__get_input_dim_for(input_image_size, input_to_output_stride, 2)
-        if not dont_init:
-            if modelpath is None or not path.isfile(modelpath):
+        if not do_not_init:
+            if model_path is None or not path.isfile(model_path):
                 self.create(input_image_size, input_to_output_stride)
             else:
-                self.load(modelpath)
+                self.load(model_path)
 
     @staticmethod
     def __get_input_dim_for(input_image_size, input_to_output_stride, dims):
@@ -70,9 +70,8 @@ class Erianet:
             candidates = self.__get_names_of(reference_data_path)
         probabilities = np.array([], dtype=[('class', int), ('probability', float)])
         for i in range(0, len(candidates)):
-            reference_img = self.load_image(reference_data_path, candidates[i], 1, False, preprocess=True)  # TODO  REF IMAGE INDEX FOR
-            #input_img = np.reshape(input_img, (1, 32, 32, 1))
-            #reference_img = np.reshape(reference_img, (1, 32, 32, 1))
+            # TODO  REF IMAGE INDEX FOR
+            reference_img = self.load_image(reference_data_path, candidates[i], 1, False, preprocess=True)
             probability = float(self.model.predict([input_img, reference_img]))
             pair = (i, probability)
             probabilities = np.append(probabilities, np.array(pair, dtype=probabilities.dtype))
@@ -117,8 +116,8 @@ class Erianet:
         print("Creating")
         print(input_d)
         seq = Sequential()
-        #seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
-        #seq.add(Flatten())
+        # seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
+        # seq.add(Flatten())
         seq.add(Dense(200, activation='linear', input_shape=input_d))
         seq.add(Dense(100, activation='linear'))
         seq.add(Dropout(0.2))
@@ -161,8 +160,6 @@ class Erianet:
                      input_to_output_stride=2):
         if input_image_size[0] % input_to_output_stride != 0 and input_image_size[1] % input_to_output_stride != 0:
             raise Exception("Input image size must be divisible by the stride")
-        #size_1 = int(input_image_size[0] / input_to_output_stride)
-        #size_2 = int(input_image_size[1] / input_to_output_stride)
         total_image_length = self.input_dim
         classes = len(class_folder_names)
 
@@ -182,12 +179,6 @@ class Erianet:
 
                 im1 = self.preprocess(im1)
                 im2 = self.preprocess(im2)
-
-                #im1 = im1[::input_to_output_stride, ::input_to_output_stride]
-                #im2 = im2[::input_to_output_stride, ::input_to_output_stride]
-
-                #im1 = im1.reshape(total_image_length)
-                #im2 = im2.reshape(total_image_length)
 
                 x_tr_positive[count, 0, :] = im1
                 x_tr_positive[count, 1, :] = im2
@@ -209,12 +200,6 @@ class Erianet:
 
                 im1 = self.preprocess(im1)
                 im2 = self.preprocess(im2)
-
-                #im1 = im1[::input_to_output_stride, ::input_to_output_stride]
-                #im2 = im2[::input_to_output_stride, ::input_to_output_stride]
-
-                #im1 = im1.reshape(im1.shape[0] * im1.shape[1])
-                #im2 = im2.reshape(im2.shape[0] * im2.shape[1])
 
                 x_tr_negative[count, 0, :] = im1
                 x_tr_negative[count, 1, :] = im2
