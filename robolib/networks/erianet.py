@@ -86,7 +86,7 @@ class Erianet:
     def load_image(self, reference_path, name, img, show=False, stride=None):
         if stride is None:
             stride = self.input_to_output_stride
-        return load_one_image(reference_path, name, img, show, stride)
+        return load_one_image(reference_path, name, img, show, stride, True)
 
     @staticmethod
     def __create_erianet_base(input_d):
