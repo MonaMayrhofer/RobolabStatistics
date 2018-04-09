@@ -1,8 +1,8 @@
 from robolib.networks.erianet import Erianet
 from robolib.datamanager.siamese_data_loader import load_one_image
 
-net = Erianet("TestModel.model", input_image_size=(92, 112))
-net.train("ModelData_AtnTFaces")
+net = Erianet(None, input_image_size=(92, 112))
+net.train("ModelData_AtnTFaces", 1000)
 
 print("Train Finished!")
 name = input("Enter name:")
@@ -13,4 +13,3 @@ probs = net.predict(image, "ModelData_AtnTFaces")
 
 for pair in probs:
     print(pair[0], str(pair[1]), str(pair[2]))
-
