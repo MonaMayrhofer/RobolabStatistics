@@ -4,7 +4,7 @@ import numpy as np
 from keras.optimizers import RMSprop
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Dropout, Lambda, Conv2D
+from keras.layers import Input, Dense, Dropout, Lambda, Conv2D, Flatten
 from robolib.datamanager.siamese_data_loader import load_one_image
 from robolib.networks.common import contrastive_loss, euclidean_dist_output_shape, euclidean_distance
 from robolib.util.random import random_different_numbers
@@ -17,7 +17,7 @@ class Erianet:
         self.input_image_size = input_image_size
         self.input_to_output_stride = input_to_output_stride
         self.model = None
-        self.input_dim = (int(input_image_size[0] / input_to_output_stride), int(input_image_size[1] / input_to_output_stride))
+        self.input_dim = (int(input_image_size[0] / input_to_output_stride), int(input_image_size[1] / input_to_output_stride), 1)
         # self.input_dim = (int(input_image_size[0] / input_to_output_stride) * int(input_image_size[1] / input_to_output_stride), )
         if not dont_init:
             if modelpath is None or not path.isfile(modelpath):
@@ -43,7 +43,6 @@ class Erianet:
         assert all(np.mod(input_image_size, input_to_output_stride) == (0, 0))
         self.model = self.create_erianet()
 
-        #self.input_dim = (int(input_image_size[0] / input_to_output_stride) * int(input_image_size[1] / input_to_output_stride), 1)
         rms = RMSprop()
         self.model.compile(loss=contrastive_loss, optimizer=rms)
 
@@ -64,6 +63,8 @@ class Erianet:
         probabilities = np.array([], dtype=[('class', int), ('probability', float)])
         for i in range(0, len(candidates)):
             reference_img = self.load_image(reference_data_path, candidates[i], 1, False, preprocess=True)  # TODO  REF IMAGE INDEX FOR
+            #input_img = np.reshape(input_img, (1, 32, 32, 1))
+            #reference_img = np.reshape(reference_img, (1, 32, 32, 1))
             probability = float(self.model.predict([input_img, reference_img]))
             pair = (i, probability)
             probabilities = np.append(probabilities, np.array(pair, dtype=probabilities.dtype))
@@ -99,17 +100,17 @@ class Erianet:
         if stride is None:
             stride = self.input_to_output_stride
         image = image[::stride, ::stride]
-        # image = image.reshape(1, image.shape[0] * image.shape[1])
-        image = image.reshape(image.shape[0], image.shape[1])
+        image = image.reshape(1, image.shape[0], image.shape[1], 1)
         image = image.astype("float32")
         return image
 
     def create_erianet_base(self):
-        input_d = np.concatenate((self.input_dim, [1]))
+        input_d = self.input_dim
         print("Creating")
         print(input_d)
         seq = Sequential()
         seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
+        seq.add(Flatten())
         seq.add(Dense(200, activation='linear', input_shape=input_d))
         seq.add(Dense(100, activation='linear'))
         seq.add(Dropout(0.2))
@@ -136,10 +137,11 @@ class Erianet:
 
     def create_erianet(self):
         # input_size = self.input_dim[0] * self.input_dim[1]
-        input_d = np.concatenate((self.input_dim, [1]))
-        print(input_d.shape)
-        input_a = Input(shape=input_d)
-        input_b = Input(shape=input_d)
+        input_d = self.input_dim
+        print(input_d)
+        print(tuple(input_d))
+        input_a = Input(shape=tuple(input_d))
+        input_b = Input(shape=tuple(input_d))
         base_network = self.create_erianet_base()
         processed_a = base_network(input_a)
         processed_b = base_network(input_b)
@@ -185,7 +187,7 @@ class Erianet:
                 count += 1
 
         count = 0
-        x_tr_negative = np.zeros([train_set_size, 2, total_image_length])
+        x_tr_negative = np.zeros(np.concatenate(([train_set_size, 2], total_image_length)))
         y_tr_negative = np.zeros([train_set_size, 1])
         # Gen Negative Examples
         for i in range(int(train_set_size / 10)):  # Für ein Zehntel der Testdaten
