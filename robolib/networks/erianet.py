@@ -63,7 +63,7 @@ class Erianet:
             probability = float(self.model.predict([input_img, reference_img]))
             pair = (i, probability)
             probabilities = np.append(probabilities, np.array(pair, dtype=probabilities.dtype))
-        probabilities = np.sort(probabilities, order='probability')[::-1]
+        probabilities = np.sort(probabilities, order='probability')
         probs = probabilities
         certainties = []
         biggestind = 0
