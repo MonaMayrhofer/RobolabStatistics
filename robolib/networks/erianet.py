@@ -17,7 +17,7 @@ class Erianet:
         self.input_image_size = input_image_size
         self.input_to_output_stride = input_to_output_stride
         self.model = None
-        self.input_dim = self.__get_input_dim_for(input_image_size, input_to_output_stride, 2)
+        self.input_dim = self.__get_input_dim_for(input_image_size, input_to_output_stride, 1)
         if not do_not_init:
             if model_path is None or not path.isfile(model_path):
                 self.create(input_image_size, input_to_output_stride)
