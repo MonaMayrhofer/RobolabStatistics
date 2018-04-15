@@ -20,7 +20,7 @@ name = input("Name: ")
 if os.path.isdir(name):
     ow = ""
     while ow != "Y" and ow != "N":
-        ow = input("Directory exists. Overwrite it? (Y/N): ")
+        ow = input("Folder already exists. Overwrite? (Y/N): ")
         if ow == "Y":
             shutil.rmtree(name)
         elif ow == "N":
@@ -55,8 +55,6 @@ while True:
             cv2.imwrite(name + "/" + str(imgNumber) + ".pgm", resImg)
             imgNumber = imgNumber + 1
             lastTime = time.time()
-            if imgNumber == 11:
-                break
         if taking:
             cv2.putText(resImg, str(3 - int(time.time() - lastTime)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
         cv2.imshow('resImg', resImg)

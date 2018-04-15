@@ -1,5 +1,6 @@
 import cv2
 import os
+import shutil
 import robolib.modelmanager.downloader as downloader
 
 MODEL_FILE = 'FrontalFace.xml'
@@ -11,13 +12,28 @@ if not os.path.isdir(src):
     print("Folder does not exist.")
     exit(1)
 
+add = False
 dst = input("Destination folder: ")
 if os.path.isdir(dst):
-    print("Folder already exists.")
-    exit(1)
-os.makedirs(dst)
+    ow = ""
+    while ow != "O" and ow != "A" and ow != "Q":
+        ow = input("Folder already exists. Overwrite, add or quit? (O/A/Q): ")
+        if ow == "O":
+            shutil.rmtree(dst)
+        elif ow == "A":
+            add = True
+        elif ow == "Q":
+            exit(0)
+else:
+    os.makedirs(dst)
 
 for name in os.listdir('./' + src):
+    dstexists = False
+    for dstname in os.listdir('./' + src):
+        if name == dstname:
+            dstexists = True
+    if dstexists:
+        continue
     imgcnt = 0
     for imgname in os.listdir('./' + src + '/' + name):
         img = cv2.imread('./' + src + '/' + name + '/' + imgname)
