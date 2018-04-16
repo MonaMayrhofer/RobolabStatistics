@@ -1,9 +1,10 @@
 """
 How to use:
-Start script
+Start script.
 Enter source folder with subfolders for each person.
 Enter destination folder. If it already exists you can add people that have no subfolder in dest.
-The program will log every picture that did not contain 1 detected face
+Every person must have at least 2 valid pictures.
+The program will log every picture that did not contain 1 detected face.
 """
 
 import cv2
@@ -35,16 +36,16 @@ if os.path.isdir(dst):
 else:
     os.makedirs(dst)
 
-for name in os.listdir('./' + src):
+for name in os.listdir(src):
     dstexists = False
-    for dstname in os.listdir('./' + src):
+    for dstname in os.listdir(dst):
         if name == dstname:
             dstexists = True
-    if dstexists:
+    if dstexists or len(os.listdir('./' + src + '/' + name)) < 2:
         continue
     imgcnt = 0
-    for imgname in os.listdir('./' + src + '/' + name):
-        img = cv2.imread('./' + src + '/' + name + '/' + imgname)
+    for imgname in os.listdir(src + '/' + name):
+        img = cv2.imread(src + '/' + name + '/' + imgname)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (300, 300), True)
         if len(faces) != 1:
@@ -52,8 +53,10 @@ for name in os.listdir('./' + src):
             continue
         imgcnt += 1
         if imgcnt == 1:
-            os.makedirs('./' + dst + '/' + name)
+            os.makedirs(dst + '/' + name)
         x, y, w, h = faces[0]
         face = gray[y:y + h, x:x + w]
         resimg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
         cv2.imwrite(dst + '/' + name + "/" + str(imgcnt) + ".pgm", resimg)
+    if imgcnt > 0 and len(os.listdir(dst + '/' + name)) < 2:
+        shutil.rmtree(dst + '/' + name)
