@@ -4,11 +4,11 @@ Start script.
 Enter directory name of person.
 If the directory exists, you can either overwrite it or exit the program.
 When the 2 Windows appear, check if the grey one reacts to the face.
-When pressing 'P' a picture will be taken after the 3 seconds countdown.
-With 'S' you can toggle a series of pictures like you press 'P' constantly.
-After 10 pictures the program will finish.
-The pictures will be named like [1-10].pgm.
-The more different the faces are, the better.
+When pressing 'P' a picture will be taken immediately.
+With 'S' you can toggle a series of pictures taken every 3 seconds.
+Press ESC to close the program.
+The pictures will be named like [1-9999].pgm.
+The more different the faces are.
 """
 import cv2
 import time

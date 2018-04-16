@@ -1,3 +1,11 @@
+"""
+How to use:
+Start script
+Enter source folder with subfolders for each person.
+Enter destination folder. If it already exists you can add people that have no subfolder in dest.
+The program will log every picture that did not contain 1 detected face
+"""
+
 import cv2
 import os
 import shutil
