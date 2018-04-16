@@ -3,6 +3,7 @@ import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet
 import time
 
+
 net = Erianet(None, input_to_output_stride=4)
 net.train("3BHIF", 100)
 net.save("3BHIF.model")
@@ -76,7 +77,7 @@ while True:
     resizedfaces = get_resized_faces(img)
     recognisednames = recognise_faces(resizedfaces)
     create_or_destroy_windows(recognisednames)
-    if len(namelist) != len(resizedfaces):
+    if len(recognisednames) != len(resizedfaces):
         print("ERROR: Name count not same as facecount: ")
         print("Names: " + str(namelist))
         print("Facecount: ", len(resizedfaces))

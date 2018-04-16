@@ -4,11 +4,11 @@ Start script.
 Enter directory name of person.
 If the directory exists, you can either overwrite it or exit the program.
 When the 2 Windows appear, check if the grey one reacts to the face.
-When pressing 'P' a picture will be taken after the 3 seconds countdown.
-With 'S' you can toggle a series of pictures like you press 'P' constantly.
-After 10 pictures the program will finish.
-The pictures will be named like [1-10].pgm.
-The more different the faces are, the better.
+When pressing 'P' a picture will be taken immediately.
+With 'S' you can toggle a series of pictures taken every 3 seconds.
+Press ESC to close the program.
+The pictures will be named like [1-9999].pgm.
+The more different the faces are.
 """
 import cv2
 import time
@@ -20,7 +20,7 @@ name = input("Name: ")
 if os.path.isdir(name):
     ow = ""
     while ow != "Y" and ow != "N":
-        ow = input("Directory exists. Overwrite it? (Y/N): ")
+        ow = input("Folder already exists. Overwrite? (Y/N): ")
         if ow == "Y":
             shutil.rmtree(name)
         elif ow == "N":
@@ -55,8 +55,6 @@ while True:
             cv2.imwrite(name + "/" + str(imgNumber) + ".pgm", resImg)
             imgNumber = imgNumber + 1
             lastTime = time.time()
-            if imgNumber == 11:
-                break
         if taking:
             cv2.putText(resImg, str(3 - int(time.time() - lastTime)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
         cv2.imshow('resImg', resImg)
