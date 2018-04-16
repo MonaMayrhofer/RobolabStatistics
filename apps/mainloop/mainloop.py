@@ -3,8 +3,9 @@ import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet
 import time
 
-net = Erianet("3BHIF.model")
-net.train("3BHIF", 60)
+
+net = Erianet(None, input_to_output_stride=4)
+net.train("3BHIF", 100)
 net.save("3BHIF.model")
 
 MODEL_FILE = 'FrontalFace.xml'
@@ -38,10 +39,7 @@ def show_faces(faces, names):
 def recognise_faces(faces):
     names = []
     for face in faces:
-        predictface = face[::2, ::2]
-        predictface = predictface.reshape((1, 4096))
-        predictface = predictface.astype("float32")
-        person = net.predict(predictface, "3BHIF")
+        person = net.predict(face, "3BHIF", give_all=True)
         names.append(person[0][0])
         print(person)
     return names
