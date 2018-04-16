@@ -4,7 +4,7 @@ from robolib.networks.erianet import Erianet
 import time
 
 net = Erianet(None, input_to_output_stride=4)
-net.train("3BHIF", 50)
+net.train("3BHIF", 100)
 net.save("3BHIF.model")
 
 MODEL_FILE = 'FrontalFace.xml'
