@@ -47,17 +47,18 @@ while True:
     faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (300, 300), True)
     if len(faces) == 1:
         x, y, w, h = faces[0]
-        face = gray[y:y+h, x:x+w]
-        resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
-        if taking and time.time() - lastTime > 3:
-            if not series:
-                taking = False
-            cv2.imwrite(name + "/" + str(imgNumber) + ".pgm", resImg)
-            imgNumber = imgNumber + 1
-            lastTime = time.time()
-        if taking:
-            cv2.putText(resImg, str(3 - int(time.time() - lastTime)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-        cv2.imshow('resImg', resImg)
+        if not (y - 0.22 * h < 0 or y + h * 1.11 > img.shape[0]):
+            face = gray[int(y - 0.22 * h):int(y + h * 1.11), x:x + w]
+            resImg = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
+            if taking and time.time() - lastTime > 3:
+                if not series:
+                    taking = False
+                cv2.imwrite(name + "/" + str(imgNumber) + ".pgm", resImg)
+                imgNumber = imgNumber + 1
+                lastTime = time.time()
+            if taking:
+                cv2.putText(resImg, str(3 - int(time.time() - lastTime)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+            cv2.imshow('resImg', resImg)
     cv2.imshow('img', img)
     k = cv2.waitKey(30) & 0xff
     if k == 27:

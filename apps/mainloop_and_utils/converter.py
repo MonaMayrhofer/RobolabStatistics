@@ -51,12 +51,15 @@ for name in os.listdir(src):
         if len(faces) != 1:
             print(name + '/' + imgname + ' could not be converted')
             continue
+        x, y, w, h = faces[0]
+        if y - 0.22 * h < 0 or y + h * 1.11 > img.shape[0]:
+            print(name + '/' + imgname + ' could not be converted')
+            continue
         imgcnt += 1
         if imgcnt == 1:
             os.makedirs(dst + '/' + name)
-        x, y, w, h = faces[0]
-        face = gray[y:y + h, x:x + w]
-        resimg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
+        face = gray[int(y - 0.22 * h):int(y + h * 1.11), x:x + w]
+        resimg = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
         cv2.imwrite(dst + '/' + name + "/" + str(imgcnt) + ".pgm", resimg)
     if imgcnt > 0 and len(os.listdir(dst + '/' + name)) < 2:
         shutil.rmtree(dst + '/' + name)
