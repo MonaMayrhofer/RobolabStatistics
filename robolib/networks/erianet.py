@@ -14,7 +14,8 @@ from robolib.util.decorations import deprecated
 
 
 class Erianet:
-    def __init__(self, model_path, input_image_size=(128, 128), insets=(0, 0, 0, 0), input_to_output_stride=2, do_not_init=False):
+    def __init__(self, model_path, input_image_size=(128, 128), insets=(0, 0, 0, 0), input_to_output_stride=2,
+                 do_not_init=False):
         self.input_image_size = input_image_size
         self.input_to_output_stride = input_to_output_stride
         self.model = None
@@ -29,11 +30,11 @@ class Erianet:
     @staticmethod
     def get_input_dim_for(input_image_size, input_to_output_stride, insets, dims):
         if dims == 1:
-            return ((int(input_image_size[0] / input_to_output_stride)-insets[1]-insets[3]) *
-                    (int(input_image_size[1] / input_to_output_stride)-insets[0]-insets[2]), )
+            return ((int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3]) *
+                    (int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2]),)
         elif dims == 2:
-            return (int(input_image_size[0] / input_to_output_stride)-insets[1]-insets[3],
-                    int(input_image_size[1] / input_to_output_stride)-insets[0]-insets[2], 1)
+            return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
+                    int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
 
     def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0):
         if callbacks is None:
@@ -52,7 +53,8 @@ class Erianet:
             data_selection = self.__get_names_of(data_folder)
 
         # TODO GEN_DATA_NEW TO HERE
-        return self.gen_data_new(amount, data_selection, data_folder, self.input_image_size, self.input_to_output_stride)
+        return self.gen_data_new(amount, data_selection, data_folder, self.input_image_size,
+                                 self.input_to_output_stride)
 
     def create(self, input_image_size=(128, 128), input_to_output_stride=2):
         assert all(np.mod(input_image_size, input_to_output_stride) == (0, 0))
@@ -87,7 +89,7 @@ class Erianet:
         certainties = []
         biggestind = 0
         for i in range(len(probs)):
-            if i != len(probs)-1:
+            if i != len(probs) - 1:
                 certainty = probs[i + 1][1] - probs[i][1]
             else:
                 certainty = 0
@@ -121,7 +123,7 @@ class Erianet:
             self.insets[3] = image.shape[1]
         """
         print(self.insets)
-        image = image[self.insets[1]:image.shape[0]-self.insets[3], self.insets[0]:image.shape[0]-self.insets[2]]
+        image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[0] - self.insets[2]]
         print(image.shape)
         print(self.input_dim)
         image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
@@ -133,8 +135,8 @@ class Erianet:
         print("Creating")
         print(input_d)
         seq = Sequential()
-        #seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
-        #seq.add(Flatten())
+        # seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
+        # seq.add(Flatten())
         seq.add(Dense(200, activation='linear', input_shape=input_d))
         seq.add(Dense(100, activation='linear'))
         seq.add(Dropout(0.2))
@@ -174,7 +176,7 @@ class Erianet:
         return model
 
     def gen_data_servantrain(self, train_set_size, class_folder_names, pic_dir, input_image_size=(100, 100),
-                     input_to_output_stride=2):
+                             input_to_output_stride=2):
         pass
 
     @deprecated
