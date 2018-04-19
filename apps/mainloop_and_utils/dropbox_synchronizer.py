@@ -6,19 +6,18 @@ APP_SECRET = "mmrpk3jqkk6zhgu"
 
 
 def update_files(foldername):
-    for entry in dbx.files_list_folder(foldername).entries:
-        name = foldername + '/' + entry.name
-        if '.' not in entry.name:
-            print("Folder " + name)
-            if not os.path.exists('.' + name):
-                print("Creating " + '.' + name)
-                os.makedirs('.' + name)
-            update_files(name)
-        else:
-            print("File " + name)
-            if not os.path.exists('.' + name):
-                print("Downloading " + name)
-                dbx.files_download_to_file('.' + name, name)
+    if '.' not in foldername:
+        print("Folder " + foldername)
+        if not os.path.exists('.' + foldername):
+            print("Creating " + '.' + foldername)
+            os.makedirs('.' + foldername)
+        for entry in dbx.files_list_folder(foldername).entries:
+            update_files(foldername + '/' + entry.name)
+    else:
+        print("File " + foldername)
+        if not os.path.exists('.' + foldername):
+            print("Downloading " + foldername)
+            dbx.files_download_to_file('.' + foldername, foldername)
 
 
 authflow = dropbox.DropboxOAuth2FlowNoRedirect(APP_KEY, APP_SECRET)
@@ -33,5 +32,5 @@ dbx = dropbox.Dropbox(oauth_result.access_token)
 acc = dbx.users_get_current_account()
 print("Account linked: " + acc.name.display_name)
 
-folder = input("Select folder to update: ")
+folder = input("Select folder or file to update: ")
 update_files('/' + folder)
