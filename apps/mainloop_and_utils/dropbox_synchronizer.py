@@ -2,17 +2,34 @@ import dropbox
 import os
 
 APP_KEY = "bdnfbbtz309an28"
-APP_SECRET = "mmrpk3jqkk6zhgu"
+APP_SECRET = "###############"
 
 
-def update_files(foldername):
+def download_files():
+    foldername = input("File or folder do download: ")
+    dbx = start_session()
     if '.' not in foldername:
-        print("Folder " + foldername)
-        if not os.path.exists('.' + foldername):
-            print("Creating " + '.' + foldername)
-            os.makedirs('.' + foldername)
+        recursive = ""
+        while recursive != "Y" and recursive != "N":
+            recursive = input("Download subfolders recursively? (Y/N): ")
+            if recursive == "Y":
+                download_files_recursive(dbx, foldername, True)
+            elif recursive == "N":
+                download_files_recursive(dbx, foldername, False)
+    else:
+        download_files_recursive(dbx, foldername, False)
+
+
+def download_files_recursive(dbx, foldername, recursive):
+    if '.' not in foldername:
+        if recursive:
+            print("Folder " + foldername)
+            if not os.path.exists('.' + foldername):
+                print("Creating " + '.' + foldername)
+                os.makedirs('.' + foldername)
         for entry in dbx.files_list_folder(foldername).entries:
-            update_files(foldername + '/' + entry.name)
+            if '.' in entry.name or recursive:
+                download_files_recursive(dbx, foldername + '/' + entry.name, True)
     else:
         print("File " + foldername)
         if not os.path.exists('.' + foldername):
@@ -20,17 +37,18 @@ def update_files(foldername):
             dbx.files_download_to_file('.' + foldername, foldername)
 
 
-authflow = dropbox.DropboxOAuth2FlowNoRedirect(APP_KEY, APP_SECRET)
-authorizeurl = authflow.start()
-print("1. Go to: " + authorizeurl)
-print("2. Click \"Allow\" (you might have to log in first).")
-print("3. Copy the authorization code.")
-authcode = input("Enter the authorization code here: ").strip()
+def start_session():
+    authflow = dropbox.DropboxOAuth2FlowNoRedirect(APP_KEY, APP_SECRET)
+    authorizeurl = authflow.start()
+    print("1. Go to: " + authorizeurl)
+    print("2. Click \"Allow\" (you might have to log in first).")
+    print("3. Copy the authorization code.")
+    authcode = input("Enter the authorization code here: ").strip()
+    oauthresult = authflow.finish(authcode)
+    dbx = dropbox.Dropbox(oauthresult.access_token)
+    acc = dbx.users_get_current_account()
+    print("Account linked: " + acc.name.display_name)
+    return dbx
 
-oauth_result = authflow.finish(authcode)
-dbx = dropbox.Dropbox(oauth_result.access_token)
-acc = dbx.users_get_current_account()
-print("Account linked: " + acc.name.display_name)
 
-folder = input("Select folder or file to update: ")
-update_files('/' + folder)
+download_files()
