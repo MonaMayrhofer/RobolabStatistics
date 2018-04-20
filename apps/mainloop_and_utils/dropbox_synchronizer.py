@@ -1,23 +1,22 @@
 import dropbox
 import os
-
-APP_KEY = "bdnfbbtz309an28"
-APP_SECRET = "###############"
+import configparser
 
 
 def download_files():
-    foldername = input("File or folder do download: ")
+    folders = input("Files and/or folders do download (seperate by ';'): ")
     dbx = start_session()
-    if '.' not in foldername:
-        recursive = ""
-        while recursive != "Y" and recursive != "N":
-            recursive = input("Download subfolders recursively? (Y/N): ")
-            if recursive == "Y":
-                download_files_recursive(dbx, foldername, True)
-            elif recursive == "N":
-                download_files_recursive(dbx, foldername, False)
-    else:
-        download_files_recursive(dbx, foldername, False)
+    for foldername in folders.split(';'):
+        if '.' not in foldername:
+            recursive = ""
+            while recursive != "Y" and recursive != "N":
+                recursive = input("Download subfolders recursively? (Y/N): ")
+                if recursive == "Y":
+                    download_files_recursive(dbx, foldername, True)
+                elif recursive == "N":
+                    download_files_recursive(dbx, foldername, False)
+        else:
+            download_files_recursive(dbx, foldername, False)
 
 
 def download_files_recursive(dbx, foldername, recursive):
@@ -38,6 +37,10 @@ def download_files_recursive(dbx, foldername, recursive):
 
 
 def start_session():
+    config = configparser.ConfigParser()
+    config.read('dropbox.cfg')
+    APP_KEY = config['dropbox']['APP_KEY']
+    APP_SECRET = config['dropbox']['APP_SECRET']
     authflow = dropbox.DropboxOAuth2FlowNoRedirect(APP_KEY, APP_SECRET)
     authorizeurl = authflow.start()
     print("1. Go to: " + authorizeurl)
