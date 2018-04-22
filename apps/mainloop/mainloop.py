@@ -7,6 +7,7 @@ net = Erianet("atnt.model", input_to_output_stride=4)
 net.train("res_ModelData_AtnTFaces", 50, initial_epochs=500)
 net.save("atnt.model")
 
+
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
@@ -76,7 +77,7 @@ while True:
     resizedfaces = get_resized_faces(img)
     recognisednames = recognise_faces(resizedfaces)
     create_or_destroy_windows(recognisednames)
-    if len(namelist) != len(resizedfaces):
+    if len(recognisednames) != len(resizedfaces):
         print("ERROR: Name count not same as facecount: ")
         print("Names: " + str(namelist))
         print("Facecount: ", len(resizedfaces))
