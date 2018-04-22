@@ -5,8 +5,8 @@ import time
 
 
 net = Erianet(None, input_to_output_stride=4)
-net.train("3BHIF", 100)
-net.save("3BHIF.model")
+#net.train("3BHIF", 100)
+#net.save("3BHIF.model")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -24,8 +24,10 @@ def get_resized_faces(imgtoresize):
     resfaces = []
     for face in faces:
         x, y, w, h = face
-        face = gray[y:y+h, x:x+w]
-        resface = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
+        if y - 0.22 * h < 0 or y + h * 1.11 > img.shape[0]:
+            continue
+        face = gray[int(y - 0.22 * h):int(y + h * 1.11), x:x + w]
+        resface = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
         resfaces.append(resface)
     return resfaces
 
