@@ -11,6 +11,7 @@ from robolib.util.random import random_different_numbers
 from keras import backend
 from robolib.images.pgmtools import read_pgm
 from robolib.util.decorations import deprecated
+import time
 
 
 class Erianet:
@@ -81,18 +82,16 @@ class Erianet:
         for reference_img in reference_imgs:
             probability_sum += float(self.model.predict([input_img, reference_img]))
             probability_amount += 1
-            print("Got new probability: "+str(probability_sum))
         return probability_sum/probability_amount
 
     def predict(self, input_img, reference_data_path, candidates=None, give_all=False):
-
+        mon_start_time = time.time()
         input_img = self.preprocess(input_img)
 
         if candidates is None:
             candidates = self.__get_names_of(reference_data_path)
         probabilities = np.array([], dtype=[('class', int), ('probability', float)])
         for i in range(0, len(candidates)):
-            # TODO  REF IMAGE INDEX FOR ##==========================================NOWWW=!!!!!!!!!!!
             probability = self.compare(input_img, reference_data_path, candidates[i], False, preprocess=True)
             pair = (i, probability)
             probabilities = np.append(probabilities, np.array(pair, dtype=probabilities.dtype))
@@ -108,6 +107,7 @@ class Erianet:
             certainties.append([candidates[probs[i][0]], probs[i][0], probs[i][1], certainty])
             if certainties[biggestind][2] < certainty:
                 biggestind = i
+        print("Predict took: "+str(time.time()-mon_start_time))
         if give_all:
             return certainties
         return certainties[0:biggestind + 1]
