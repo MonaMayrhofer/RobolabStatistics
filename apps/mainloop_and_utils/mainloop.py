@@ -1,12 +1,12 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
-from robolib.networks.erianet import Erianet
+from robolib.networks.erianet import Erianet, ConvolutionalConfig
 import time
 
 
-net = Erianet(None, input_to_output_stride=4)
-#net.train("3BHIF", 100)
-#net.save("3BHIF.model")
+net = Erianet("atnt.model", input_to_output_stride=4, config=ConvolutionalConfig)
+net.train("res_ModelData_AtnTFaces", 50, initial_epochs=500)
+net.save("atnt.model")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
