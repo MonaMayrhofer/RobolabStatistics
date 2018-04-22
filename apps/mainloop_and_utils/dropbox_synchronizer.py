@@ -12,11 +12,11 @@ def download_files():
             while recursive != "Y" and recursive != "N":
                 recursive = input("Download subfolders recursively? (Y/N): ")
                 if recursive == "Y":
-                    download_files_recursive(dbx, foldername, True)
+                    download_files_recursive(dbx, '/' + foldername, True)
                 elif recursive == "N":
-                    download_files_recursive(dbx, foldername, False)
+                    download_files_recursive(dbx, '/' + foldername, False)
         else:
-            download_files_recursive(dbx, foldername, False)
+            download_files_recursive(dbx, '/' + foldername, False)
 
 
 def download_files_recursive(dbx, foldername, recursive):
