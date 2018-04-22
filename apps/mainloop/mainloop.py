@@ -1,9 +1,9 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
-from robolib.networks.erianet import Erianet
+from robolib.networks.erianet import Erianet, ConvolutionalConfig
 import time
 
-net = Erianet("atnt.model", input_to_output_stride=4)
+net = Erianet("atnt.model", input_to_output_stride=4, config=ConvolutionalConfig)
 net.train("res_ModelData_AtnTFaces", 50, initial_epochs=500)
 net.save("atnt.model")
 

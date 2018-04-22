@@ -14,14 +14,57 @@ from robolib.util.decorations import deprecated
 import time
 
 
+class ClassicConfig:
+    def __init__(self):
+        pass
+
+    def create_base(self, input_d):
+        seq = Sequential()
+        # seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
+        # seq.add(Flatten())
+        seq.add(Dense(200, activation='linear', input_shape=input_d))
+        seq.add(Dense(100, activation='linear'))
+        seq.add(Dropout(0.2))
+        seq.add(Dense(50, activation='linear'))
+        return seq
+
+    def get_input_dim(self, input_image_size, input_to_output_stride, insets):
+        return ((int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3]) *
+                (int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2]),)
+
+
+class ConvolutionalConfig:
+    def __init__(self):
+        pass
+
+    def create_base(self, input_d):
+        seq = Sequential()
+        seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
+        seq.add(Flatten())
+        seq.add(Dense(200, activation='linear', input_shape=input_d))
+        seq.add(Dense(100, activation='linear'))
+        seq.add(Dropout(0.2))
+        seq.add(Dense(50, activation='linear'))
+        return seq
+
+    def get_input_dim(self, input_image_size, input_to_output_stride, insets):
+        return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
+                int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
+
+
 class Erianet:
     def __init__(self, model_path, input_image_size=(128, 128), insets=(0, 0, 0, 0), input_to_output_stride=2,
-                 do_not_init=False):
+                 do_not_init=False, config=None):
+        if config is None:
+            config = ClassicConfig()
+        else:
+            config = config()
+        self.config = config
         self.input_image_size = input_image_size
         self.input_to_output_stride = input_to_output_stride
         self.model = None
         self.insets = np.asarray(insets)
-        self.input_dim = self.get_input_dim_for(input_image_size, input_to_output_stride, self.insets, 1)
+        self.input_dim = self.config.get_input_dim(input_image_size, input_to_output_stride, self.insets)
         self.model_path = model_path
         if not do_not_init:
             if model_path is None or not path.isfile(model_path):
@@ -29,22 +72,12 @@ class Erianet:
             else:
                 self.load(model_path)
 
-    @staticmethod
-    def get_input_dim_for(input_image_size, input_to_output_stride, insets, dims):
-        if dims == 1:
-            return ((int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3]) *
-                    (int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2]),)
-        elif dims == 2:
-            return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
-                    int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
-
     def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0, initial_epochs=None):
         if initial_epochs is not None and self.model_path is not None and not os.path.exists(self.model_path):
             epochs = initial_epochs
         if callbacks is None:
             callbacks = []
 
-        # TODO GEN_DATA_NEW TO HERE
         x, y = self.get_train_data(1000, data_folder, data_selection)
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
 
@@ -55,8 +88,6 @@ class Erianet:
     def get_train_data(self, amount, data_folder, data_selection=None):
         if data_selection is None:
             data_selection = self.__get_names_of(data_folder)
-
-        # TODO GEN_DATA_NEW TO HERE
         return self.gen_data_new(amount, data_selection, data_folder, self.input_image_size,
                                  self.input_to_output_stride)
 
@@ -76,6 +107,8 @@ class Erianet:
         self.model = load_model(modelpath, custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
 
     def compare(self, input_img, reference_path, reference_name, show=False, stride=None, preprocess=False):
+        # Optimierungsideen:
+        # Wenn Standardabweichung klein genug ist, den bis jetztigen Durchschnitt als gegeben annehmen
         reference_imgs = self.load_image(reference_path, reference_name, None, show=show, stride=stride, preprocess=preprocess)
         probability_sum = 0
         probability_amount = 0
@@ -131,54 +164,20 @@ class Erianet:
         if stride is None:
             stride = self.input_to_output_stride
         image = image[::stride, ::stride]
-        """
-        if self.insets[2] == 0:
-            self.insets[2] = image.shape[0]
-        if self.insets[3] == 0:
-            self.insets[3] = image.shape[1]
-        """
-        #print(self.insets)
+
         image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[0] - self.insets[2]]
-        #print(image.shape)
-        #print(self.input_dim)
+
         image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
         image = image.astype("float32")
         return image
 
     def create_erianet_base(self):
-        input_d = self.input_dim
-        #print("Creating")
-        #print(input_d)
-        seq = Sequential()
-        # seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
-        # seq.add(Flatten())
-        seq.add(Dense(200, activation='linear', input_shape=input_d))
-        seq.add(Dense(100, activation='linear'))
-        seq.add(Dropout(0.2))
-        seq.add(Dense(50, activation='linear'))
-
-        """
-        seq.add(Dense(600, input_shape=(input_d,), activation='linear'))
-        seq.add(Dropout(0.2))
-        seq.add(Dense(300, activation='linear'))
-        seq.add(Dense(200, activation='linear'))
-        seq.add(Dropout(0.1))
-        seq.add(Dense(100, activation='linear'))
-        seq.add(Dropout(0.2))
-        seq.add(Dense(50, activation='linear'))
-        """
-        """
-        for i in range(len(hidden_layer_size)):
-            if i == 0:
-                seq.add(Dense(hidden_layer_size[i], input_shape=(input_d,), activation='linear'))
-            else:
-                seq.add(Dense(hidden_layer_size[i], activation='linear'))
-            seq.add(Dropout(0.2))"""
-        return seq
+        print(self.input_dim)
+        ind = self.input_dim
+        return self.config.create_base(ind)
 
     def create_erianet(self):
-        # input_size = self.input_dim[0] * self.input_dim[1]
-        input_d = self.input_dim
+        input_d = self.input_dim  # TODO Replace usages of input_d with self.input_dim
         print(input_d)
         print(tuple(input_d))
         input_a = Input(shape=tuple(input_d))
