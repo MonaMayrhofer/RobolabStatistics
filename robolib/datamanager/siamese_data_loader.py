@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from robolib.images.pgmtools import read_pgm
 from robolib.util.random import random_different_numbers
-
+import warnings
 
 def gen_data_new(train_set_size, class_folder_names, pic_dir, input_image_size=(100, 100), input_to_output_stride=2):
     if input_image_size[0] % input_to_output_stride != 0 and input_image_size[1] % input_to_output_stride != 0:
@@ -23,13 +23,17 @@ def gen_data_new(train_set_size, class_folder_names, pic_dir, input_image_size=(
         for j in range(int(train_set_size / classes)):  # Get two different images of the same person
             ind1, ind2 = random_different_numbers(10)
 
-            im1 = read_pgm(os.getcwd() + '/'+pic_dir+'/' + class_folder_names[i] + '/' + str(ind1 + 1) + '.pgm', 'rw+')\
-                [::input_to_output_stride, ::input_to_output_stride]
-            im2 = read_pgm(os.getcwd() + '/'+pic_dir+'/' + class_folder_names[i] + '/' + str(ind2 + 1) + '.pgm', 'rw+')\
-                [::input_to_output_stride, ::input_to_output_stride]
+            im1 = read_pgm(os.getcwd() + '/'+pic_dir+'/' + class_folder_names[i] + '/' + str(ind1 + 1) + '.pgm', 'rw+')
+            im2 = read_pgm(os.getcwd() + '/'+pic_dir+'/' + class_folder_names[i] + '/' + str(ind2 + 1) + '.pgm', 'rw+')
 
-            x_tr_positive[count, 0, :] = im1.reshape(total_image_length)
-            x_tr_positive[count, 1, :] = im2.reshape(total_image_length)
+            im1 = im1[::input_to_output_stride, ::input_to_output_stride]
+            im2 = im2[::input_to_output_stride, ::input_to_output_stride]
+
+            im1 = im1.reshape(total_image_length)
+            im2 = im2.reshape(total_image_length)
+
+            x_tr_positive[count, 0, :] = im1
+            x_tr_positive[count, 1, :] = im2
             y_tr_positive[count] = 1
             count += 1
 
@@ -41,30 +45,39 @@ def gen_data_new(train_set_size, class_folder_names, pic_dir, input_image_size=(
         for j in range(10):  # Jeweils 10 Bilder auswählen
             ind1, ind2 = random_different_numbers(classes)
 
-            im1 = read_pgm(os.getcwd() + '/'+pic_dir+'/' + class_folder_names[ind1] + '/' + str(j + 1) + '.pgm', 'rw+')\
-                [::input_to_output_stride, ::input_to_output_stride]
-            im2 = read_pgm(os.getcwd() + '/'+pic_dir+'/' + class_folder_names[ind2] + '/' + str(j + 1) + '.pgm', 'rw+')\
-                [::input_to_output_stride, ::input_to_output_stride]
+            im1 = read_pgm(os.getcwd() + '/'+pic_dir+'/' + class_folder_names[ind1] + '/' + str(j + 1) + '.pgm', 'rw+')
+            im2 = read_pgm(os.getcwd() + '/'+pic_dir+'/' + class_folder_names[ind2] + '/' + str(j + 1) + '.pgm', 'rw+')
 
-            x_tr_negative[count, 0, :] = im1.reshape(im1.shape[0] * im1.shape[1])
-            x_tr_negative[count, 1, :] = im2.reshape(im1.shape[0] * im1.shape[1])
+            im1 = im1[::input_to_output_stride, ::input_to_output_stride]
+            im2 = im2[::input_to_output_stride, ::input_to_output_stride]
+
+            im1 = im1.reshape(im1.shape[0] * im1.shape[1])
+            im2 = im2.reshape(im2.shape[0] * im2.shape[1])
+
+            x_tr_negative[count, 0, :] = im1
+            x_tr_negative[count, 1, :] = im2
             y_tr_negative[count] = 0
             count += 1
 
     x_train = np.concatenate([x_tr_positive, x_tr_negative], axis=0) / 255  # Squish training-data from 0-255 to 0-1
     y_train = np.concatenate([y_tr_positive, y_tr_negative], axis=0)
 
-    return x_train.astype('float32'), y_train.astype('float32')
+    return x_train, y_train
 
 
-def load_one_image(referenceimgpath, name, img, show=False, stride=2, resize=False):
-    img = read_pgm(referenceimgpath + "/" + name + "/" + str(img) + ".pgm")
+def load_one_image(referenceimgpath, name, img, show=False):
+    if img is not None:
+        img = read_pgm(referenceimgpath + "/" + name + "/" + str(img) + ".pgm")
+        if show:
+            plt.figure(1)
+            plt.imshow(img, cmap='Greys_r')
+            plt.show()
+        return img
+    imgs = []
+    for file in os.listdir(os.path.join(referenceimgpath, name)):
+        img = read_pgm(os.path.join(referenceimgpath, name, file))
+        imgs.append(img)
     if show:
-        plt.figure(1)
-        plt.imshow(img, cmap='Greys_r')
-        plt.show()
-    if resize:
-        img = img[::stride, ::stride]
-        img = img.reshape(1, img.shape[0] * img.shape[1])
-        img = img.astype("float32")
-    return img
+        warnings.warn("Show is not yet supported with bulk-load", RuntimeWarning)  # TODO Show with bulk-load
+    return imgs
+

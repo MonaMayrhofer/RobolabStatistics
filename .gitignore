@@ -169,3 +169,8 @@ logs/
 *.model
 *.pgm
 *.cfg
+
+*.jpg
+*.tar
+
+*.mat
