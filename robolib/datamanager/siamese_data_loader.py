@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from robolib.images.pgmtools import read_pgm
 from robolib.util.random import random_different_numbers
-
+import warnings
 
 def gen_data_new(train_set_size, class_folder_names, pic_dir, input_image_size=(100, 100), input_to_output_stride=2):
     if input_image_size[0] % input_to_output_stride != 0 and input_image_size[1] % input_to_output_stride != 0:
@@ -66,9 +66,18 @@ def gen_data_new(train_set_size, class_folder_names, pic_dir, input_image_size=(
 
 
 def load_one_image(referenceimgpath, name, img, show=False):
-    img = read_pgm(referenceimgpath + "/" + name + "/" + str(img) + ".pgm")
+    if img is not None:
+        img = read_pgm(referenceimgpath + "/" + name + "/" + str(img) + ".pgm")
+        if show:
+            plt.figure(1)
+            plt.imshow(img, cmap='Greys_r')
+            plt.show()
+        return img
+    imgs = []
+    for file in os.listdir(os.path.join(referenceimgpath, name)):
+        img = read_pgm(os.path.join(referenceimgpath, name, file))
+        imgs.append(img)
     if show:
-        plt.figure(1)
-        plt.imshow(img, cmap='Greys_r')
-        plt.show()
-    return img
+        warnings.warn("Show is not yet supported with bulk-load", RuntimeWarning)  # TODO Show with bulk-load
+    return imgs
+

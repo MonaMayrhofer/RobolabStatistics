@@ -74,6 +74,16 @@ class Erianet:
         print("Loading model from File {}".format(modelpath))
         self.model = load_model(modelpath, custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
 
+    def compare(self, input_img, reference_path, reference_name, show=False, stride=None, preprocess=False):
+        reference_imgs = self.load_image(reference_path, reference_name, None, show=show, stride=stride, preprocess=preprocess)
+        probability_sum = 0
+        probability_amount = 0
+        for reference_img in reference_imgs:
+            probability_sum += float(self.model.predict([input_img, reference_img]))
+            probability_amount += 1
+            print("Got new probability: "+str(probability_sum))
+        return probability_sum/probability_amount
+
     def predict(self, input_img, reference_data_path, candidates=None, give_all=False):
 
         input_img = self.preprocess(input_img)
@@ -82,9 +92,8 @@ class Erianet:
             candidates = self.__get_names_of(reference_data_path)
         probabilities = np.array([], dtype=[('class', int), ('probability', float)])
         for i in range(0, len(candidates)):
-            # TODO  REF IMAGE INDEX FOR
-            reference_img = self.load_image(reference_data_path, candidates[i], 1, False, preprocess=True)
-            probability = float(self.model.predict([input_img, reference_img]))
+            # TODO  REF IMAGE INDEX FOR ##==========================================NOWWW=!!!!!!!!!!!
+            probability = self.compare(input_img, reference_data_path, candidates[i], False, preprocess=True)
             pair = (i, probability)
             probabilities = np.append(probabilities, np.array(pair, dtype=probabilities.dtype))
         probabilities = np.sort(probabilities, order='probability')
@@ -112,7 +121,10 @@ class Erianet:
             stride = self.input_to_output_stride
         image = load_one_image(reference_path, name, img, show)
         if preprocess:
-            image = self.preprocess(image, stride)
+            if img is not None:
+                image = self.preprocess(image, stride)
+            else:
+                image = [self.preprocess(currimg, stride) for currimg in image]
         return image
 
     def preprocess(self, image, stride=None):
