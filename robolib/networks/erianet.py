@@ -21,6 +21,7 @@ class Erianet:
         self.model = None
         self.insets = np.asarray(insets)
         self.input_dim = self.get_input_dim_for(input_image_size, input_to_output_stride, self.insets, 1)
+        self.model_path = model_path
         if not do_not_init:
             if model_path is None or not path.isfile(model_path):
                 self.create(input_image_size, input_to_output_stride)
@@ -36,7 +37,9 @@ class Erianet:
             return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
                     int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
 
-    def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0):
+    def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0, initial_epochs=None):
+        if initial_epochs is not None and self.model_path is not None and not os.path.exists(self.model_path):
+            epochs = initial_epochs
         if callbacks is None:
             callbacks = []
 
@@ -122,18 +125,18 @@ class Erianet:
         if self.insets[3] == 0:
             self.insets[3] = image.shape[1]
         """
-        print(self.insets)
+        #print(self.insets)
         image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[0] - self.insets[2]]
-        print(image.shape)
-        print(self.input_dim)
+        #print(image.shape)
+        #print(self.input_dim)
         image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
         image = image.astype("float32")
         return image
 
     def create_erianet_base(self):
         input_d = self.input_dim
-        print("Creating")
-        print(input_d)
+        #print("Creating")
+        #print(input_d)
         seq = Sequential()
         # seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
         # seq.add(Flatten())
