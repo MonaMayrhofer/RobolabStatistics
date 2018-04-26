@@ -2,7 +2,7 @@ import robolib.modelmanager.downloader as downloader
 import cv2
 import numpy as np
 
-PONGFACEDETECTORDEBUG = True
+PONGFACEDETECTORDEBUG = False
 
 class PongFaceDetector:
     def __init__(self, file):
