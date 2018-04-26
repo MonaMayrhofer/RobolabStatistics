@@ -17,4 +17,5 @@ dependencies:
   - dropbox=8.5.0
   - pip:
     - pymunk
+    - pygame
 
