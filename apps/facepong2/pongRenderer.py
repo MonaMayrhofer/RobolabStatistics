@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+import os
 import cv2
 
 
@@ -47,10 +48,10 @@ class PongRenderer:
 
     def rect(self, color, x, y, width, height, linewidth=0, out=False):
         if y < 0:
-            y = y+self.screenStart[1]
+            y = y + self.screenStart[1]
 
         if x < 0:
-            x = x+self.screenStart[0]
+            x = x + self.screenStart[0]
 
         if out:
             surf = self.display
@@ -58,25 +59,25 @@ class PongRenderer:
             surf = self.screen
         pygame.draw.rect(surf, color, (x, y, width, height), linewidth)
 
-    def text(self, pos, color, msg, out=False):
+    def text(self, pos, color, msg, family='Iceland', weight='Regular', size=30, out=False):
         pygame.font.init()
-        myfont = pygame.font.SysFont('Helvetica', 30)
+
+        if os.path.isfile(os.path.join("res", family, family + "-" + weight + ".ttf")):
+            myfont = pygame.font.Font("res/Iceland/Iceland-Regular.ttf", size)
+        else:
+            myfont = pygame.font.SysFont(family, size)
 
         textsurface = myfont.render(msg, True, color)
 
-        if pos[0] is None:
-            pos = (self.windowSize[0]/2-textsurface.get_width()/2, pos[1])
+        canvas = self.display if out else self.screen
 
-        if pos[1] < 0:
-            pos = (pos[0], pos[1]+self.screenStart[1])
+        pos = (pos[0] if pos[0] is not None else canvas.get_width() / 2 - textsurface.get_width() / 2,
+               pos[1] if pos[1] is not None else canvas.get_height() / 2 - textsurface.get_height() / 2)
 
-        if pos[0] < 0:
-            pos = (pos[0]+self.screenStart[0], pos[1])
+        pos = (pos[0] if pos[0] >= 0 else pos[0] + self.screenStart[0],
+               pos[1] if pos[1] >= 0 else pos[1] + self.screenStart[1])
 
-        if out:
-            self.display.blit(textsurface, pos)
-        else:
-            self.screen.blit(textsurface, pos)
+        canvas.blit(textsurface, pos)
 
     def draw_background(self, img):
         frame = pygame.surfarray.make_surface(img)

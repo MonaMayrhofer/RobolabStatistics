@@ -126,7 +126,7 @@ class ReadyState(GameState):
 
         img = cv2.multiply(video, mat, dtype=3)
         renderer.draw_background(img)
-        renderer.text((0, 0), (255, 255, 255), "Countdown: {:.1f}".format(self.duration - self.time))
+        renderer.text((None, None), (255, 255, 255), "{:.1f}".format(self.duration - self.time), size=120)
 
     def __init__(self, duration):
         self.duration = duration
@@ -157,7 +157,7 @@ class PlayingState(GameState):
         faceBPos = game.physics.faceTwo.get_pos()
 
         renderer.rect((0, 0, 0), game.width/2, -30, game.width, 30, out=True)
-        renderer.text((None, -30), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), True)
+        renderer.text((None, -30), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), out=True)
 
         # == Circles ==
         renderer.circle((255, 0, 0),
