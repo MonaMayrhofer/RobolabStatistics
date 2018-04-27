@@ -27,7 +27,7 @@ class PongGame:
         self.state = 0
         self.last_tick = 0
         self.state = ReadyState(2.0)
-        self.wins = (0, 0)
+        self.wins = [0, 0]
 
     def run(self):
         try:
@@ -84,7 +84,7 @@ class PongGame:
         return dt
 
     def win(self, plr):
-        self.wins[(plr+1)/2] += 1
+        self.wins[int((plr+1)/2)] += 1
 
 
 class GameState(metaclass=ABCMeta):
@@ -118,9 +118,6 @@ class ReadyState(GameState):
         mat = np.zeros(video.shape, dtype=np.float32)
         mat.fill(0.3)
 
-        print(self.face_one)
-        print(self.face_two)
-
         if self.face_one is not None:
             cv2.circle(mat, (int(self.face_one[1]), int(self.face_one[0])), 100, (1, 1, 1), -1)
 
@@ -144,7 +141,6 @@ class ReadyState(GameState):
         self.time = self.time + delta
         if self.time < 0:
             self.time = 0
-        print(self.time)
         if self.time > self.duration:
             game.state = PlayingState()
 
@@ -160,6 +156,7 @@ class PlayingState(GameState):
         faceAPos = game.physics.faceOne.get_pos()
         faceBPos = game.physics.faceTwo.get_pos()
 
+        renderer.rect((0, 0, 0), game.width/2, -30, game.width, 30, out=True)
         renderer.text((None, -30), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), True)
 
         # == Circles ==

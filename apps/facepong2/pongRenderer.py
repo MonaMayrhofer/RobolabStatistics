@@ -45,9 +45,23 @@ class PongRenderer:
     def line(self, color, start, end, width=1):
         pygame.draw.line(self.screen, color, start, end, width)
 
+    def rect(self, color, x, y, width, height, linewidth=0, out=False):
+        if y < 0:
+            y = y+self.screenStart[1]
+
+        if x < 0:
+            x = x+self.screenStart[0]
+
+        if out:
+            surf = self.display
+        else:
+            surf = self.screen
+        pygame.draw.rect(surf, color, (x, y, width, height), linewidth)
+
     def text(self, pos, color, msg, out=False):
         pygame.font.init()
         myfont = pygame.font.SysFont('Helvetica', 30)
+
         textsurface = myfont.render(msg, True, color)
 
         if pos[0] is None:

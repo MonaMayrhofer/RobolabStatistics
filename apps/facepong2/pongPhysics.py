@@ -82,27 +82,6 @@ class Borders(PhysicsObject):
         b = height
         bo = b + m
 
-        """
-        #LeftBody
-        
-            pymunk.Poly(body, [
-                (lo, to),
-                (lo, bo),
-                (l, bo),
-                (l, to)
-            ]),
-            
-        #RightBody
-        
-            pymunk.Poly(body, [
-                (r, to),
-                (r, bo),
-                (ro, bo),
-                (ro, to)
-            ]),
-        
-        """
-
         shape = [
             pymunk.Poly(body, [
                 (lo, to),
