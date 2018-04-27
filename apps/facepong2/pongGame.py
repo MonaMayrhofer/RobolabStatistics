@@ -156,7 +156,15 @@ class PlayingState(GameState):
         self.timeout = 0
 
     def render(self, renderer: PongRenderer, video, game: PongGame):
-        renderer.draw_background(video)
+        #Middlefield
+        middlemat = np.zeros(video.shape, dtype=np.float32)
+        cv2.rectangle(middlemat, (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0]/3*2)), (1, 1, 1),
+                      thickness=-1)
+        middlemat = cv2.blur(middlemat, (10, 10))
+        middlefieldvid = cv2.multiply(video, middlemat, dtype=3)
+        middlefieldvid = cv2.blur(middlefieldvid, (30, 30))
+        restvid = cv2.multiply(video, 1-middlemat, dtype=3)
+        renderer.draw_background(cv2.add(middlefieldvid, restvid))
 
         ballPos = game.physics.ball.get_pos()
         faceAPos = game.physics.faceOne.get_pos()
@@ -174,10 +182,12 @@ class PlayingState(GameState):
         if faceBPos is not None:
             renderer.circle((0, 0, 255),
                             (int(faceBPos[0]), int(faceBPos[1])), game.physics.faceTwo.radius)
-        renderer.line((255, 0, 0),
-                      (int(video.shape[0] / 3), 0), (int(video.shape[0] / 3), video.shape[1]))
-        renderer.line((255, 0, 0), (int(video.shape[0] / 3 * 2), 0),
-                      (int(video.shape[0] / 3 * 2), video.shape[1]))
+
+        # Fieldlines
+        #renderer.line((255, 0, 0),
+        #              (int(video.shape[0] / 3), 0), (int(video.shape[0] / 3), video.shape[1]))
+        #renderer.line((255, 0, 0), (int(video.shape[0] / 3 * 2), 0),
+        #              (int(video.shape[0] / 3 * 2), video.shape[1]))
 
     def loop(self, game, img, delta):
         if game.update_faces(delta, img) < 2:
