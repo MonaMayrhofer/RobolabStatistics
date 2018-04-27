@@ -84,7 +84,7 @@ class PongGame:
         return dt
 
     def win(self, plr):
-        self.wins[int((plr+1)/2)] += 1
+        self.wins[int((plr + 1) / 2)] += 1
 
 
 class GameState(metaclass=ABCMeta):
@@ -116,7 +116,7 @@ class WinState(GameState):
 class ReadyState(GameState):
     def render(self, renderer, video, game: PongGame):
         mat = np.zeros(video.shape, dtype=np.float32)
-        mat.fill(0.3)
+        mat.fill(0.0)
 
         if self.face_one is not None:
             cv2.circle(mat, (int(self.face_one[1]), int(self.face_one[0])), 100, (1, 1, 1), -1)
@@ -124,7 +124,13 @@ class ReadyState(GameState):
         if self.face_two is not None:
             cv2.circle(mat, (int(self.face_two[1]), int(self.face_two[0])), 100, (1, 1, 1), -1)
 
-        img = cv2.multiply(video, mat, dtype=3)
+        mat = cv2.blur(mat, (20, 20))
+        img = cv2.multiply(cv2.cvtColor(video, cv2.COLOR_RGB2GRAY), 0.5)
+        img = cv2.blur(img, (50, 50))
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        img = cv2.multiply(img, 1-mat, dtype=3)
+        video = cv2.multiply(video, mat, dtype=3)
+        img = cv2.add(img, video)
         renderer.draw_background(img)
         renderer.text((None, None), (255, 255, 255), "{:.1f}".format(self.duration - self.time), size=120)
 
@@ -156,7 +162,7 @@ class PlayingState(GameState):
         faceAPos = game.physics.faceOne.get_pos()
         faceBPos = game.physics.faceTwo.get_pos()
 
-        renderer.rect((0, 0, 0), game.width/2, -30, game.width, 30, out=True)
+        renderer.rect((0, 0, 0), game.width / 2, -30, game.width, 30, out=True)
         renderer.text((None, -30), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), out=True)
 
         # == Circles ==
@@ -193,4 +199,3 @@ class PlayingState(GameState):
                 game.state = WinState(won_player)
             else:
                 game.state = WinState(won_player)
-
