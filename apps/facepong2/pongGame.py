@@ -152,19 +152,21 @@ class PlayingState(GameState):
     def __init__(self):
         self.timeout = 0
 
-    def render(self, renderer: PongRenderer, video, game: PongGame):
-        # Middlefield
+    @staticmethod
+    def get_blurred_field(video, upper_left, lower_right):
         middle_mat = np.zeros(video.shape, dtype=np.float32)
-        cv2.rectangle(middle_mat, (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0] / 3 * 2)),
-                      (1.0, 1, 1),
-                      thickness=-1)
+        cv2.rectangle(middle_mat, upper_left, lower_right, (1.0, 1, 1), thickness=-1)
         middle_mat = cv2.blur(middle_mat, (20, 20))
 
-        middle_field_vid = cv2.blur(video, (50, 50))
+        middle_field_vid = cv2.blur(video, (CONFIG.graphics.middle_field_blur, CONFIG.graphics.middle_field_blur))
         middle_field_vid = cv2.multiply(middle_field_vid, CONFIG.graphics.middle_field_brightness * middle_mat, dtype=3)
         rest_vid = cv2.multiply(video, 1 - middle_mat, dtype=3)
 
-        background = cv2.add(middle_field_vid, rest_vid)
+        return cv2.add(middle_field_vid, rest_vid)
+
+    def render(self, renderer: PongRenderer, video, game: PongGame):
+        # Middlefield
+        background = self.get_blurred_field(video, (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0] / 3 * 2)))
 
         # Faces
         face_mat = np.zeros(video.shape, dtype=np.float32)
@@ -220,16 +222,8 @@ class PlayingState(GameState):
 
 class WinState(PlayingState):
     def render(self, renderer: PongRenderer, video, game: PongGame):
-        middlemat = np.zeros(video.shape, dtype=np.float32)
-        cv2.rectangle(middlemat, (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0] / 3 * 2)),
-                      (1.0, 1, 1),
-                      thickness=-1)
-        middlemat = cv2.blur(middlemat, (20, 20))
-
-        middlefieldvid = cv2.blur(video, (50, 50))
-        middlefieldvid = cv2.multiply(middlefieldvid, 0.6 * middlemat, dtype=3)
-        restvid = cv2.multiply(video, 1 - middlemat, dtype=3)
-        renderer.draw_background(cv2.add(middlefieldvid, restvid))
+        background = self.get_blurred_field(video, (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0] / 3 * 2)))
+        renderer.draw_background(background)
 
     def __init__(self, player):
         super().__init__()
