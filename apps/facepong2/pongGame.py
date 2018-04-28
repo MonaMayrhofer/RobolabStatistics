@@ -28,16 +28,20 @@ class PongGame:
         self.last_tick = 0
         self.state = ReadyState(2.0)
         self.wins = [0, 0]
-        self.fps = 0
+        self.fps = 0.0
         self.last_img_time = 0
         self.last_img = None
         self.target_cam_fps = 24  # TODO Optimize this
+        self.last_fps_print = 0
 
     def run(self):
         try:
             self.last_tick = time.time()
             while True:
                 self.fps = 1/(time.time() - self.last_tick)
+                if time.time() - self.last_fps_print > 0.5:
+                    self.last_fps_print = time.time()
+                    print("{0:.2f} Fps".format(self.fps))
                 img = self.get_image()
                 delta = self.update_time()
 
