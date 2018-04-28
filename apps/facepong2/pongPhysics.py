@@ -8,6 +8,8 @@ import random
 class PhysicsObject(metaclass=ABCMeta):
     def __init__(self):
         self.was_none = True
+        self.body = None  # Ducktype
+        self.shape = None  # Ducktype
 
     def add_to(self, space: pymunk.Space):
         space.add(self.body, self.shape)
@@ -72,28 +74,28 @@ class Borders(PhysicsObject):
     def __init__(self, width, height):
         super().__init__()
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        m = 50
-        l = 0
-        lo = l - m
-        r = width
-        ro = r + m
-        t = 0
-        to = t - m
-        b = height
-        bo = b + m
+        middle = 50
+        left = 0
+        lo = left - middle
+        right = width
+        ro = right + middle
+        top = 0
+        to = top - middle
+        bottom = height
+        bo = bottom + middle
 
         shape = [
             pymunk.Poly(body, [
                 (lo, to),
-                (lo, t),
-                (ro, t),
+                (lo, top),
+                (ro, top),
                 (ro, to)
             ]),
             pymunk.Poly(body, [
-                (lo, b),
+                (lo, bottom),
                 (lo, bo),
                 (ro, bo),
-                (ro, b)
+                (ro, bottom)
             ])
         ]
         for s in shape:
@@ -133,7 +135,7 @@ class PongPhysics:
 
     def throw_in(self):
         print("Throw In")
-        self.ball.throw_in((self.width/2, self.height/2))
+        self.ball.throw_in((self.width / 2, self.height / 2))
 
     def get_win(self):
         pos = self.ball.get_pos()
@@ -142,4 +144,3 @@ class PongPhysics:
         if pos[0] > self.width:
             return -1
         return 0
-

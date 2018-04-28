@@ -32,7 +32,6 @@ class PongGame:
         self.fps = 0.0
         self.last_img_time = 0
         self.last_img = None
-        self.target_cam_fps = 24  # TODO Optimize this
         self.last_fps_print = 0
 
     def run(self):
@@ -72,7 +71,7 @@ class PongGame:
                 pygame.display.flip()
 
     def get_image(self):
-        if self.last_img is None or time.time() - self.last_img_time > (1 / self.target_cam_fps):
+        if self.last_img is None or time.time() - self.last_img_time > (1 / CONFIG.graphics.target_cam_fps):
             _, self.last_img = self.cap.read()
             self.last_img = np.flip(self.last_img, 1)
             self.last_img_time = time.time()

@@ -3,17 +3,18 @@ import pygame.gfxdraw
 import numpy as np
 import os
 import cv2
+from apps.facepong2.pongConfig import CONFIG
 
 
 class PongRenderer:
-    def __init__(self, camSize, windowSize):
+    def __init__(self, cam_size, window_size):
         pygame.init()
-        pygame.display.set_caption("OpenCV camera stream on Pygame")
-        self.display = pygame.display.set_mode(windowSize, pygame.FULLSCREEN & 0)
-        self.camSize = camSize
-        self.windowSize = windowSize
-        self.screen = pygame.Surface(camSize)
-        self.insets = (0, 0)
+        pygame.display.set_caption("Facepong")
+        self.display = pygame.display.set_mode(window_size, pygame.FULLSCREEN if CONFIG.graphics.fullscreen else 0)
+        self.camSize = cam_size
+        self.windowSize = window_size
+        self.screen = pygame.Surface(cam_size)
+        self.insets = CONFIG.graphics.camera_insets
         self.screenStart = np.subtract(np.divide(self.windowSize, 2), np.divide(self.camSize, 2))
 
     def __crop_image(self, image):
@@ -44,7 +45,7 @@ class PongRenderer:
     def circle(self, color, center, radius, width=0):
         pygame.gfxdraw.aacircle(self.screen, center[0], center[1], radius, color)
         pygame.gfxdraw.filled_circle(self.screen, center[0], center[1], radius, color)
-        #pygame.draw.circle(self.screen, color, center, radius, width)
+        # pygame.draw.circle(self.screen, color, center, radius, width)
 
     def line(self, color, start, end, width=1):
         pygame.draw.line(self.screen, color, start, end, width)
