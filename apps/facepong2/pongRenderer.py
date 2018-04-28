@@ -1,4 +1,5 @@
 import pygame
+import pygame.gfxdraw
 import numpy as np
 import os
 import cv2
@@ -41,7 +42,9 @@ class PongRenderer:
         pygame.display.update()
 
     def circle(self, color, center, radius, width=0):
-        pygame.draw.circle(self.screen, color, center, radius, width)
+        pygame.gfxdraw.aacircle(self.screen, center[0], center[1], radius, color)
+        pygame.gfxdraw.filled_circle(self.screen, center[0], center[1], radius, color)
+        #pygame.draw.circle(self.screen, color, center, radius, width)
 
     def line(self, color, start, end, width=1):
         pygame.draw.line(self.screen, color, start, end, width)

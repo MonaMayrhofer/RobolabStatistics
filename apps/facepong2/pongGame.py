@@ -28,11 +28,16 @@ class PongGame:
         self.last_tick = 0
         self.state = ReadyState(2.0)
         self.wins = [0, 0]
+        self.fps = 0
+        self.last_img_time = 0
+        self.last_img = None
+        self.target_cam_fps = 24  # TODO Optimize this
 
     def run(self):
         try:
             self.last_tick = time.time()
             while True:
+                self.fps = 1/(time.time() - self.last_tick)
                 img = self.get_image()
                 delta = self.update_time()
 
@@ -61,8 +66,11 @@ class PongGame:
                 pygame.display.flip()
 
     def get_image(self):
-        _, img = self.cap.read()
-        return np.flip(img, 1)
+        if self.last_img is None or time.time() - self.last_img_time > (1/self.target_cam_fps):
+            _, self.last_img = self.cap.read()
+            self.last_img = np.flip(self.last_img, 1)
+            self.last_img_time = time.time()
+        return self.last_img
 
     def get_faces(self, image):
         return self.faceDetector.get_face_positions(image, (30, 30),
