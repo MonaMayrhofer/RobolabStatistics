@@ -152,28 +152,6 @@ class PlayingState(GameState):
         self.timeout = 0
 
     def render(self, renderer: PongRenderer, video, game: PongGame):
-        self.draw_field(renderer, video, game)
-
-        #Balls
-        ballPos = game.physics.ball.get_pos()
-        faceAPos = game.physics.faceOne.get_pos()
-        faceBPos = game.physics.faceTwo.get_pos()
-
-        # == Circles ==
-        renderer.circle((244, 120, 30),
-                        (int(ballPos[0]), int(ballPos[1])), game.physics.ball.radius)
-        if faceAPos is not None:
-            renderer.circle((0, 255, 0),
-                            (int(faceAPos[0]), int(faceAPos[1])), game.physics.faceOne.radius)
-        if faceBPos is not None:
-            renderer.circle((0, 0, 255),
-                            (int(faceBPos[0]), int(faceBPos[1])), game.physics.faceTwo.radius)
-
-        #Goals
-        renderer.rect((0, 0, 0), game.width / 2, -30, game.width, 30, out=True)
-        renderer.text((None, -30), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), out=True)
-
-    def draw_field(self, renderer: PongRenderer, video, game: PongGame):
         #Middlefield
         middlemat = np.zeros(video.shape, dtype=np.float32)
         cv2.rectangle(middlemat, (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0]/3*2)), (1.0, 1, 1),
@@ -183,7 +161,36 @@ class PlayingState(GameState):
         middlefieldvid = cv2.blur(video, (50, 50))
         middlefieldvid = cv2.multiply(middlefieldvid, 0.6*middlemat, dtype=3)
         restvid = cv2.multiply(video, 1-middlemat, dtype=3)
-        renderer.draw_background(cv2.add(middlefieldvid, restvid))
+
+        background = cv2.add(middlefieldvid, restvid)
+
+        # Faces
+        facemat = np.zeros(video.shape, dtype=np.float32)
+        facemat.fill(1.0)
+        faceAPos = game.physics.faceOne.get_pos()
+        faceBPos = game.physics.faceTwo.get_pos()
+        thickness = 10
+        if faceAPos is not None:
+            cv2.circle(facemat, (int(faceAPos[1]), int(faceAPos[0])),
+                       game.physics.faceOne.radius+thickness, (0.0, 0.0, 0.0), -1)
+            cv2.circle(facemat, (int(faceAPos[1]), int(faceAPos[0])), game.physics.faceOne.radius, (0.5, 1.0, 0.5), -1)
+        if faceBPos is not None:
+            cv2.circle(facemat, (int(faceBPos[1]), int(faceBPos[0])),
+                       game.physics.faceOne.radius+thickness, (0.0, 0.0, 0.0), -1)
+            cv2.circle(facemat, (int(faceBPos[1]), int(faceBPos[0])), game.physics.faceOne.radius, (0.5, 0.5, 1.0), -1)
+        facemat = cv2.blur(facemat, (20, 20))
+        background = cv2.multiply(background, facemat, dtype=3)
+
+        renderer.draw_background(background)
+
+        #Ball
+        ballPos = game.physics.ball.get_pos()
+        renderer.circle((0, 0, 30),
+                        (int(ballPos[0]), int(ballPos[1])), game.physics.ball.radius)
+
+        #Goals
+        renderer.rect((0, 0, 0), game.width / 2, -30, game.width, 30, out=True)
+        renderer.text((None, -30), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), out=True)
 
     def loop(self, game, img, delta):
         if game.update_faces(delta, img) < 2:
