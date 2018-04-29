@@ -21,10 +21,9 @@ class PongGame:
         self.width = img.shape[1]
         self.height = img.shape[0]
         self.third_size = self.width / 3
-        self.renderer = PongRenderer((self.width, self.height), (1280, 720))
+        self.renderer = PongRenderer((self.width, self.height), CONFIG.graphics.monitor_size)
         self.physics = PongPhysics(self.width, self.height)
-        # self.state = ReadyState(2.0)
-        self.state = PlayingState()
+        self.state = ReadyState()
         self.fps = 0.0
         self.last_img_time = 0
         self.last_img = None
@@ -36,7 +35,6 @@ class PongGame:
         self.winPaused = False
         self.wins = [0, 0]
         self.restart()
-        self.reset()
 
     def restart(self):
         self.paused = False
