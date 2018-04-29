@@ -8,13 +8,14 @@ class PongConfig:
         self.final_screen_duration = 2
         self.final_screen_times = (1, 6)
         self.cam = 0
-        self.goals_to_win = 1
+        self.goals_to_win = 3
         self.ready_state_duration = 3
+        self.timeout_ready_state_duration = 1
 
 
 class PongGraphicsConfig:
     def __init__(self):
-        self.monitor_size = (1920, 1200)
+        self.monitor_size = (1280, 720)
         self.face_border_thickness = 10
         self.middle_field_brightness = 0.7
         self.win_screen_brightness = 0.4

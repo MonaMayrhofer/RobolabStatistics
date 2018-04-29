@@ -146,8 +146,10 @@ class ReadyState(GameState):
         renderer.draw_background(img)
         renderer.text(None, (255, 255, 255), "{:.1f}".format(self.duration - self.time), size=120, out=True)
 
-    def __init__(self):
-        self.duration = CONFIG.ready_state_duration
+    def __init__(self, duration=None):
+        if duration is None:
+            duration = CONFIG.ready_state_duration
+        self.duration = duration
         self.time = 0
         self.face_one = None
         self.face_two = None
@@ -223,7 +225,7 @@ class PlayingState(GameState):
         if game.update_faces(delta, img) < 2:
             self.timeout += delta
         if self.timeout > 1.0:
-            game.change_state_to(ReadyState())
+            game.change_state_to(ReadyState(CONFIG.timeout_ready_state_duration))
         game.physics.tick(delta)
         self.check_state(game)
 
