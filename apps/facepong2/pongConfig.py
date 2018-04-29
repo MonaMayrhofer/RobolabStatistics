@@ -17,6 +17,7 @@ class PongGraphicsConfig:
     def __init__(self):
         self.monitor_size = (1280, 720)
         self.face_border_thickness = 10
+        self.ball_border_thickness = 3
         self.middle_field_brightness = 0.7
         self.win_screen_brightness = 0.4
         self.middle_field_blur = 10
@@ -25,6 +26,12 @@ class PongGraphicsConfig:
         self.camera_insets = (0, 0)
         self.goal_font_size = 50
         self.final_screen_font_size = 100
+        self.color_face_left_border = (0.0, 0.0, 0.0)
+        self.color_face_right_border = (0.0, 0.0, 0.0)
+        self.color_ball_border = (0.0, 0.0, 0.0)
+        self.color_face_left = (0.5, 1.0, 0.5)
+        self.color_face_right = (0.5, 0.5, 1.0)
+        self.color_ball = (1.0, 0.5, 0.5)
 
 
 class DebugOnConfig:

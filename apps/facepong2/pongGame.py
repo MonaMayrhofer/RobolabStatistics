@@ -110,8 +110,8 @@ class PongGame:
         return self.wins[int((plr + 1) / 2)]
     
     def change_state_to(self, state):
-        print("Changing state...")
-        print(state)
+        #print("Changing state...")
+        #print(state)
         self.state = state
 
 
@@ -199,25 +199,33 @@ class PlayingState(GameState):
         face_a_pos = game.physics.faceOne.get_pos()
         face_b_pos = game.physics.faceTwo.get_pos()
         thickness = CONFIG.graphics.face_border_thickness
+
         if face_a_pos is not None:
             cv2.circle(face_mat, (int(face_a_pos[1]), int(face_a_pos[0])),
-                       game.physics.faceOne.radius + thickness, (0.0, 0.0, 0.0), -1)
+                       game.physics.faceOne.radius + thickness, CONFIG.graphics.color_face_left_border, -1)
             cv2.circle(face_mat, (int(face_a_pos[1]), int(face_a_pos[0])),
-                       game.physics.faceOne.radius, (0.5, 1.0, 0.5), -1)
+                       game.physics.faceOne.radius, CONFIG.graphics.color_face_left, -1)
         if face_b_pos is not None:
             cv2.circle(face_mat, (int(face_b_pos[1]), int(face_b_pos[0])),
-                       game.physics.faceOne.radius + thickness, (0.0, 0.0, 0.0), -1)
+                       game.physics.faceOne.radius + thickness, CONFIG.graphics.color_face_right_border, -1)
             cv2.circle(face_mat, (int(face_b_pos[1]), int(face_b_pos[0])),
-                       game.physics.faceOne.radius, (0.5, 0.5, 1.0), -1)
-        face_mat = cv2.blur(face_mat, (20, 20))
+                       game.physics.faceOne.radius, CONFIG.graphics.color_face_right, -1)
+        face_mat = cv2.blur(face_mat, (15, 15))
+        ball_pos = game.physics.ball.get_pos()
+        cv2.circle(face_mat, (int(ball_pos[1]), int(ball_pos[0])),
+                   game.physics.ball.radius+CONFIG.graphics.ball_border_thickness,
+                   CONFIG.graphics.color_ball_border, -1)
+        cv2.circle(face_mat, (int(ball_pos[1]), int(ball_pos[0])), game.physics.ball.radius,
+                   CONFIG.graphics.color_ball, -1)
+        face_mat = cv2.blur(face_mat, (5, 5))
         background = cv2.multiply(background, face_mat, dtype=3)
 
         renderer.draw_background(background)
 
         # Ball
-        ball_pos = game.physics.ball.get_pos()
-        renderer.circle((0, 0, 30),
-                        (int(ball_pos[0]), int(ball_pos[1])), game.physics.ball.radius)
+        #ball_pos = game.physics.ball.get_pos()
+        #renderer.circle((0, 0, 30),
+        #                (int(ball_pos[0]), int(ball_pos[1])), game.physics.ball.radius)
 
         self.draw_points(renderer, -CONFIG.graphics.goal_font_size, game.wins[0], game.wins[1])
 
@@ -245,7 +253,7 @@ class PlayingState(GameState):
 
 class WinState(PlayingState):
     def render(self, renderer: PongRenderer, video, game: PongGame):
-        print(game.wins_of(self.player))
+        #print(game.wins_of(self.player))
         if game.wins_of(self.player) >= CONFIG.goals_to_win:
             game.change_state_to(FinalState(self.player))
             return
