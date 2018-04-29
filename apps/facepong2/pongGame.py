@@ -45,7 +45,7 @@ class PongGame:
         try:
             self.last_tick = time.time()
             while True:
-                self.fps = 1 / (time.time() - self.last_tick)
+                self.fps = 1 / max(time.time() - self.last_tick, 0.000001)
                 if time.time() - self.last_fps_print > CONFIG.fps_interval:
                     self.last_fps_print = time.time()
                     print("{0:.2f} Fps".format(self.fps))
