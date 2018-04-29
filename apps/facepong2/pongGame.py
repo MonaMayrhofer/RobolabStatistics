@@ -9,7 +9,7 @@ import pygame
 from apps.facepong2.pongFaceDetector import PongFaceDetector
 from apps.facepong2.pongPhysics import PongPhysics
 from apps.facepong2.pongConfig import CONFIG
-from apps.facepong2.pongRenderer import PongRenderer
+from apps.facepong2.pongRenderer import PongRenderer, TextAlign
 
 
 class PongGame:
@@ -225,18 +225,38 @@ class PlayingState(GameState):
 
 class WinState(PlayingState):
     def render(self, renderer: PongRenderer, video, game: PongGame):
-        time_progress = min(1.0, (self.duration - self.time)/self.duration*self.duration/1)
-        player_id = (self.player+1)/2
-        x_start = (1-time_progress*player_id) * (video.shape[0]/3)
-        x_end = video.shape[0] - ((1-time_progress*(1-player_id)) * (video.shape[0] / 3))
-        blur = time_progress*CONFIG.graphics.middle_field_blur*4+CONFIG.graphics.middle_field_blur
-        brightness = CONFIG.graphics.middle_field_brightness-(time_progress*CONFIG.graphics.middle_field_brightness)
+        # Timing
+        time_progress = min(1.0, (self.duration - self.time) / self.duration)
+
+        fade_in_end = CONFIG.win_screen_times[0]
+        fade_out_start = CONFIG.win_screen_times[1]
+        time_progress = time_progress / fade_in_end if time_progress < fade_in_end else (
+            1 if time_progress < fade_out_start else
+            (1 - time_progress) / (1 - fade_out_start)
+        )
+
+        # Background-Animation
+        player_id = (self.player + 1) / 2
+        a_third = video.shape[0] / 3
+        x_start = (1 - time_progress * player_id) * a_third
+        x_end = video.shape[0] - ((1 - time_progress * (1 - player_id)) * a_third)
+        blur = time_progress * CONFIG.graphics.middle_field_blur * 4 + CONFIG.graphics.middle_field_blur
+        brightness = CONFIG.graphics.middle_field_brightness - (time_progress * CONFIG.graphics.middle_field_brightness
+                                                                * (1 - CONFIG.graphics.win_screen_brightness))
         background = self.get_blurred_field(video, (0, int(x_start)), (video.shape[1], int(x_end)), blur, brightness)
         renderer.draw_background(background)
 
+        # Texts
+        text_x = a_third + player_id * a_third - self.player * 30
+        text_align = TextAlign.RIGHT if self.player > 0 else TextAlign.LEFT
+        lr_text = "left" if self.player < 0 else "right"
+        text_alpha = max(0.0, time_progress * 355 - 100)
+        renderer.text((text_x, None), (255, 255, 255, text_alpha), "Point for {0} Player".format(lr_text), size=60,
+                      align=(text_align, TextAlign.CENTER), out=True)
+
     def __init__(self, player):
         super().__init__()
-        self.duration = 3
+        self.duration = CONFIG.win_screen_duration
         self.time = self.duration
         self.player = player
 
