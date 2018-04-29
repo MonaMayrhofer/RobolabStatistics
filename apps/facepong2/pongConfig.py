@@ -19,7 +19,7 @@ class PongGraphicsConfig:
         self.win_screen_brightness = 0.4
         self.middle_field_blur = 10
         self.target_cam_fps = 25
-        self.fullscreen = False
+        self.fullscreen = True
         self.camera_insets = (0, 0)
         self.goal_font_size = 50
         self.final_screen_font_size = 100
@@ -27,7 +27,7 @@ class PongGraphicsConfig:
 
 class DebugOnConfig:
     def __init__(self):
-        self.face_detector_debug = True
+        self.face_detector_debug = False
 
 
 CONFIG = PongConfig()
