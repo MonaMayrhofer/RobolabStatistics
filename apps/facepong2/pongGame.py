@@ -27,7 +27,8 @@ class PongGame:
         self.physics = PongPhysics(self.width, self.height)
         self.state = 0
         self.last_tick = 0
-        self.state = ReadyState(2.0)
+        # self.state = ReadyState(2.0)
+        self.state = PlayingState()
         self.wins = [0, 0]
         self.fps = 0.0
         self.last_img_time = 0
@@ -153,20 +154,22 @@ class PlayingState(GameState):
         self.timeout = 0
 
     @staticmethod
-    def get_blurred_field(video, upper_left, lower_right):
+    def get_blurred_field(video, upper_left, lower_right, blur, brightness):
         middle_mat = np.zeros(video.shape, dtype=np.float32)
         cv2.rectangle(middle_mat, upper_left, lower_right, (1.0, 1, 1), thickness=-1)
         middle_mat = cv2.blur(middle_mat, (20, 20))
 
-        middle_field_vid = cv2.blur(video, (CONFIG.graphics.middle_field_blur, CONFIG.graphics.middle_field_blur))
-        middle_field_vid = cv2.multiply(middle_field_vid, CONFIG.graphics.middle_field_brightness * middle_mat, dtype=3)
+        middle_field_vid = cv2.blur(video, (int(blur), int(blur)))
+        middle_field_vid = cv2.multiply(middle_field_vid, brightness * middle_mat, dtype=3)
         rest_vid = cv2.multiply(video, 1 - middle_mat, dtype=3)
 
         return cv2.add(middle_field_vid, rest_vid)
 
     def render(self, renderer: PongRenderer, video, game: PongGame):
         # Middlefield
-        background = self.get_blurred_field(video, (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0] / 3 * 2)))
+        background = self.get_blurred_field(video,
+                                            (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0] / 3 * 2)),
+                                            CONFIG.graphics.middle_field_blur, CONFIG.graphics.middle_field_brightness)
 
         # Faces
         face_mat = np.zeros(video.shape, dtype=np.float32)
@@ -222,12 +225,19 @@ class PlayingState(GameState):
 
 class WinState(PlayingState):
     def render(self, renderer: PongRenderer, video, game: PongGame):
-        background = self.get_blurred_field(video, (0, int(video.shape[0] / 3)), (video.shape[1], int(video.shape[0] / 3 * 2)))
+        time_progress = min(1.0, (self.duration - self.time)/self.duration*self.duration/1)
+        player_id = (self.player+1)/2
+        x_start = (1-time_progress*player_id) * (video.shape[0]/3)
+        x_end = video.shape[0] - ((1-time_progress*(1-player_id)) * (video.shape[0] / 3))
+        blur = time_progress*CONFIG.graphics.middle_field_blur*4+CONFIG.graphics.middle_field_blur
+        brightness = CONFIG.graphics.middle_field_brightness-(time_progress*CONFIG.graphics.middle_field_brightness)
+        background = self.get_blurred_field(video, (0, int(x_start)), (video.shape[1], int(x_end)), blur, brightness)
         renderer.draw_background(background)
 
     def __init__(self, player):
         super().__init__()
-        self.time = 3
+        self.duration = 3
+        self.time = self.duration
         self.player = player
 
     def loop(self, game, img, delta):
