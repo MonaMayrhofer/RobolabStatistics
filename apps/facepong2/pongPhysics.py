@@ -123,9 +123,6 @@ class PongPhysics:
         self.faceTwo = Face().add_to(self.space)
         Borders(self.width, self.height).add_to(self.space)
 
-        # SETUP PHYSICS
-        self.throw_in()
-
     def tick(self, delta):
         self.space.step(delta)
 

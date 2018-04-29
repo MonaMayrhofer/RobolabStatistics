@@ -14,26 +14,34 @@ from apps.facepong2.pongRenderer import PongRenderer, TextAlign
 
 class PongGame:
     def __init__(self, file='FrontalFace.xml'):
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(CONFIG.cam)
         _, img = self.cap.read()
         self.gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         self.faceDetector = PongFaceDetector(file)
-        self.paused = False
-        self.winPaused = False
         self.width = img.shape[1]
         self.height = img.shape[0]
         self.third_size = self.width / 3
         self.renderer = PongRenderer((self.width, self.height), (1280, 720))
         self.physics = PongPhysics(self.width, self.height)
-        self.state = 0
-        self.last_tick = 0
         # self.state = ReadyState(2.0)
         self.state = PlayingState()
-        self.wins = [0, 0]
         self.fps = 0.0
         self.last_img_time = 0
         self.last_img = None
         self.last_fps_print = 0
+        self.last_tick = 0
+
+        # Restart
+        self.paused = False
+        self.winPaused = False
+        self.wins = [0, 0]
+        self.restart()
+        self.reset()
+
+    def restart(self):
+        self.paused = False
+        self.winPaused = False
+        self.wins = [0, 0]
 
     def run(self):
         try:
@@ -100,6 +108,14 @@ class PongGame:
     def win(self, plr):
         self.wins[int((plr + 1) / 2)] += 1
 
+    def wins_of(self, plr):
+        return self.wins[int((plr + 1) / 2)]
+    
+    def change_state_to(self, state):
+        print("Changing state...")
+        print(state)
+        self.state = state
+
 
 class GameState(metaclass=ABCMeta):
     @abstractmethod
@@ -130,10 +146,10 @@ class ReadyState(GameState):
         video = cv2.multiply(video, mat, dtype=3)
         img = cv2.add(img, video)
         renderer.draw_background(img)
-        renderer.text((None, None), (255, 255, 255), "{:.1f}".format(self.duration - self.time), size=120)
+        renderer.text(None, (255, 255, 255), "{:.1f}".format(self.duration - self.time), size=120, out=True)
 
-    def __init__(self, duration):
-        self.duration = duration
+    def __init__(self):
+        self.duration = CONFIG.ready_state_duration
         self.time = 0
         self.face_one = None
         self.face_two = None
@@ -146,7 +162,8 @@ class ReadyState(GameState):
         if self.time < 0:
             self.time = 0
         if self.time > self.duration:
-            game.state = PlayingState()
+            game.reset()
+            game.change_state_to(PlayingState())
 
 
 class PlayingState(GameState):
@@ -164,6 +181,11 @@ class PlayingState(GameState):
         rest_vid = cv2.multiply(video, 1 - middle_mat, dtype=3)
 
         return cv2.add(middle_field_vid, rest_vid)
+
+    def draw_points(self, renderer: PongRenderer, y, points_a, points_b, alpha=255):
+        # Goals
+        renderer.text((None, y), (255, 255, 255, alpha), "{0} - {1}".format(points_a, points_b), out=True,
+                      align=(TextAlign.CENTER, TextAlign.LEFT), size=50, draw_in_front=False)
 
     def render(self, renderer: PongRenderer, video, game: PongGame):
         # Middlefield
@@ -197,15 +219,13 @@ class PlayingState(GameState):
         renderer.circle((0, 0, 30),
                         (int(ball_pos[0]), int(ball_pos[1])), game.physics.ball.radius)
 
-        # Goals
-        renderer.rect((0, 0, 0), game.width / 2, -30, game.width, 30, out=True)
-        renderer.text((None, -30), (255, 255, 255), "Wins: {0}-{1}".format(game.wins[0], game.wins[1]), out=True)
+        self.draw_points(renderer, -CONFIG.graphics.goal_font_size, game.wins[0], game.wins[1])
 
     def loop(self, game, img, delta):
         if game.update_faces(delta, img) < 2:
             self.timeout += delta
         if self.timeout > 1.0:
-            game.state = ReadyState(1.0)
+            game.change_state_to(ReadyState())
         game.physics.tick(delta)
         self.check_state(game)
 
@@ -218,18 +238,23 @@ class PlayingState(GameState):
         if won_player != 0:
             game.win(won_player)
             if won_player < 0:
-                game.state = WinState(won_player)
+                game.change_state_to(WinState(won_player))
             else:
-                game.state = WinState(won_player)
+                game.change_state_to(WinState(won_player))
 
 
 class WinState(PlayingState):
     def render(self, renderer: PongRenderer, video, game: PongGame):
+        print(game.wins_of(self.player))
+        if game.wins_of(self.player) >= CONFIG.goals_to_win:
+            game.change_state_to(FinalState(self.player))
+            return
+
         # Timing
         time_progress = min(1.0, (self.duration - self.time) / self.duration)
 
-        fade_in_end = CONFIG.win_screen_times[0]
-        fade_out_start = CONFIG.win_screen_times[1]
+        fade_in_end = CONFIG.win_screen_times[0] / CONFIG.win_screen_duration
+        fade_out_start = CONFIG.win_screen_times[1] / CONFIG.win_screen_duration
         time_progress = time_progress / fade_in_end if time_progress < fade_in_end else (
             1 if time_progress < fade_out_start else
             (1 - time_progress) / (1 - fade_out_start)
@@ -254,6 +279,17 @@ class WinState(PlayingState):
         renderer.text((text_x, None), (255, 255, 255, text_alpha), "Point for {0} Player".format(lr_text), size=60,
                       align=(text_align, TextAlign.CENTER), out=True)
 
+        # Goals Text
+        win_a_pre = int(game.wins[0] - (1 - player_id))
+        win_b_pre = int(game.wins[1] - player_id)
+        if self.time > self.duration * fade_in_end:
+            self.draw_points(renderer, -CONFIG.graphics.goal_font_size * (1 - time_progress), win_a_pre, win_b_pre,
+                             alpha=255 * (1 - time_progress))
+        else:
+            self.draw_points(renderer, -CONFIG.graphics.goal_font_size * (1 - time_progress), game.wins[0],
+                             game.wins[1],
+                             alpha=255 * (1 - time_progress))
+
     def __init__(self, player):
         super().__init__()
         self.duration = CONFIG.win_screen_duration
@@ -264,4 +300,43 @@ class WinState(PlayingState):
         self.time -= delta
         if self.time < 0:
             game.reset()
-            game.state = PlayingState()
+            game.change_state_to(PlayingState())
+
+
+class FinalState(PlayingState):
+    def __init__(self, won_player):
+        super().__init__()
+        self.player = won_player
+        self.time = 0
+        self.duration = CONFIG.final_screen_duration
+
+    def render(self, renderer: PongRenderer, video, game: PongGame):
+        # Timing
+        time_progress = min(1.0, self.time / CONFIG.final_screen_times[0])
+
+        # Background-Animation
+        player_id = (self.player + 1) / 2
+        a_third = video.shape[0] / 3
+        x_start = (1 - time_progress) * a_third
+        x_end = video.shape[0] - ((1 - time_progress) * a_third)
+        blur = time_progress * CONFIG.graphics.middle_field_blur * 4 + CONFIG.graphics.middle_field_blur
+        brightness = CONFIG.graphics.middle_field_brightness - (time_progress * CONFIG.graphics.middle_field_brightness
+                                                                * (1 - CONFIG.graphics.win_screen_brightness))
+        background = self.get_blurred_field(video, (0, int(x_start)), (video.shape[1], int(x_end)), blur, brightness)
+        renderer.draw_background(background)
+
+        # Points
+        pointsY = -CONFIG.graphics.goal_font_size \
+                  + (CONFIG.graphics.goal_font_size + renderer.screen.get_height() / 2
+                  - CONFIG.graphics.final_screen_font_size / 2) * time_progress
+        renderer.text((None, pointsY), (255, 255, 255), "{0} - {1}".format(game.wins[0], game.wins[1]), out=True,
+                      align=(TextAlign.CENTER, TextAlign.LEFT),
+                      size=int(CONFIG.graphics.goal_font_size +
+                               (
+                                           CONFIG.graphics.final_screen_font_size - CONFIG.graphics.goal_font_size) * time_progress))
+
+    def loop(self, game, img, delta):
+        self.time += delta
+        if self.time >= self.duration:
+            game.restart()
+            game.change_state_to(ReadyState())

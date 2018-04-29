@@ -55,10 +55,10 @@ class PongRenderer:
         frame = np.rot90(frame)
         frame = np.flip(frame, 0)
 
+        self.display.fill((0, 0, 0))
         state.render(self, frame, game)
 
         # pygame.draw.rect(self.display, (0, 0, 0), (0, 0, self.display.get_width(), self.display.get_height()))
-        self.display.fill((0, 0, 0))
         self.display.blit(self.screen, self.screenStart)
         self.execute_blits()
 
@@ -86,7 +86,7 @@ class PongRenderer:
         pygame.draw.rect(surf, color, (x, y, width, height), linewidth)
 
     def text(self, pos, color, msg, family='Iceland', weight='Regular', size=30, out=False,
-             align=(TextAlign.CENTER, TextAlign.CENTER)):
+             align=(TextAlign.CENTER, TextAlign.CENTER), draw_in_front=True):
         pygame.font.init()
 
         if os.path.isfile(os.path.join("res", family, family + "-" + weight + ".ttf")):
@@ -133,7 +133,7 @@ class PongRenderer:
             tempSurface.blit(text_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
             text_surface = tempSurface
 
-        if out:
+        if draw_in_front:
             self.blit_later(canvas, text_surface, pos)
         else:
             canvas.blit(text_surface, pos)
