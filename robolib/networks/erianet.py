@@ -88,7 +88,7 @@ class Erianet:
     def get_train_data(self, amount, data_folder, data_selection=None):
         if data_selection is None:
             data_selection = self.__get_names_of(data_folder)
-        return self.gen_data_new(amount, data_selection, data_folder, self.input_image_size,
+        return self.gen_data_servantrain(amount, data_selection, data_folder, self.input_image_size,
                                  self.input_to_output_stride)
 
     def create(self, input_image_size=(128, 128), input_to_output_stride=2):
@@ -191,7 +191,93 @@ class Erianet:
 
     def gen_data_servantrain(self, train_set_size, class_folder_names, pic_dir, input_image_size=(100, 100),
                              input_to_output_stride=2):
-        pass
+
+        print("Servantrain...")
+        classes = len(class_folder_names)
+
+        # Gen Positive Examples
+        print("Generating Positive")
+        examples_per_class = int(min(1.0, train_set_size/classes))
+
+        x_shape = (classes*examples_per_class, 2)
+        y_shape = (classes*examples_per_class, 1)
+
+        # positive_x = np.array([])
+        # positive_y = np.array([])
+        positive_x = np.zeros(x_shape)
+        positive_y = np.zeros(y_shape)
+        count = 0
+
+        for i in range(classes):
+            this_class_path = os.path.join(os.getcwd(), pic_dir, class_folder_names[i])
+            this_class_images = os.listdir(this_class_path)
+            print("Positive example from: " + this_class_path)
+            if len(this_class_images) < 2:
+                continue
+            for j in range(examples_per_class):
+                i1, i2 = random_different_numbers(len(this_class_images))
+                image_path1 = os.path.join(this_class_path, this_class_images[i1])
+                image_path2 = os.path.join(this_class_path, this_class_images[i2])
+                print(image_path1)
+                print(image_path2)
+
+                im1 = self.preprocess(read_pgm(image_path1))
+                im2 = self.preprocess(read_pgm(image_path2))
+
+                # np.append(positive_x, [im1, im2])
+                # np.append(positive_y, 1)
+                positive_x[count, 0] = im1
+                positive_x[count, 1] = im2
+                positive_y[count] = 1
+                count += 1
+
+        # Gen Negative Examples
+        print("Generating Negatives")
+        examples_per_class = int(min(1.0, train_set_size/classes))
+
+        negative_x = np.zeros(x_shape)
+        negative_y = np.zeros(y_shape)
+        for i in range(classes):
+            first_class_path = os.path.join(os.getcwd(), pic_dir, class_folder_names[i])
+            first_class_images = os.listdir(first_class_path)
+            used_classes = [i]
+            for j in range(examples_per_class):
+                other_ind = i
+                while other_ind in used_classes:
+                    other_ind = np.random.randint(0, classes)
+                used_classes.append(other_ind)
+
+                other_class_path = os.path.join(os.getcwd(), pic_dir, class_folder_names[other_ind])
+                other_class_images = os.listdir(other_class_path)
+
+                i1 = np.random.randint(0, len(first_class_images))
+                i2 = np.random.randint(0, len(other_class_images))
+
+                image_path1 = os.path.join(first_class_path, first_class_images[i1])
+                image_path2 = os.path.join(other_class_path, other_class_images[i2])
+                print(image_path1)
+                print(image_path2)
+
+                im1 = self.preprocess(read_pgm(image_path1))
+                im2 = self.preprocess(read_pgm(image_path2))
+
+                np.append(negative_x, [im1, im2])
+                np.append(negative_y, 1)
+                #positive_x.append([im1, im2])
+                #positive_y.append(0)
+                negative_x[count, 0] = im1
+                negative_x[count, 1] = im2
+                negative_y[count] = 1
+                count += 1
+
+        print(positive_x.shape)
+        print(negative_x.shape)
+        print(positive_y.shape)
+
+        x_train = np.concatenate([positive_x, negative_x], axis=0) / 255  # Squish training-data from 0-255 to 0-1
+        y_train = np.concatenate([positive_y, negative_y], axis=0)
+
+        return x_train, y_train
 
     @deprecated
     def gen_data_new(self, train_set_size, class_folder_names, pic_dir, input_image_size=(100, 100),

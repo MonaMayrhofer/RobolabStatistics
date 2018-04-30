@@ -2,11 +2,11 @@ from robolib.networks.erianet import Erianet, ConvolutionalConfig
 from robolib.datamanager.siamese_data_loader import load_one_image
 import os
 
-train_set = "res_ModelData_AtnTFaces"
+train_set = "convlfw"
 predict_set = "res_ModelData_AtnTFaces"
 model_name = "atnt.model"
 
-net = Erianet(model_name, input_image_size=(128, 128), config=ConvolutionalConfig)
+net = Erianet(model_name, input_image_size=(96, 128), config=ConvolutionalConfig)
 net.train(train_set, 10, initial_epochs=200)
 net.save(model_name)
 
@@ -16,7 +16,7 @@ while True:
     name = input("Enter name:")
     img = int(input("Which image:"))
 
-    if not os.path.exists(os.path.join(predict_set,name)):
+    if not os.path.exists(os.path.join(predict_set, name)):
         break
 
     image = load_one_image(predict_set, name, img, True)
