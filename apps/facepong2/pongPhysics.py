@@ -3,11 +3,13 @@ import abc
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import random
-
+from apps.facepong2.pongConfig import CONFIG
 
 class PhysicsObject(metaclass=ABCMeta):
     def __init__(self):
         self.was_none = True
+        self.body = None  # Ducktype
+        self.shape = None  # Ducktype
 
     def add_to(self, space: pymunk.Space):
         space.add(self.body, self.shape)
@@ -56,6 +58,18 @@ class Ball(PhysicsObject):
         else:
             self.body.velocity = (-50, 0)
 
+    def normalize_speed(self):
+        self.body.velocity = self.resize(self.body.velocity, CONFIG.max_ball_speed)
+
+    @staticmethod
+    def resize(l_tuple, l_new_len):
+        length = (l_tuple[0] ** 2 + l_tuple[1] ** 2) ** 0.5
+        if length > l_new_len:
+            normal = (l_tuple[0] / length * l_new_len, l_tuple[1] / length * l_new_len)
+        else:
+            normal = l_tuple
+        return normal
+
 
 class Face(PhysicsObject):
     def __init__(self):
@@ -72,49 +86,28 @@ class Borders(PhysicsObject):
     def __init__(self, width, height):
         super().__init__()
         body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
-        m = 50
-        l = 0
-        lo = l - m
-        r = width
-        ro = r + m
-        t = 0
-        to = t - m
-        b = height
-        bo = b + m
-
-        """
-        #LeftBody
-        
-            pymunk.Poly(body, [
-                (lo, to),
-                (lo, bo),
-                (l, bo),
-                (l, to)
-            ]),
-            
-        #RightBody
-        
-            pymunk.Poly(body, [
-                (r, to),
-                (r, bo),
-                (ro, bo),
-                (ro, to)
-            ]),
-        
-        """
+        middle = 50
+        left = 0
+        lo = left - middle
+        right = width
+        ro = right + middle
+        top = 0
+        to = top - middle
+        bottom = height
+        bo = bottom + middle
 
         shape = [
             pymunk.Poly(body, [
                 (lo, to),
-                (lo, t),
-                (ro, t),
+                (lo, top),
+                (ro, top),
                 (ro, to)
             ]),
             pymunk.Poly(body, [
-                (lo, b),
+                (lo, bottom),
                 (lo, bo),
                 (ro, bo),
-                (ro, b)
+                (ro, bottom)
             ])
         ]
         for s in shape:
@@ -142,11 +135,9 @@ class PongPhysics:
         self.faceTwo = Face().add_to(self.space)
         Borders(self.width, self.height).add_to(self.space)
 
-        # SETUP PHYSICS
-        self.throw_in()
-
     def tick(self, delta):
         self.space.step(delta)
+        self.ball.normalize_speed()
 
     def is_invalid_state(self):
         pos = self.ball.get_pos()
@@ -154,7 +145,7 @@ class PongPhysics:
 
     def throw_in(self):
         print("Throw In")
-        self.ball.throw_in((self.width/2, self.height/2))
+        self.ball.throw_in((self.width / 2, self.height / 2))
 
     def get_win(self):
         pos = self.ball.get_pos()
@@ -163,4 +154,3 @@ class PongPhysics:
         if pos[0] > self.width:
             return -1
         return 0
-
