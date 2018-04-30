@@ -11,6 +11,8 @@ class PongConfig:
         self.goals_to_win = 3
         self.ready_state_duration = 3
         self.timeout_ready_state_duration = 1
+        self.face_missing_timeout = 1.0
+        self.max_ball_speed = 320
 
 
 class PongGraphicsConfig:

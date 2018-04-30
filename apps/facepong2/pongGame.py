@@ -146,13 +146,14 @@ class ReadyState(GameState):
         renderer.draw_background(img)
         renderer.text(None, (255, 255, 255), "{:.1f}".format(self.duration - self.time), size=120, out=True)
 
-    def __init__(self, duration=None):
+    def __init__(self, duration=None, reset=True):
         if duration is None:
             duration = CONFIG.ready_state_duration
         self.duration = duration
         self.time = 0
         self.face_one = None
         self.face_two = None
+        self.reset = reset
 
     def loop(self, game, img, delta):
         self.face_one, self.face_two = game.get_faces(img)
@@ -162,7 +163,8 @@ class ReadyState(GameState):
         if self.time < 0:
             self.time = 0
         if self.time > self.duration:
-            game.reset()
+            if self.reset:
+                game.reset()
             game.change_state_to(PlayingState())
 
 
@@ -232,8 +234,8 @@ class PlayingState(GameState):
     def loop(self, game, img, delta):
         if game.update_faces(delta, img) < 2:
             self.timeout += delta
-        if self.timeout > 1.0:
-            game.change_state_to(ReadyState(CONFIG.timeout_ready_state_duration))
+        if self.timeout > CONFIG.face_missing_timeout:
+            game.change_state_to(ReadyState(CONFIG.timeout_ready_state_duration, False))
         game.physics.tick(delta)
         self.check_state(game)
 
@@ -282,9 +284,9 @@ class WinState(PlayingState):
         # Texts
         text_x = a_third + player_id * a_third - self.player * 30
         text_align = TextAlign.RIGHT if self.player > 0 else TextAlign.LEFT
-        lr_text = "left" if self.player < 0 else "right"
+        lr_text = "Left" if self.player < 0 else "Right"
         text_alpha = max(0.0, time_progress * 355 - 100)
-        renderer.text((text_x, None), (255, 255, 255, text_alpha), "Point for {0} Player".format(lr_text), size=60,
+        renderer.text((text_x, None), (255, 255, 255, text_alpha), "{0} Goal".format(lr_text), size=60,
                       align=(text_align, TextAlign.CENTER), out=True)
 
         # Goals Text

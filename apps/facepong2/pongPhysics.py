@@ -3,7 +3,7 @@ import abc
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import random
-
+from apps.facepong2.pongConfig import CONFIG
 
 class PhysicsObject(metaclass=ABCMeta):
     def __init__(self):
@@ -57,6 +57,18 @@ class Ball(PhysicsObject):
             self.body.velocity = (50, 0)
         else:
             self.body.velocity = (-50, 0)
+
+    def normalize_speed(self):
+        self.body.velocity = self.resize(self.body.velocity, CONFIG.max_ball_speed)
+
+    @staticmethod
+    def resize(l_tuple, l_new_len):
+        length = (l_tuple[0] ** 2 + l_tuple[1] ** 2) ** 0.5
+        if length > l_new_len:
+            normal = (l_tuple[0] / length * l_new_len, l_tuple[1] / length * l_new_len)
+        else:
+            normal = l_tuple
+        return normal
 
 
 class Face(PhysicsObject):
@@ -125,6 +137,7 @@ class PongPhysics:
 
     def tick(self, delta):
         self.space.step(delta)
+        self.ball.normalize_speed()
 
     def is_invalid_state(self):
         pos = self.ball.get_pos()
