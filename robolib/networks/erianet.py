@@ -199,8 +199,11 @@ class Erianet:
         print("Generating Positive")
         examples_per_class = int(min(1.0, train_set_size/classes))
 
-        x_shape = (classes*examples_per_class, 2)
-        y_shape = (classes*examples_per_class, 1)
+        total_image_length = self.input_dim
+        x_shape = np.zeros(np.concatenate(([classes*examples_per_class, 2], total_image_length)))
+        y_shape = np.zeros(np.concatenate(([classes * examples_per_class, 1], total_image_length)))
+
+        print(x_shape)
 
         # positive_x = np.array([])
         # positive_y = np.array([])
@@ -226,8 +229,8 @@ class Erianet:
 
                 # np.append(positive_x, [im1, im2])
                 # np.append(positive_y, 1)
-                positive_x[count, 0] = im1
-                positive_x[count, 1] = im2
+                positive_x[count, 0, :] = im1
+                positive_x[count, 1, :] = im2
                 positive_y[count] = 1
                 count += 1
 
@@ -265,8 +268,8 @@ class Erianet:
                 np.append(negative_y, 1)
                 #positive_x.append([im1, im2])
                 #positive_y.append(0)
-                negative_x[count, 0] = im1
-                negative_x[count, 1] = im2
+                negative_x[count, 0, :] = im1
+                negative_x[count, 1, :] = im2
                 negative_y[count] = 1
                 count += 1
 
