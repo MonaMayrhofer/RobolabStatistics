@@ -73,18 +73,13 @@ class Erianet:
                 self.load(model_path)
 
     def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0, initial_epochs=None,
-              servantrain=True):
-        if initial_epochs is not None and self.model_path is not None and not os.path.exists(self.model_path):
+              servantrain=True, train_set_size=1000):
+        if initial_epochs is not None and (self.model_path is None or not os.path.exists(self.model_path)):
             epochs = initial_epochs
         if callbacks is None:
             callbacks = []
-
-        x, y = self.get_train_data(1000, data_folder, data_selection, servantrain=servantrain)
+        x, y = self.get_train_data(train_set_size, data_folder, data_selection, servantrain=servantrain)
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
-
-        print("Train-Shapes:")
-        print(x_train.shape)
-        print(y_train.shape)
 
         self.model.fit([x_train[:, 0], x_train[:, 1]], y_train, validation_split=.25, batch_size=128, verbose=2,
                        epochs=epochs,
@@ -173,9 +168,21 @@ class Erianet:
     def preprocess(self, image, stride=None):
         if stride is None:
             stride = self.input_to_output_stride
-        image = image[::stride, ::stride]
 
-        image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[0] - self.insets[2]]
+        assert (self.input_image_size[0] *
+                self.input_image_size[1]) == \
+               (image.shape[0] *
+                image.shape[1]), \
+            "Images({0}) must have the same size as specified in input_image_size({1})".format(image.shape,
+                                                                                               self.input_image_size)
+        print("Preprocess")
+        image = image[::stride, ::stride]
+        print(image.shape)
+
+        print(self.insets)
+
+        image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[1] - self.insets[2]]
+        print(image.shape)
 
         image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
         image = image.astype("float32")
@@ -202,18 +209,19 @@ class Erianet:
     def gen_data_servantrain(self, train_set_size, class_folder_names, pic_dir, input_image_size=(100, 100),
                              input_to_output_stride=2):
 
-        print("Servantrain...")
+        # print("Servantrain...")
         classes = len(class_folder_names)
 
         # Gen Positive Examples
-        print("Generating Positive")
-        examples_per_class = int(min(1.0, train_set_size / classes))
+        # print("Generating Positive")
+        examples_per_class = int(max(1.0, train_set_size / classes))
+        print(examples_per_class)
 
         total_image_length = self.input_dim
         x_shape = np.concatenate(([classes * examples_per_class, 2], total_image_length))
         y_shape = [classes * examples_per_class, 1]
 
-        print(x_shape)
+        # print(x_shape)
 
         # positive_x = np.array([])
         # positive_y = np.array([])
@@ -224,15 +232,15 @@ class Erianet:
         for i in range(classes):
             this_class_path = os.path.join(os.getcwd(), pic_dir, class_folder_names[i])
             this_class_images = os.listdir(this_class_path)
-            print("Positive example from: " + this_class_path)
+            # print("Positive example from: " + this_class_path)
             if len(this_class_images) < 2:
                 continue
             for j in range(examples_per_class):
                 i1, i2 = random_different_numbers(len(this_class_images))
                 image_path1 = os.path.join(this_class_path, this_class_images[i1])
                 image_path2 = os.path.join(this_class_path, this_class_images[i2])
-                print(image_path1)
-                print(image_path2)
+                # print(image_path1)
+                # print(image_path2)
 
                 im1 = self.preprocess(read_pgm(image_path1))
                 im2 = self.preprocess(read_pgm(image_path2))
@@ -243,7 +251,7 @@ class Erianet:
                 count += 1
 
         # Gen Negative Examples
-        print("Generating Negatives")
+        # print("Generating Negatives")
         count = 0
         examples_per_class = int(min(1.0, train_set_size / classes))
 
@@ -267,8 +275,8 @@ class Erianet:
 
                 image_path1 = os.path.join(first_class_path, first_class_images[i1])
                 image_path2 = os.path.join(other_class_path, other_class_images[i2])
-                print(image_path1)
-                print(image_path2)
+                # print(image_path1)
+                # print(image_path2)
 
                 im1 = self.preprocess(read_pgm(image_path1))
                 im2 = self.preprocess(read_pgm(image_path2))
@@ -277,10 +285,6 @@ class Erianet:
                 negative_x[count, 1, :] = im2
                 negative_y[count] = 1
                 count += 1
-
-        print("shapes")
-        print(positive_x.shape)
-        print(positive_y.shape)
 
         x_train = np.concatenate([positive_x, negative_x], axis=0) / 255  # Squish training-data from 0-255 to 0-1
         y_train = np.concatenate([positive_y, negative_y], axis=0)

@@ -1,12 +1,15 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
-from robolib.networks.erianet import Erianet
+from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig
 import time
 
+train_folder = "convlfw"
+data_folder = "3BHIF"
+model_name = "atnt.model"
 
-net = Erianet("atnt.model", input_image_size=(96, 128), input_to_output_stride=4)
-net.train("res96128_ModelData_AtnTFaces", 50, initial_epochs=500)
-net.save("atnt.model")
+net = Erianet(None, input_image_size=(96, 128), input_to_output_stride=4, config=ClassicConfig)
+net.train(train_folder, 50, initial_epochs=500)
+net.save(model_name)
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -41,14 +44,14 @@ def show_faces(faces, names):
 def recognise_faces(faces):
     names = []
     for face in faces:
-        person = net.predict(face, "3BHIF", give_all=True)
+        person = net.predict(face, data_folder, give_all=True)
         names.append(person[0][0])
         print(person)
     return names
 
 
 def create_or_destroy_windows(names):
-    #Destroying windows of not recognised and timeouted people
+    # Destroying windows of not recognised and timeouted people
     for checkname in namelist:
         exists = False
         index = namelist.index(checkname)
@@ -61,7 +64,7 @@ def create_or_destroy_windows(names):
                 cv2.destroyWindow(checkname)
                 timeoutlist.pop(index)
                 namelist.remove(checkname)
-    #Creating windows of newly recognised people
+    # Creating windows of newly recognised people
     for name in names:
         exists = False
         for checkname in namelist:
