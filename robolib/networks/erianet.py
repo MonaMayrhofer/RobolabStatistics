@@ -11,6 +11,7 @@ from robolib.util.random import random_different_numbers
 from keras import backend
 from robolib.images.pgmtools import read_pgm
 from robolib.util.decorations import deprecated
+from robolib.networks.debug import debug_train_data
 import time
 
 
@@ -80,8 +81,7 @@ class Erianet:
             callbacks = []
         x, y = self.get_train_data(train_set_size, data_folder, data_selection, servantrain=servantrain)
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
-        # print("Train")
-        # print(x.shape)
+        # debug_train_data(x, self.input_image_size, self.input_to_output_stride)
 
         self.model.fit([x_train[:, 0], x_train[:, 1]], y_train, validation_split=.25, batch_size=128, verbose=2,
                        epochs=epochs,
