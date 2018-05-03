@@ -80,6 +80,8 @@ class Erianet:
             callbacks = []
         x, y = self.get_train_data(train_set_size, data_folder, data_selection, servantrain=servantrain)
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
+        # print("Train")
+        # print(x.shape)
 
         self.model.fit([x_train[:, 0], x_train[:, 1]], y_train, validation_split=.25, batch_size=128, verbose=2,
                        epochs=epochs,
@@ -103,11 +105,11 @@ class Erianet:
         self.model.compile(loss=contrastive_loss, optimizer=rms)
 
     def save(self, modelpath):
-        print("Saving model to {}".format(modelpath))
+        # print("Saving model to {}".format(modelpath))
         self.model.save(modelpath)
 
     def load(self, modelpath):
-        print("Loading model from File {}".format(modelpath))
+        # print("Loading model from File {}".format(modelpath))
         self.model = load_model(modelpath, custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
 
     def compare(self, input_img, reference_path, reference_name, show=False, stride=None, preprocess=False):
@@ -152,6 +154,7 @@ class Erianet:
 
     @staticmethod
     def __get_names_of(folder):
+        assert os.path.isdir(folder), "Cannot find folder '{0}'".format(folder)
         return next(os.walk(folder))[1]
 
     def load_image(self, reference_path, name, img, show=False, stride=None, preprocess=False):
@@ -175,28 +178,25 @@ class Erianet:
                 image.shape[1]), \
             "Images({0}) must have the same size as specified in input_image_size({1})".format(image.shape,
                                                                                                self.input_image_size)
-        print("Preprocess")
+        # print("Preprocess")
         image = image[::stride, ::stride]
-        print(image.shape)
+        # print(image.shape)
 
-        print(self.insets)
+        # print(self.insets)
 
         image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[1] - self.insets[2]]
-        print(image.shape)
+        # print(image.shape)
 
         image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
         image = image.astype("float32")
         return image
 
     def create_erianet_base(self):
-        print(self.input_dim)
         ind = self.input_dim
         return self.config.create_base(ind)
 
     def create_erianet(self):
         input_d = self.input_dim  # TODO Replace usages of input_d with self.input_dim
-        print(input_d)
-        print(tuple(input_d))
         input_a = Input(shape=tuple(input_d))
         input_b = Input(shape=tuple(input_d))
         base_network = self.create_erianet_base()
@@ -215,7 +215,7 @@ class Erianet:
         # Gen Positive Examples
         # print("Generating Positive")
         examples_per_class = int(max(1.0, train_set_size / classes))
-        print(examples_per_class)
+        # print(examples_per_class)
 
         total_image_length = self.input_dim
         x_shape = np.concatenate(([classes * examples_per_class, 2], total_image_length))

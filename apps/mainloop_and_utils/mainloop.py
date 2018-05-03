@@ -3,11 +3,11 @@ import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig
 import time
 
-train_folder = "convlfw"
+train_folder = "3BHIF"
 data_folder = "3BHIF"
 model_name = "atnt.model"
 
-net = Erianet(None, input_image_size=(96, 128), input_to_output_stride=4, config=ClassicConfig)
+net = Erianet(None, input_image_size=(96, 128), input_to_output_stride=2, config=ClassicConfig)
 net.train(train_folder, 50, initial_epochs=500)
 net.save(model_name)
 
