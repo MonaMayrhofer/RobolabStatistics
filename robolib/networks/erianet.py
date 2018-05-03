@@ -72,24 +72,33 @@ class Erianet:
             else:
                 self.load(model_path)
 
-    def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0, initial_epochs=None):
+    def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0, initial_epochs=None,
+              servantrain=True):
         if initial_epochs is not None and self.model_path is not None and not os.path.exists(self.model_path):
             epochs = initial_epochs
         if callbacks is None:
             callbacks = []
 
-        x, y = self.get_train_data(1000, data_folder, data_selection)
+        x, y = self.get_train_data(1000, data_folder, data_selection, servantrain=servantrain)
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
+
+        print("Train-Shapes:")
+        print(x_train.shape)
+        print(y_train.shape)
 
         self.model.fit([x_train[:, 0], x_train[:, 1]], y_train, validation_split=.25, batch_size=128, verbose=2,
                        epochs=epochs,
                        callbacks=callbacks)
 
-    def get_train_data(self, amount, data_folder, data_selection=None):
+    def get_train_data(self, amount, data_folder, data_selection=None, servantrain=True):
         if data_selection is None:
             data_selection = self.__get_names_of(data_folder)
-        return self.gen_data_servantrain(amount, data_selection, data_folder, self.input_image_size,
-                                 self.input_to_output_stride)
+        if servantrain:
+            return self.gen_data_servantrain(amount, data_selection, data_folder, self.input_image_size,
+                                             self.input_to_output_stride)
+        else:
+            return self.gen_data_new(amount, data_selection, data_folder, self.input_image_size,
+                                     self.input_to_output_stride)
 
     def create(self, input_image_size=(128, 128), input_to_output_stride=2):
         assert all(np.mod(input_image_size, input_to_output_stride) == (0, 0))
@@ -109,13 +118,14 @@ class Erianet:
     def compare(self, input_img, reference_path, reference_name, show=False, stride=None, preprocess=False):
         # Optimierungsideen:
         # Wenn Standardabweichung klein genug ist, den bis jetztigen Durchschnitt als gegeben annehmen
-        reference_imgs = self.load_image(reference_path, reference_name, None, show=show, stride=stride, preprocess=preprocess)
+        reference_imgs = self.load_image(reference_path, reference_name, None, show=show, stride=stride,
+                                         preprocess=preprocess)
         probability_sum = 0
         probability_amount = 0
         for reference_img in reference_imgs:
             probability_sum += float(self.model.predict([input_img, reference_img]))
             probability_amount += 1
-        return probability_sum/probability_amount
+        return probability_sum / probability_amount
 
     def predict(self, input_img, reference_data_path, candidates=None, give_all=False):
         mon_start_time = time.time()
@@ -140,7 +150,7 @@ class Erianet:
             certainties.append([candidates[probs[i][0]], probs[i][0], probs[i][1], certainty])
             if certainties[biggestind][2] < certainty:
                 biggestind = i
-        print("Predict took: "+str(time.time()-mon_start_time))
+        print("Predict took: " + str(time.time() - mon_start_time))
         if give_all:
             return certainties
         return certainties[0:biggestind + 1]
@@ -197,11 +207,11 @@ class Erianet:
 
         # Gen Positive Examples
         print("Generating Positive")
-        examples_per_class = int(min(1.0, train_set_size/classes))
+        examples_per_class = int(min(1.0, train_set_size / classes))
 
         total_image_length = self.input_dim
-        x_shape = np.zeros(np.concatenate(([classes*examples_per_class, 2], total_image_length)))
-        y_shape = np.zeros(np.concatenate(([classes * examples_per_class, 1], total_image_length)))
+        x_shape = np.concatenate(([classes * examples_per_class, 2], total_image_length))
+        y_shape = [classes * examples_per_class, 1]
 
         print(x_shape)
 
@@ -227,8 +237,6 @@ class Erianet:
                 im1 = self.preprocess(read_pgm(image_path1))
                 im2 = self.preprocess(read_pgm(image_path2))
 
-                # np.append(positive_x, [im1, im2])
-                # np.append(positive_y, 1)
                 positive_x[count, 0, :] = im1
                 positive_x[count, 1, :] = im2
                 positive_y[count] = 1
@@ -236,7 +244,8 @@ class Erianet:
 
         # Gen Negative Examples
         print("Generating Negatives")
-        examples_per_class = int(min(1.0, train_set_size/classes))
+        count = 0
+        examples_per_class = int(min(1.0, train_set_size / classes))
 
         negative_x = np.zeros(x_shape)
         negative_y = np.zeros(y_shape)
@@ -264,17 +273,13 @@ class Erianet:
                 im1 = self.preprocess(read_pgm(image_path1))
                 im2 = self.preprocess(read_pgm(image_path2))
 
-                np.append(negative_x, [im1, im2])
-                np.append(negative_y, 1)
-                #positive_x.append([im1, im2])
-                #positive_y.append(0)
                 negative_x[count, 0, :] = im1
                 negative_x[count, 1, :] = im2
                 negative_y[count] = 1
                 count += 1
 
+        print("shapes")
         print(positive_x.shape)
-        print(negative_x.shape)
         print(positive_y.shape)
 
         x_train = np.concatenate([positive_x, negative_x], axis=0) / 255  # Squish training-data from 0-255 to 0-1
@@ -294,6 +299,8 @@ class Erianet:
         x_tr_positive = np.zeros(np.concatenate(([train_set_size, 2], total_image_length)))  # Save n pairs of images
         y_tr_positive = np.zeros([train_set_size, 1])  # Is this pair a positive or a negative
 
+        print("Shape: ")
+        print(x_tr_positive.shape)
         # Gen Positive Examples
         for i in range(classes):  # From all classes
             for j in range(int(train_set_size / classes)):  # Get two different images of the same person
