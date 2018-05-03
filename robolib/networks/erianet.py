@@ -206,6 +206,9 @@ class Erianet:
         model = Model(inputs=[input_a, input_b], outputs=distance)
         return model
 
+    def debug(self, data):
+        debug_train_data(data, self.input_image_size, self.input_to_output_stride)
+
     def gen_data_servantrain(self, train_set_size, class_folder_names, pic_dir, input_image_size=(100, 100),
                              input_to_output_stride=2):
 
@@ -283,11 +286,13 @@ class Erianet:
 
                 negative_x[count, 0, :] = im1
                 negative_x[count, 1, :] = im2
-                negative_y[count] = 1
+                negative_y[count] = 0
                 count += 1
 
         x_train = np.concatenate([positive_x, negative_x], axis=0) / 255  # Squish training-data from 0-255 to 0-1
         y_train = np.concatenate([positive_y, negative_y], axis=0)
+
+        #self.debug(x_train)
 
         return x_train, y_train
 
@@ -310,10 +315,8 @@ class Erianet:
             for j in range(int(train_set_size / classes)):  # Get two different images of the same person
                 ind1, ind2 = random_different_numbers(10)
 
-                im1 = read_pgm(os.getcwd() + '/' + pic_dir + '/' + class_folder_names[i] + '/' + str(ind1 + 1) + '.pgm',
-                               'rw+')
-                im2 = read_pgm(os.getcwd() + '/' + pic_dir + '/' + class_folder_names[i] + '/' + str(ind2 + 1) + '.pgm',
-                               'rw+')
+                im1 = read_pgm(os.getcwd() + '/' + pic_dir + '/' + class_folder_names[i] + '/' + str(ind1 + 1) + '.pgm')
+                im2 = read_pgm(os.getcwd() + '/' + pic_dir + '/' + class_folder_names[i] + '/' + str(ind2 + 1) + '.pgm')
 
                 im1 = self.preprocess(im1)
                 im2 = self.preprocess(im2)
@@ -331,10 +334,8 @@ class Erianet:
             for j in range(10):  # Jeweils 10 Bilder auswählen
                 ind1, ind2 = random_different_numbers(classes)
 
-                im1 = read_pgm(os.getcwd() + '/' + pic_dir + '/' + class_folder_names[ind1] + '/' + str(j + 1) + '.pgm',
-                               'rw+')
-                im2 = read_pgm(os.getcwd() + '/' + pic_dir + '/' + class_folder_names[ind2] + '/' + str(j + 1) + '.pgm',
-                               'rw+')
+                im1 = read_pgm(os.getcwd() + '/' + pic_dir + '/' + class_folder_names[ind1] + '/' + str(j + 1) + '.pgm')
+                im2 = read_pgm(os.getcwd() + '/' + pic_dir + '/' + class_folder_names[ind2] + '/' + str(j + 1) + '.pgm')
 
                 im1 = self.preprocess(im1)
                 im2 = self.preprocess(im2)
@@ -346,5 +347,7 @@ class Erianet:
 
         x_train = np.concatenate([x_tr_positive, x_tr_negative], axis=0) / 255  # Squish training-data from 0-255 to 0-1
         y_train = np.concatenate([y_tr_positive, y_tr_negative], axis=0)
+
+        #self.debug(x_train, )
 
         return x_train, y_train
