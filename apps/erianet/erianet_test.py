@@ -5,18 +5,23 @@ import os
 servantrain = True
 
 train_set = "convlfw" if servantrain else "96128res_3BHIF"
-predict_set = "res_ModelData_AtnTFaces"
-model_name = "atnt.model"
+predict_set = "res96128_ModelData_AtnTFaces"
+model_name = "atnt_2500.model"
 
-net = Erianet(None, input_image_size=(96, 128), config=ConvolutionalConfig)
-net.train(train_set, 10, initial_epochs=200, servantrain=servantrain)
-net.save(model_name)
+net = Erianet(model_name, input_image_size=(96, 128), config=ConvolutionalConfig)
+# net.train(train_set, 10, initial_epochs=200, servantrain=servantrain)
+# net.save(model_name)
 
 print("Train Finished!")
 
 while True:
-    name = input("Enter name:")
-    img = int(input("Which image:"))
+    name = input("Enter name of {0}:".format(predict_set))
+    if name == '':
+        break
+    img = input("Which image:")
+    if img == '':
+        break
+    img = int(img)
 
     if not os.path.exists(os.path.join(predict_set, name)):
         break

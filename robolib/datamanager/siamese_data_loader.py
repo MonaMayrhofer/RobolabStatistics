@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from robolib.images.pgmtools import read_pgm
 from robolib.util.random import random_different_numbers
+from robolib.networks.debug import debug_image
 import random
 import warnings
 
@@ -70,12 +71,12 @@ def load_one_image(referenceimgpath, name, img, show=False, amount=5):
     if img is not None:
         img = read_pgm(referenceimgpath + "/" + name + "/" + str(img) + ".pgm")
         if show:
-            plt.figure(1)
-            plt.imshow(img, cmap='Greys_r')
-            plt.show()
+            debug_image(img)
         return img
     imgs = []
-    for file in random.sample(os.listdir(os.path.join(referenceimgpath, name)), amount):
+    selection = os.listdir(os.path.join(referenceimgpath, name))
+    selection = random.sample(selection, min(len(selection), amount))
+    for file in selection:
         img = read_pgm(os.path.join(referenceimgpath, name, file))
         imgs.append(img)
     if show:

@@ -160,7 +160,12 @@ class Erianet:
         if candidates is None:
             candidates = self.__get_names_of(reference_data_path)
         probabilities = np.array([], dtype=[('class', int), ('probability', float)])
+        last = 0
         for i in range(0, len(candidates)):
+            if time.time() - last > 1:
+                last = time.time()
+                print("{0:.1f}%".format(i/len(candidates)*100))
+
             probability = self.compare(input_img, reference_data_path, candidates[i], False, preprocess=True)
             pair = (i, probability)
             probabilities = np.append(probabilities, np.array(pair, dtype=probabilities.dtype))

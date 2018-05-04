@@ -1,6 +1,7 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MutliConvConfig
+from robolib.networks.common import contrastive_loss_manual
 import time
 import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
@@ -10,12 +11,20 @@ train_folder = "res96128_ModelData_AtnTFaces"
 data_folder = "conv3BHIF"
 model_name = "atnt.model"
 
+
 print("Using devices: ")
 print(device_lib.list_local_devices())
 
-net = Erianet(None, input_image_size=(96, 128), input_to_output_stride=2, config=MutliConvConfig)
-net.train(train_folder, 5, initial_epochs=100)
-net.save(model_name)
+net = Erianet("atnt_2500.model", input_image_size=(96, 128), config=MutliConvConfig)
+train = False
+
+if train:
+    runs = 20
+    one_run_epochs = 500
+    for i in range(runs):
+        print("New run {0}".format(i))
+        net.train(train_folder, one_run_epochs)
+        net.save("atnt_{0}.model".format(i*one_run_epochs))
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -56,6 +65,8 @@ def recognise_faces(faces):
         person = net.predict(face, data_folder, give_all=True)
         names.append(person[0][0])
         print(person)
+        print("Correct: {0} - Incorrect:{0}".format(contrastive_loss_manual(True, person[0][2]),
+                                                    contrastive_loss_manual(False, person[0][2])))
         for name in person:
             if name[0] not in timeline:
                 print(name[0])
