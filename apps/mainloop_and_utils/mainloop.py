@@ -1,10 +1,18 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
-from robolib.networks.erianet import Erianet
+from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MutliConvConfig
+from robolib.networks.common import contrastive_loss_manual
 import time
+import matplotlib.pyplot as plt
+from tensorflow.python.client import device_lib
+# https://www.openu.ac.il/home/hassner/data/lfwa/
 
+data_folder = "conv3BHIF"
 
-net = Erianet(None, input_to_output_stride=4)
+print("Using devices: ")
+print(device_lib.list_local_devices())
+
+net = Erianet("atnt_2500.model", input_image_size=(96, 128), config=MutliConvConfig)
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -14,6 +22,8 @@ cap = cv2.VideoCapture(0)
 facewindows = 0
 namelist = []
 timeoutlist = []
+
+timeline = dict()
 
 
 def get_resized_faces(imgtoresize):
@@ -38,15 +48,25 @@ def show_faces(faces, names):
 
 def recognise_faces(faces):
     names = []
+    ts = time.time()
     for face in faces:
-        person = net.predict(face, "3BHIF", give_all=True)
+        person = net.predict(face, data_folder, give_all=True)
         names.append(person[0][0])
         print(person)
+        print("Correct: {0} - Incorrect:{0}".format(contrastive_loss_manual(True, person[0][2]),
+                                                    contrastive_loss_manual(False, person[0][2])))
+        for name in person:
+            if name[0] not in timeline:
+                print(name[0])
+                timeline[name[0]] = [[ts], [name[2]]]
+            else:
+                timeline[name[0]][0].append(ts)
+                timeline[name[0]][1].append(name[2])
     return names
 
 
 def create_or_destroy_windows(names):
-    #Destroying windows of not recognised and timeouted people
+    # Destroying windows of not recognised and timeouted people
     for checkname in namelist:
         exists = False
         index = namelist.index(checkname)
@@ -59,7 +79,7 @@ def create_or_destroy_windows(names):
                 cv2.destroyWindow(checkname)
                 timeoutlist.pop(index)
                 namelist.remove(checkname)
-    #Creating windows of newly recognised people
+    # Creating windows of newly recognised people
     for name in names:
         exists = False
         for checkname in namelist:
@@ -88,3 +108,13 @@ while True:
         break
 cap.release()
 cv2.destroyAllWindows()
+
+legend = []
+for key, value in timeline.items():
+    plt.plot(value[0], value[1])
+    legend.append(key)
+
+plt.legend(legend, loc='upper left')
+plt.show()
+
+
