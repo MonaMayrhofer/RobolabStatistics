@@ -73,8 +73,9 @@ class MutliConvConfig:
 
         seq.add(Flatten())
         seq.add(Dense(500, activation='relu'))
+        seq.add(Dropout(0.2))
         seq.add(Dense(500, activation='relu'))
-        seq.add(Dense(5, activation='linear'))
+        seq.add(Dense(50, activation='linear'))
         return seq
 
     def get_input_dim(self, input_image_size, input_to_output_stride, insets):
@@ -235,8 +236,8 @@ class Erianet:
         input_a = Input(shape=tuple(self.input_dim))
         input_b = Input(shape=tuple(self.input_dim))
         base_network = self.create_erianet_base()
-        processed_a = base_network(input_a)
-        processed_b = base_network(input_b)
+        processed_a = base_network(input_a)  # n-Dim classification Vector
+        processed_b = base_network(input_b)  # n-Dim classification vector
         distance = Lambda(euclidean_distance, output_shape=euclidean_dist_output_shape)([processed_a, processed_b])
         model = Model(inputs=[input_a, input_b], outputs=distance)
         return model

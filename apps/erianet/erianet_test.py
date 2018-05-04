@@ -1,16 +1,14 @@
-from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig
+from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MutliConvConfig
 from robolib.datamanager.siamese_data_loader import load_one_image
 import os
 
 servantrain = True
 
 train_set = "convlfw" if servantrain else "96128res_3BHIF"
-predict_set = "res96128_ModelData_AtnTFaces"
+predict_set = input("Predict Set: ")
 model_name = "atnt_2500.model"
 
-net = Erianet(model_name, input_image_size=(96, 128), config=ConvolutionalConfig)
-# net.train(train_set, 10, initial_epochs=200, servantrain=servantrain)
-# net.save(model_name)
+net = Erianet(model_name, input_image_size=(96, 128), config=MutliConvConfig)
 
 print("Train Finished!")
 

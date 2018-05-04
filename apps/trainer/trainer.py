@@ -31,7 +31,7 @@ if not os.path.exists(train_folder):
 
 # ============= TRAINING ============
 net = Erianet(start, input_image_size=(96, 128), config=MutliConvConfig)
-x_train, _, y_train, _ = net.prepare_train(train_folder)
+x_train, y_train = net.prepare_train(train_folder)
 
 for i in range(runs):
     print("==== RUN {0}/{1} ====".format(i, runs))
