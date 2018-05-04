@@ -91,8 +91,7 @@ class Erianet:
         if data_selection is None:
             data_selection = self.__get_names_of(data_folder)
         if servantrain:
-            return self.gen_data_servantrain(amount, data_selection, data_folder, self.input_image_size,
-                                             self.input_to_output_stride)
+            return self.gen_data_servantrain(amount, data_selection, data_folder)
         else:
             return self.gen_data_new(amount, data_selection, data_folder, self.input_image_size,
                                      self.input_to_output_stride)
@@ -178,15 +177,8 @@ class Erianet:
                 image.shape[1]), \
             "Images({0}) must have the same size as specified in input_image_size({1})".format(image.shape,
                                                                                                self.input_image_size)
-        # print("Preprocess")
         image = image[::stride, ::stride]
-        # print(image.shape)
-
-        # print(self.insets)
-
         image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[1] - self.insets[2]]
-        # print(image.shape)
-
         image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
         image = image.astype("float32")
         return image
@@ -196,9 +188,8 @@ class Erianet:
         return self.config.create_base(ind)
 
     def create_erianet(self):
-        input_d = self.input_dim  # TODO Replace usages of input_d with self.input_dim
-        input_a = Input(shape=tuple(input_d))
-        input_b = Input(shape=tuple(input_d))
+        input_a = Input(shape=tuple(self.input_dim))
+        input_b = Input(shape=tuple(self.input_dim))
         base_network = self.create_erianet_base()
         processed_a = base_network(input_a)
         processed_b = base_network(input_b)
@@ -209,25 +200,14 @@ class Erianet:
     def debug(self, data):
         debug_train_data(data, self.input_image_size, self.input_to_output_stride)
 
-    def gen_data_servantrain(self, train_set_size, class_folder_names, pic_dir, input_image_size=(100, 100),
-                             input_to_output_stride=2):
-
-        # print("Servantrain...")
+    def gen_data_servantrain(self, train_set_size, class_folder_names, pic_dir):
         classes = len(class_folder_names)
-
-        # Gen Positive Examples
-        # print("Generating Positive")
         examples_per_class = int(max(1.0, train_set_size / classes))
-        # print(examples_per_class)
 
         total_image_length = self.input_dim
         x_shape = np.concatenate(([classes * examples_per_class, 2], total_image_length))
         y_shape = [classes * examples_per_class, 1]
 
-        # print(x_shape)
-
-        # positive_x = np.array([])
-        # positive_y = np.array([])
         positive_x = np.zeros(x_shape)
         positive_y = np.zeros(y_shape)
         count = 0
@@ -235,16 +215,12 @@ class Erianet:
         for i in range(classes):
             this_class_path = os.path.join(os.getcwd(), pic_dir, class_folder_names[i])
             this_class_images = os.listdir(this_class_path)
-            # print("Positive example from: " + this_class_path)
             if len(this_class_images) < 2:
                 continue
             for j in range(examples_per_class):
                 i1, i2 = random_different_numbers(len(this_class_images))
                 image_path1 = os.path.join(this_class_path, this_class_images[i1])
                 image_path2 = os.path.join(this_class_path, this_class_images[i2])
-                # print(image_path1)
-                # print(image_path2)
-
                 im1 = self.preprocess(read_pgm(image_path1))
                 im2 = self.preprocess(read_pgm(image_path2))
 
@@ -254,9 +230,8 @@ class Erianet:
                 count += 1
 
         # Gen Negative Examples
-        # print("Generating Negatives")
         count = 0
-        examples_per_class = int(min(1.0, train_set_size / classes))
+        examples_per_class = int(max(1.0, train_set_size / classes))
 
         negative_x = np.zeros(x_shape)
         negative_y = np.zeros(y_shape)
@@ -278,8 +253,6 @@ class Erianet:
 
                 image_path1 = os.path.join(first_class_path, first_class_images[i1])
                 image_path2 = os.path.join(other_class_path, other_class_images[i2])
-                # print(image_path1)
-                # print(image_path2)
 
                 im1 = self.preprocess(read_pgm(image_path1))
                 im2 = self.preprocess(read_pgm(image_path2))
@@ -291,8 +264,6 @@ class Erianet:
 
         x_train = np.concatenate([positive_x, negative_x], axis=0) / 255  # Squish training-data from 0-255 to 0-1
         y_train = np.concatenate([positive_y, negative_y], axis=0)
-
-        #self.debug(x_train)
 
         return x_train, y_train
 
@@ -348,6 +319,10 @@ class Erianet:
         x_train = np.concatenate([x_tr_positive, x_tr_negative], axis=0) / 255  # Squish training-data from 0-255 to 0-1
         y_train = np.concatenate([y_tr_positive, y_tr_negative], axis=0)
 
-        #self.debug(x_train, )
+        self.debug(x_train, )
+
+        print("NewTrain-Shapes:")
+        print(x_train.shape)
+        print(y_train.shape)
 
         return x_train, y_train
