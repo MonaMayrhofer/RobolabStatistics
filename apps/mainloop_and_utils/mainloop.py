@@ -5,26 +5,14 @@ from robolib.networks.common import contrastive_loss_manual
 import time
 import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
-#https://www.openu.ac.il/home/hassner/data/lfwa/
+# https://www.openu.ac.il/home/hassner/data/lfwa/
 
-train_folder = "res96128_ModelData_AtnTFaces"
 data_folder = "conv3BHIF"
-model_name = "atnt.model"
-
 
 print("Using devices: ")
 print(device_lib.list_local_devices())
 
 net = Erianet("atnt_2500.model", input_image_size=(96, 128), config=MutliConvConfig)
-train = False
-
-if train:
-    runs = 20
-    one_run_epochs = 500
-    for i in range(runs):
-        print("New run {0}".format(i))
-        net.train(train_folder, one_run_epochs)
-        net.save("atnt_{0}.model".format(i*one_run_epochs))
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)

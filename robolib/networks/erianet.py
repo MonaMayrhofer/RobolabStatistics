@@ -103,19 +103,23 @@ class Erianet:
             else:
                 self.load(model_path)
 
-    def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, test_percent=0, initial_epochs=None,
-              servantrain=True, train_set_size=1000):
+    def prepare_train(self, data_folder, data_selection=None, servantrain=True, train_set_size=1000):
+        x, y = self.get_train_data(train_set_size, data_folder, data_selection, servantrain=servantrain)
+        return x, y
+
+    def execute_train(self, x_train, y_train, epochs=100, callbacks=None, initial_epochs=None):
         if initial_epochs is not None and (self.model_path is None or not os.path.exists(self.model_path)):
             epochs = initial_epochs
         if callbacks is None:
             callbacks = []
-        x, y = self.get_train_data(train_set_size, data_folder, data_selection, servantrain=servantrain)
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
-        # debug_train_data(x, self.input_image_size, self.input_to_output_stride)
-
         self.model.fit([x_train[:, 0], x_train[:, 1]], y_train, validation_split=.25, batch_size=128, verbose=2,
                        epochs=epochs,
                        callbacks=callbacks)
+
+    def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, initial_epochs=None,
+              servantrain=True, train_set_size=1000):
+        x_train, y_train = self.prepare_train(data_folder, data_selection, servantrain, train_set_size)
+        self.execute_train(x_train, y_train, epochs, callbacks, initial_epochs)
 
     def get_train_data(self, amount, data_folder, data_selection=None, servantrain=True):
         if data_selection is None:
