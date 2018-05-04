@@ -2,13 +2,14 @@ import cv2
 import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig
 import time
+import matplotlib.pyplot as plt
 
-train_folder = "3BHIF"
+train_folder = "convlfw"
 data_folder = "3BHIF"
 model_name = "atnt.model"
 
-net = Erianet(None, input_image_size=(96, 128), input_to_output_stride=2, config=ClassicConfig)
-net.train(train_folder, 50, initial_epochs=500, servantrain=True, train_set_size=10)
+net = Erianet(model_name, input_image_size=(96, 128), input_to_output_stride=2, config=ConvolutionalConfig)
+net.train(train_folder, 5, initial_epochs=500)
 net.save(model_name)
 
 MODEL_FILE = 'FrontalFace.xml'
@@ -19,6 +20,8 @@ cap = cv2.VideoCapture(0)
 facewindows = 0
 namelist = []
 timeoutlist = []
+
+timeline = dict()
 
 
 def get_resized_faces(imgtoresize):
@@ -43,10 +46,18 @@ def show_faces(faces, names):
 
 def recognise_faces(faces):
     names = []
+    ts = time.time()
     for face in faces:
         person = net.predict(face, data_folder, give_all=True)
         names.append(person[0][0])
         print(person)
+        for name in person:
+            if name[0] not in timeline:
+                print(name[0])
+                timeline[name[0]] = [[ts], [name[2]]]
+            else:
+                timeline[name[0]][0].append(ts)
+                timeline[name[0]][1].append(name[2])
     return names
 
 
@@ -93,3 +104,13 @@ while True:
         break
 cap.release()
 cv2.destroyAllWindows()
+
+legend = []
+for key, value in timeline.items():
+    plt.plot(value[0], value[1])
+    legend.append(key)
+
+plt.legend(legend, loc='upper left')
+plt.show()
+
+
