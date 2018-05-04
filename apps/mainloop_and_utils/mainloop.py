@@ -1,15 +1,20 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
-from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig
+from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MutliConvConfig
 import time
 import matplotlib.pyplot as plt
+from tensorflow.python.client import device_lib
+#https://www.openu.ac.il/home/hassner/data/lfwa/
 
-train_folder = "convlfw"
-data_folder = "3BHIF"
+train_folder = "convlfwa"
+data_folder = "conv3BHIF"
 model_name = "atnt.model"
 
-net = Erianet(model_name, input_image_size=(96, 128), input_to_output_stride=2, config=ConvolutionalConfig)
-net.train(train_folder, 5, initial_epochs=500)
+print("Using devices: ")
+print(device_lib.list_local_devices())
+
+net = Erianet(None, input_image_size=(96, 128), input_to_output_stride=2, config=MutliConvConfig)
+net.train(train_folder, 5, initial_epochs=100)
 net.save(model_name)
 
 MODEL_FILE = 'FrontalFace.xml'

@@ -4,14 +4,16 @@ import numpy as np
 from keras.optimizers import RMSprop
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Dropout, Lambda, Conv2D, Flatten
+from keras.layers import Input, Dense, Dropout, Lambda, Conv2D, Flatten, BatchNormalization
+
 from robolib.datamanager.siamese_data_loader import load_one_image
 from robolib.networks.common import contrastive_loss, euclidean_dist_output_shape, euclidean_distance
 from robolib.util.random import random_different_numbers
 from keras import backend
 from robolib.images.pgmtools import read_pgm
 from robolib.util.decorations import deprecated
-from robolib.networks.debug import debug_train_data
+from robolib.networks.debug import debug_train_data, debug_image
+import cv2
 import time
 
 
@@ -21,8 +23,6 @@ class ClassicConfig:
 
     def create_base(self, input_d):
         seq = Sequential()
-        # seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
-        # seq.add(Flatten())
         seq.add(Dense(200, activation='linear', input_shape=input_d))
         seq.add(Dense(100, activation='linear'))
         seq.add(Dropout(0.2))
@@ -40,9 +40,9 @@ class ConvolutionalConfig:
 
     def create_base(self, input_d):
         seq = Sequential()
-        seq.add(Conv2D(filters=9, kernel_size=(3, 3), strides=(2, 2), activation='relu', input_shape=input_d))
+        seq.add(Conv2D(filters=9, kernel_size=(2, 2), strides=(1, 1), activation='relu', input_shape=input_d))
         seq.add(Flatten())
-        seq.add(Dense(200, activation='linear', input_shape=input_d))
+        seq.add(Dense(200, activation='linear'))
         seq.add(Dense(100, activation='linear'))
         seq.add(Dropout(0.2))
         seq.add(Dense(50, activation='linear'))
@@ -53,9 +53,38 @@ class ConvolutionalConfig:
                 int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
 
 
+class MutliConvConfig:
+    def __init__(self):
+        pass
+
+    def create_base(self, input_d):
+        seq = Sequential()
+        seq.add(Conv2D(filters=4, kernel_size=(3, 3), strides=(1, 1), activation='relu', input_shape=input_d))
+        seq.add(BatchNormalization())
+        seq.add(Dropout(0.2))
+
+        seq.add(Conv2D(8, (3, 3), activation='relu'))
+        seq.add(BatchNormalization())
+        seq.add(Dropout(0.2))
+
+        seq.add(Conv2D(8, (3, 3), activation='relu'))
+        seq.add(BatchNormalization())
+        seq.add(Dropout(0.2))
+
+        seq.add(Flatten())
+        seq.add(Dense(500, activation='relu'))
+        seq.add(Dense(500, activation='relu'))
+        seq.add(Dense(5, activation='linear'))
+        return seq
+
+    def get_input_dim(self, input_image_size, input_to_output_stride, insets):
+        return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
+                int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
+
+
 class Erianet:
     def __init__(self, model_path, input_image_size=(128, 128), insets=(0, 0, 0, 0), input_to_output_stride=2,
-                 do_not_init=False, config=None):
+                 do_not_init=False, config=None, experimental_preprocess=False):
         if config is None:
             config = ClassicConfig()
         else:
@@ -67,6 +96,7 @@ class Erianet:
         self.insets = np.asarray(insets)
         self.input_dim = self.config.get_input_dim(input_image_size, input_to_output_stride, self.insets)
         self.model_path = model_path
+        self.experimental_preprocess = experimental_preprocess
         if not do_not_init:
             if model_path is None or not path.isfile(model_path):
                 self.create(input_image_size, input_to_output_stride)
@@ -177,8 +207,13 @@ class Erianet:
                 image.shape[1]), \
             "Images({0}) must have the same size as specified in input_image_size({1})".format(image.shape,
                                                                                                self.input_image_size)
+
         image = image[::stride, ::stride]
         image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[1] - self.insets[2]]
+        # debug_image(image)
+        if self.experimental_preprocess:
+            image = cv2.Canny(image, 50, 150)
+        # debug_image(image)
         image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
         image = image.astype("float32")
         return image
@@ -200,7 +235,7 @@ class Erianet:
     def debug(self, data):
         debug_train_data(data, self.input_image_size, self.input_to_output_stride)
 
-    def gen_data_servantrain(self, train_set_size, class_folder_names, pic_dir):
+    def gen_data_servantrain(self, train_set_size, class_folder_names, pic_dir, output=True):
         classes = len(class_folder_names)
         examples_per_class = int(max(1.0, train_set_size / classes))
 
@@ -211,7 +246,8 @@ class Erianet:
         positive_x = np.zeros(x_shape)
         positive_y = np.zeros(y_shape)
         count = 0
-
+        if output:
+            print("Generating Positives")
         for i in range(classes):
             this_class_path = os.path.join(os.getcwd(), pic_dir, class_folder_names[i])
             this_class_images = os.listdir(this_class_path)
@@ -235,6 +271,8 @@ class Erianet:
 
         negative_x = np.zeros(x_shape)
         negative_y = np.zeros(y_shape)
+        if output:
+            print("Generating Negatives")
         for i in range(classes):
             first_class_path = os.path.join(os.getcwd(), pic_dir, class_folder_names[i])
             first_class_images = os.listdir(first_class_path)

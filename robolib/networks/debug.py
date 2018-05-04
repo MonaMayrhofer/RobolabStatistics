@@ -9,3 +9,8 @@ def debug_train_data(data, input_size, stride):
         b = np.reshape(b, shape)
         plt.imshow(np.concatenate((a, b)).T, cmap='Greys_r')
         plt.show()
+
+
+def debug_image(img):
+    plt.imshow(img.T, cmap='Greys_r')
+    plt.show()
