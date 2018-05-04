@@ -34,7 +34,7 @@ net = Erianet(start, input_image_size=(96, 128), config=MutliConvConfig)
 x_train, _, y_train, _ = net.prepare_train(train_folder)
 
 for i in range(runs):
-    print("==== RUN {0} ====".format(i))
+    print("==== RUN {0}/{1} ====".format(i, runs))
     net.execute_train(x_train, y_train, epochs_per_run)
     file_name = "{0}_{1}.model".format(name, (i+1)*epochs_per_run)
     print("==== SAVING {0} ====".format(file_name))
