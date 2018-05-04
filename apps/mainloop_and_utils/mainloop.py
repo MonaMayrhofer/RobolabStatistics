@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
 #https://www.openu.ac.il/home/hassner/data/lfwa/
 
-train_folder = "convlfwa"
+train_folder = "res96128_ModelData_AtnTFaces"
 data_folder = "conv3BHIF"
 model_name = "atnt.model"
 
