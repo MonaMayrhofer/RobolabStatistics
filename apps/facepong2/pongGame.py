@@ -15,6 +15,8 @@ from apps.facepong2.pongRenderer import PongRenderer, TextAlign
 class PongGame:
     def __init__(self, file='FrontalFace.xml'):
         self.cap = cv2.VideoCapture(CONFIG.cam)
+        self.cap.set(3, 1920)
+        self.cap.set(4, 1080)
         _, img = self.cap.read()
         self.gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         self.faceDetector = PongFaceDetector(file)
@@ -144,7 +146,7 @@ class ReadyState(GameState):
         video = cv2.multiply(video, mat, dtype=3)
         img = cv2.add(img, video)
         renderer.draw_background(img)
-        renderer.text(None, (255, 255, 255), "{:.1f}".format(self.duration - self.time), size=120, out=True)
+        renderer.text(None, (255, 255, 255), "{:.1f}s".format(self.duration - self.time), size=120, out=True)
 
     def __init__(self, duration=None, reset=True):
         if duration is None:
@@ -212,14 +214,14 @@ class PlayingState(GameState):
                        game.physics.faceOne.radius + thickness, CONFIG.graphics.color_face_right_border, -1)
             cv2.circle(face_mat, (int(face_b_pos[1]), int(face_b_pos[0])),
                        game.physics.faceOne.radius, CONFIG.graphics.color_face_right, -1)
-        face_mat = cv2.blur(face_mat, (15, 15))
+        face_mat = cv2.blur(face_mat, CONFIG.graphics.face_blur)
         ball_pos = game.physics.ball.get_pos()
         cv2.circle(face_mat, (int(ball_pos[1]), int(ball_pos[0])),
                    game.physics.ball.radius+CONFIG.graphics.ball_border_thickness,
                    CONFIG.graphics.color_ball_border, -1)
         cv2.circle(face_mat, (int(ball_pos[1]), int(ball_pos[0])), game.physics.ball.radius,
                    CONFIG.graphics.color_ball, -1)
-        face_mat = cv2.blur(face_mat, (5, 5))
+        face_mat = cv2.blur(face_mat, CONFIG.graphics.ball_blur)
         background = cv2.multiply(background, face_mat, dtype=3)
 
         renderer.draw_background(background)

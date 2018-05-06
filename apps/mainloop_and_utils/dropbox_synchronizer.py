@@ -1,6 +1,5 @@
 import dropbox
 import os
-import configparser
 
 
 def download_files():
@@ -37,10 +36,8 @@ def download_files_recursive(dbx, foldername, recursive):
 
 
 def start_session():
-    config = configparser.ConfigParser()
-    config.read('dropbox.cfg')
-    APP_KEY = config['dropbox']['APP_KEY']
-    APP_SECRET = config['dropbox']['APP_SECRET']
+    APP_KEY = "bdnfbbtz309an28"
+    APP_SECRET = "mmrpk3jqkk6zhgu"
     authflow = dropbox.DropboxOAuth2FlowNoRedirect(APP_KEY, APP_SECRET)
     authorizeurl = authflow.start()
     print("1. Go to: " + authorizeurl)
@@ -54,4 +51,5 @@ def start_session():
     return dbx
 
 
-download_files()
+print(start_session().sharing_create_shared_link_with_settings("/convlfw").url)
+#download_files()
