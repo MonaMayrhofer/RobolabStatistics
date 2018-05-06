@@ -2,9 +2,8 @@ import os
 from os import path
 import numpy as np
 from keras.optimizers import RMSprop
-from sklearn.model_selection import train_test_split
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Dropout, Lambda, Conv2D, Flatten, BatchNormalization
+from keras.layers import Input, Dense, Dropout, Conv2D, Flatten, BatchNormalization, Lambda
 
 from robolib.datamanager.siamese_data_loader import load_one_image
 from robolib.networks.common import contrastive_loss, euclidean_dist_output_shape, euclidean_distance
@@ -22,6 +21,7 @@ class ClassicConfig:
         pass
 
     def create_base(self, input_d):
+        print("Generating ClassicConfig")
         seq = Sequential()
         seq.add(Dense(200, activation='linear', input_shape=input_d))
         seq.add(Dense(100, activation='linear'))
@@ -39,6 +39,7 @@ class ConvolutionalConfig:
         pass
 
     def create_base(self, input_d):
+        print("Generating ConvolutionalConfig")
         seq = Sequential()
         seq.add(Conv2D(filters=9, kernel_size=(2, 2), strides=(1, 1), activation='relu', input_shape=input_d))
         seq.add(Flatten())
@@ -53,11 +54,12 @@ class ConvolutionalConfig:
                 int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
 
 
-class MutliConvConfig:
+class MultiConvConfig:
     def __init__(self):
         pass
 
     def create_base(self, input_d):
+        print("Generating MultiConvConfig")
         seq = Sequential()
         seq.add(Conv2D(filters=4, kernel_size=(3, 3), strides=(1, 1), activation='relu', input_shape=input_d))
         seq.add(BatchNormalization())
