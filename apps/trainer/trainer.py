@@ -1,66 +1,41 @@
-import cv2
-import time
-import robolib.modelmanager.downloader as downloader
+from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MutliConvConfig
+from tensorflow.python.client import device_lib
 import os
-import shutil
 
-name = input("Name: ")
-if os.path.isdir(name):
-    ow = ""
-    while ow != "Y" and ow != "N":
-        ow = input("Directory exists. Overwrite it? (Y/N): ")
-        if ow == "Y":
-            shutil.rmtree(name)
-        elif ow == "N":
-            exit(0)
-os.makedirs(name)
+# ============= INPUT ============
+print("Using devices: ")
+print(device_lib.list_local_devices())
 
-MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
-face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-cap = cv2.VideoCapture(0)
+name = input("Enter the model's family-name: ")
+start = input("Build on other model? [empty for None]: ")
+if start == '':
+    start = None
+else:
+    if not start.endswith(".model"):
+        start += '.model'
+    if not os.path.exists(start):
+        print("File '{0}' does not exist.".format(start))
+        exit(1)
 
-imgNumber = 1
-lastTime = time.time()
+runs = input("Enter runs: ")
+runs = int(runs)
 
-cv2.namedWindow('img')
-cv2.namedWindow('resImg')
+epochs_per_run = input("Enter epochs per run: ")
+epochs_per_run = int(epochs_per_run)
 
-taking = False
-series = False
+train_folder = input("Enter image-folder: ")
+if not os.path.exists(train_folder):
+    print("Folder '{0}' couldn't be found!")
+    exit(1)
 
-while True:
-    ret, img = cap.read()
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (300, 300), True)
-    if len(faces) == 1:
-        x, y, w, h = faces[0]
-        if int(y - h * 0.2) <= 0 or int(x - w * 0.2) <= 0 or int(y + h * 1.2) >= img.shape[1] or int(x + w * 1.2) >= img.shape[0]:
-            print("Outside of camera's range")
-        else:
-            face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
-            resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
-            if taking and (imgNumber == 1 or time.time() - lastTime > 3):
-                if not series:
-                    taking = False
-                cv2.imwrite(str(name) + "/" + str(imgNumber) + ".pgm", resImg)
-                imgNumber = imgNumber + 1
-                lastTime = time.time()
-                if imgNumber == 11:
-                    break
-            if taking:
-                cv2.putText(resImg, str(3 - int(time.time() - lastTime)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-            cv2.imshow('resImg', resImg)
-    cv2.imshow('img', img)
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        break
-    if not taking and k == 112:
-        lastTime = time.time()
-        taking = True
-    if k == 115:
-        series = not series
-        if not taking:
-            taking = True
-            lastTime = time.time()
-cv2.destroyAllWindows()
+
+# ============= TRAINING ============
+net = Erianet(start, input_image_size=(96, 128), config=MutliConvConfig)
+x_train, _, y_train, _ = net.prepare_train(train_folder)
+
+for i in range(runs):
+    print("==== RUN {0}/{1} ====".format(i, runs))
+    net.execute_train(x_train, y_train, epochs_per_run)
+    file_name = "{0}_{1}.model".format(name, (i+1)*epochs_per_run)
+    print("==== SAVING {0} ====".format(file_name))
+    net.save(file_name)

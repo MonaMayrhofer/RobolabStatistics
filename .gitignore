@@ -168,3 +168,13 @@ logs/
 # Trained Keras Models
 *.model
 *.pgm
+*.cfg
+*.xml
+*.jpg
+*.tar
+
+*.mat
+
+*.pdf
+
+*.gz
