@@ -1,66 +1,72 @@
-import cv2
-import time
-import robolib.modelmanager.downloader as downloader
+from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MultiConvConfig, VGG19ish
+from tensorflow.python.client import device_lib
 import os
-import shutil
+import argparse
 
-name = input("Name: ")
-if os.path.isdir(name):
-    ow = ""
-    while ow != "Y" and ow != "N":
-        ow = input("Directory exists. Overwrite it? (Y/N): ")
-        if ow == "Y":
-            shutil.rmtree(name)
-        elif ow == "N":
-            exit(0)
-os.makedirs(name)
 
-MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
-face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-cap = cv2.VideoCapture(0)
+def main():
+    # ============= ARGUMENTS ===========
+    parser = argparse.ArgumentParser(description='Train Erianet')
+    parser.add_argument('--name', '-n', type=str, nargs='?', help='The prefix for the trained model file?')
+    parser.add_argument('--base', '-b', type=str, nargs='?', help='Shall this model be trained ontop of existing one?')
+    parser.add_argument('--runs', '-r', type=str, nargs='?', help='How many runs (files) shall be made?')
+    parser.add_argument('--epochs', '-e', type=str, nargs='?', help='Each run shall last for how many epochs?')
+    parser.add_argument('--folder', '-f', type=str, nargs='?', help='Where are the training-images?')
 
-imgNumber = 1
-lastTime = time.time()
+    args = parser.parse_args()
+    name = args.name
+    start = args.base
+    runs = args.runs
+    epochs_per_run = args.epochs
+    train_folder = args.folder
+    # ============= INPUT ============
 
-cv2.namedWindow('img')
-cv2.namedWindow('resImg')
+    print("Available devices: ")
+    for dev in device_lib.list_local_devices():
+        print("{0:5} {1:20} {2}".format(dev.device_type, dev.name, dev.physical_device_desc))
 
-taking = False
-series = False
+    if name is None:
+        name = input("Enter the model's family-name [or specify -n]: ")
 
-while True:
-    ret, img = cap.read()
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (300, 300), True)
-    if len(faces) == 1:
-        x, y, w, h = faces[0]
-        if int(y - h * 0.2) <= 0 or int(x - w * 0.2) <= 0 or int(y + h * 1.2) >= img.shape[1] or int(x + w * 1.2) >= img.shape[0]:
-            print("Outside of camera's range")
-        else:
-            face = gray[int(y - h * 0.2):int(y + (h * 1.2)), int(x - w * 0.2):int(x + (w * 1.2))]
-            resImg = cv2.resize(face, dst=None, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
-            if taking and (imgNumber == 1 or time.time() - lastTime > 3):
-                if not series:
-                    taking = False
-                cv2.imwrite(str(name) + "/" + str(imgNumber) + ".pgm", resImg)
-                imgNumber = imgNumber + 1
-                lastTime = time.time()
-                if imgNumber == 11:
-                    break
-            if taking:
-                cv2.putText(resImg, str(3 - int(time.time() - lastTime)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-            cv2.imshow('resImg', resImg)
-    cv2.imshow('img', img)
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        break
-    if not taking and k == 112:
-        lastTime = time.time()
-        taking = True
-    if k == 115:
-        series = not series
-        if not taking:
-            taking = True
-            lastTime = time.time()
-cv2.destroyAllWindows()
+    if start == '':
+        start = None
+    elif start is not None:
+        if not start.endswith(".model"):
+            start += '.model'
+        if not os.path.exists(start):
+            print("File '{0}' does not exist.".format(start))
+            exit(1)
+
+    if runs is None:
+        runs = input("Enter runs [or specify -r]: ")
+    runs = int(runs)
+
+    if epochs_per_run is None:
+        epochs_per_run = input("Enter epochs per run [or specify -e]: ")
+    epochs_per_run = int(epochs_per_run)
+
+    if train_folder is None:
+        train_folder = input("Enter image-folder [or specify -f]: ")
+    if not os.path.exists(train_folder):
+        print("Folder '{0}' couldn't be found!".format(train_folder))
+        exit(1)
+
+    train(start, train_folder, runs, epochs_per_run, name)
+
+
+# ============= TRAINING ============
+def train(start, train_folder, runs, epochs_per_run, name):
+    print("== Starting Training ==")
+    net = Erianet(start, input_image_size=(96, 128), config=VGG19ish)
+    x_train, y_train = net.prepare_train(train_folder, train_set_size=4000)
+
+    for i in range(runs):
+        print("==== RUN {0}/{1} ====".format(i, runs))
+        net.execute_train(x_train, y_train, epochs_per_run, validation_split=0.128)
+        file_name = "{0}_{1}.model".format(name, (i+1)*epochs_per_run)
+        print("==== SAVING {0} ====".format(file_name))
+        net.save(file_name)
+
+
+if __name__ == "__main__":
+    main()

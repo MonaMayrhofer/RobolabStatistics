@@ -7,10 +7,9 @@ import time
 import os
 import pymunk
 import robolib.modelmanager.downloader as downloader
-import apps.facepong.camOpener as camOpener
 
 # ==Win==
-pointsToWin = camOpener.get_wins()
+pointsToWin = 3
 
 # ==MODEL==
 MODEL_FILE = 'FrontalFace.xml'
@@ -49,7 +48,7 @@ def max_speed():
 
 
 # ==OPEN CV==
-cap = camOpener.open_cam()
+cap = cv2.VideoCapture(0)
 _, img = cap.read()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces = []
