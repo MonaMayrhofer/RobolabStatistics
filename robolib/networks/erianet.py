@@ -33,8 +33,8 @@ class ClassicConfig:
         return ((int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3]) *
                 (int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2]),)
 
-    def new_optimizer(self, rate):
-        return RMSprop(lr=rate)
+    def new_optimizer(self):
+        return RMSprop()
 
 
 class ConvolutionalConfig:
@@ -56,8 +56,8 @@ class ConvolutionalConfig:
         return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
                 int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
 
-    def new_optimizer(self, rate):
-        return RMSprop(lr=rate)
+    def new_optimizer(self):
+        return RMSprop()
 
 
 class MultiConvConfig:
@@ -92,7 +92,7 @@ class MultiConvConfig:
                 int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
 
     def new_optimizer(self):
-        return RMSprop(lr=0.05)
+        return RMSprop()
 
 
 class VGG19ish:
@@ -143,8 +143,8 @@ class VGG19ish:
         return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
                 int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
 
-    def new_optimizer(self, rate):
-        return SGD(lr=rate)
+    def new_optimizer(self):
+        return SGD()  # LR = 0.01
 
 
 class Erianet:
@@ -199,11 +199,11 @@ class Erianet:
             return self.gen_data_new(amount, data_selection, data_folder, self.input_image_size,
                                      self.input_to_output_stride)
 
-    def create(self, input_image_size=(128, 128), input_to_output_stride=2, learning_rate=0.05):
+    def create(self, input_image_size=(128, 128), input_to_output_stride=2):
         assert all(np.mod(input_image_size, input_to_output_stride) == (0, 0))
         self.model = self.create_erianet()
 
-        optimizer = self.config.new_optimizer(learning_rate)
+        optimizer = self.config.new_optimizer()
         self.model.compile(loss=contrastive_loss, optimizer=optimizer)
 
     def save(self, modelpath):
