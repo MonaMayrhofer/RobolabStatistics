@@ -1,9 +1,9 @@
 import os
 from os import path
 import numpy as np
-from keras.optimizers import RMSprop
+from keras.optimizers import SGD, RMSprop
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Dropout, Conv2D, Flatten, BatchNormalization, Lambda
+from keras.layers import Input, Dense, Dropout, Conv2D, Flatten, BatchNormalization, Lambda, MaxPooling2D
 
 from robolib.datamanager.siamese_data_loader import load_one_image
 from robolib.networks.common import contrastive_loss, euclidean_dist_output_shape, euclidean_distance
@@ -33,6 +33,9 @@ class ClassicConfig:
         return ((int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3]) *
                 (int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2]),)
 
+    def new_optimizer(self, rate):
+        return RMSprop(lr=rate)
+
 
 class ConvolutionalConfig:
     def __init__(self):
@@ -52,6 +55,9 @@ class ConvolutionalConfig:
     def get_input_dim(self, input_image_size, input_to_output_stride, insets):
         return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
                 int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
+
+    def new_optimizer(self, rate):
+        return RMSprop(lr=rate)
 
 
 class MultiConvConfig:
@@ -77,12 +83,68 @@ class MultiConvConfig:
         seq.add(Dense(500, activation='relu'))
         seq.add(Dropout(0.2))
         seq.add(Dense(500, activation='relu'))
-        seq.add(Dense(50, activation='linear'))
+        seq.add(Dropout(0.2))
+        seq.add(Dense(50, activation='relu'))  # Why nan in loss when this is increased?
         return seq
 
     def get_input_dim(self, input_image_size, input_to_output_stride, insets):
         return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
                 int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
+
+    def new_optimizer(self):
+        return RMSprop(lr=0.05)
+
+
+class VGG19ish:
+    def __init__(self):
+        pass
+
+    def create_base(self, input_d):
+        print("Generating FaceNetInspired")
+        seq = Sequential()
+        seq.add(Conv2D(filters=64, kernel_size=(7, 7), strides=(2, 2), padding='same',
+                       activation='relu', input_shape=input_d, name="conv1"))
+        print("conv1 {0}".format(seq.output_shape))
+        seq.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same', name="pool1"))
+        print("pool1 {0}".format(seq.output_shape))
+        seq.add(BatchNormalization())
+
+        seq.add(Conv2D(filters=192, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu', name="conv2"))
+        print("conv2 {0}".format(seq.output_shape))
+        seq.add(BatchNormalization())
+        seq.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same', name="pool2"))
+        print("pool2 {0}".format(seq.output_shape))
+
+        seq.add(Conv2D(filters=384, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu', name="conv3"))
+        print("conv3 {0}".format(seq.output_shape))
+        seq.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same', name="pool3"))
+        print("pool3 {0}".format(seq.output_shape))
+
+        seq.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu', name="conv4"))  # 4
+        print("conv4 {0}".format(seq.output_shape))
+        seq.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu', name="conv5"))  # 5
+        print("conv5 {0}".format(seq.output_shape))
+        seq.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu', name="conv6"))  # 6
+        print("conv6 {0}".format(seq.output_shape))
+        seq.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same', name="pool4"))
+        print("pool4 {0}".format(seq.output_shape))
+
+        seq.add(Flatten(input_shape=(3, 4, 256), name='concat'))
+        print("concat {0}".format(seq.output_shape))
+        seq.add(Dense(4096, activation='relu', name="fc1"))
+        print("fc1 {0}".format(seq.output_shape))
+        seq.add(Dense(4096, activation='relu', name="fc2"))
+        print("fc2 {0}".format(seq.output_shape))
+        seq.add(Dense(128, activation='relu', name="fc3"))
+        print("fc3 {0}".format(seq.output_shape))
+        return seq
+
+    def get_input_dim(self, input_image_size, input_to_output_stride, insets):
+        return (int(input_image_size[0] / input_to_output_stride) - insets[1] - insets[3],
+                int(input_image_size[1] / input_to_output_stride) - insets[0] - insets[2], 1)
+
+    def new_optimizer(self, rate):
+        return SGD(lr=rate)
 
 
 class Erianet:
@@ -110,19 +172,23 @@ class Erianet:
         x, y = self.get_train_data(train_set_size, data_folder, data_selection, servantrain=servantrain)
         return x, y
 
-    def execute_train(self, x_train, y_train, epochs=100, callbacks=None, initial_epochs=None):
+    def execute_train(self, x_train, y_train, epochs=100, callbacks=None, initial_epochs=None,
+                      validation_split=0.25, batch_size=128, verbose=2):
         if initial_epochs is not None and (self.model_path is None or not os.path.exists(self.model_path)):
             epochs = initial_epochs
         if callbacks is None:
             callbacks = []
-        self.model.fit([x_train[:, 0], x_train[:, 1]], y_train, validation_split=.25, batch_size=128, verbose=2,
+        self.model.fit([x_train[:, 0], x_train[:, 1]], y_train,
+                       validation_split=validation_split,
+                       batch_size=batch_size,
+                       verbose=verbose,
                        epochs=epochs,
                        callbacks=callbacks)
 
     def train(self, data_folder, epochs=100, data_selection=None, callbacks=None, initial_epochs=None,
-              servantrain=True, train_set_size=1000):
+              servantrain=True, train_set_size=1000, validation_split=0.25, batch_size=128, verbose=2):
         x_train, y_train = self.prepare_train(data_folder, data_selection, servantrain, train_set_size)
-        self.execute_train(x_train, y_train, epochs, callbacks, initial_epochs)
+        self.execute_train(x_train, y_train, epochs, callbacks, initial_epochs, validation_split, batch_size, verbose)
 
     def get_train_data(self, amount, data_folder, data_selection=None, servantrain=True):
         if data_selection is None:
@@ -133,12 +199,12 @@ class Erianet:
             return self.gen_data_new(amount, data_selection, data_folder, self.input_image_size,
                                      self.input_to_output_stride)
 
-    def create(self, input_image_size=(128, 128), input_to_output_stride=2):
+    def create(self, input_image_size=(128, 128), input_to_output_stride=2, learning_rate=0.05):
         assert all(np.mod(input_image_size, input_to_output_stride) == (0, 0))
         self.model = self.create_erianet()
 
-        rms = RMSprop()
-        self.model.compile(loss=contrastive_loss, optimizer=rms)
+        optimizer = self.config.new_optimizer(learning_rate)
+        self.model.compile(loss=contrastive_loss, optimizer=optimizer)
 
     def save(self, modelpath):
         # print("Saving model to {}".format(modelpath))
@@ -148,6 +214,10 @@ class Erianet:
         # print("Loading model from File {}".format(modelpath))
         self.model = load_model(modelpath, custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
 
+    def run_pair(self, input_a, input_b):
+        pred = self.model.predict([input_a, input_b])
+        return float(pred)
+
     def compare(self, input_img, reference_path, reference_name, show=False, stride=None, preprocess=False):
         # Optimierungsideen:
         # Wenn Standardabweichung klein genug ist, den bis jetztigen Durchschnitt als gegeben annehmen
@@ -156,7 +226,7 @@ class Erianet:
         probability_sum = 0
         probability_amount = 0
         for reference_img in reference_imgs:
-            probability_sum += float(self.model.predict([input_img, reference_img]))
+            probability_sum += self.run_pair(input_img, reference_img)
             probability_amount += 1
         return probability_sum / probability_amount
 

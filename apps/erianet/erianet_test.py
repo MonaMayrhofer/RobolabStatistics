@@ -1,4 +1,4 @@
-from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MutliConvConfig
+from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, VGG19ish
 from robolib.datamanager.siamese_data_loader import load_one_image
 import os
 
@@ -6,9 +6,9 @@ servantrain = True
 
 train_set = "convlfw" if servantrain else "96128res_3BHIF"
 predict_set = input("Predict Set: ")
-model_name = "atnt_2500.model"
+model_name = "vgg_1000.model"
 
-net = Erianet(model_name, input_image_size=(96, 128), config=MutliConvConfig)
+net = Erianet(model_name, input_image_size=(96, 128), config=VGG19ish)
 
 print("Train Finished!")
 

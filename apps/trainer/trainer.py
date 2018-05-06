@@ -62,7 +62,7 @@ def train(start, train_folder, runs, epochs_per_run, name):
 
     for i in range(runs):
         print("==== RUN {0}/{1} ====".format(i, runs))
-        net.execute_train(x_train, y_train, epochs_per_run, validation_split=0.128, batch_size=256)
+        net.execute_train(x_train, y_train, epochs_per_run, validation_split=0.128)
         file_name = "{0}_{1}.model".format(name, (i+1)*epochs_per_run)
         print("==== SAVING {0} ====".format(file_name))
         net.save(file_name)
