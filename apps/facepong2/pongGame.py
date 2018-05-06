@@ -15,6 +15,8 @@ from apps.facepong2.pongRenderer import PongRenderer, TextAlign
 class PongGame:
     def __init__(self, file='FrontalFace.xml'):
         self.cap = cv2.VideoCapture(CONFIG.cam)
+        self.cap.set(3, 1920)
+        self.cap.set(4, 1080)
         _, img = self.cap.read()
         self.gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         self.faceDetector = PongFaceDetector(file)
