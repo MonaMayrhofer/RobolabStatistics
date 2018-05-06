@@ -11,7 +11,9 @@ import cv2
 import os
 import shutil
 import robolib.modelmanager.downloader as downloader
+from robolib.util.files import list_dir_recursive
 
+MODE = cv2.COLOR_RGB2GRAY
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
@@ -44,9 +46,9 @@ for name in os.listdir(src):
     if dstexists or len(os.listdir('./' + src + '/' + name)) < 2:
         continue
     imgcnt = 0
-    for imgname in os.listdir(src + '/' + name):
-        img = cv2.imread(src + '/' + name + '/' + imgname)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    for imgname in list_dir_recursive(os.path.join(src, name)):
+        img = cv2.imread(imgname)
+        gray = cv2.cvtColor(img, MODE)
         faces, rejectLevels, levelWeights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (300, 300), True)
         if len(faces) != 1:
             print(name + '/' + imgname + ' could not be converted')
