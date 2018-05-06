@@ -361,7 +361,7 @@ class Erianet:
             used_classes = [i]
             for j in range(examples_per_class):
                 other_ind = i
-                while other_ind in used_classes:
+                while other_ind in used_classes and len(used_classes) < classes:
                     other_ind = np.random.randint(0, classes)
                 used_classes.append(other_ind)
 
