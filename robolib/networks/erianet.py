@@ -149,7 +149,7 @@ class VGG19ish:
 
 class Erianet:
     def __init__(self, model_path, input_image_size=(128, 128), insets=(0, 0, 0, 0), input_to_output_stride=2,
-                 do_not_init=False, config=None, experimental_preprocess=False):
+                 do_not_init=False, config=None, experimental_preprocess=False, load_only_weights=True):
         if config is None:
             config = ClassicConfig()
         else:
@@ -166,6 +166,8 @@ class Erianet:
             if model_path is None or not path.isfile(model_path):
                 self.create(input_image_size, input_to_output_stride)
             else:
+                if load_only_weights:
+                    self.create(input_image_size, input_to_output_stride)
                 self.load(model_path)
 
     def prepare_train(self, data_folder, data_selection=None, servantrain=True, train_set_size=1000):
@@ -206,13 +208,22 @@ class Erianet:
         optimizer = self.config.new_optimizer()
         self.model.compile(loss=contrastive_loss, optimizer=optimizer)
 
-    def save(self, modelpath):
+    def save(self, modelpath, weights_only=True):
         # print("Saving model to {}".format(modelpath))
-        self.model.save(modelpath)
+        if weights_only:
+            print("Saving weights {0}".format(modelpath))
+            self.model.save_weights(modelpath)
+        else:
+            self.model.save(modelpath)
 
-    def load(self, modelpath):
+    def load(self, modelpath, weights_only=True):
         # print("Loading model from File {}".format(modelpath))
-        self.model = load_model(modelpath, custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
+        if weights_only:
+            assert self.model is not None, "Model must be created before loaded, if only weights are given."
+            print("Loading weights {0}".format(modelpath))
+            self.model.load_weights(modelpath)
+        else:
+            self.model = load_model(modelpath, custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
 
     def run_pair(self, input_a, input_b):
         pred = self.model.predict([input_a, input_b])
