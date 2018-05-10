@@ -1,11 +1,11 @@
-from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MultiConvConfig, VGG19ish
-import robolib.networks.erianet
+from robolib.networks.erianet import Erianet
 from tensorflow.python.client import device_lib
 import os
 import argparse
 import importlib
-__ROBOLIB_CONFIG_PACKAGE = "robolib.networks.erianet"
+__ROBOLIB_CONFIG_PACKAGE = "robolib.networks.configurations"
 MODEL_EXTENSION = ".hd5"
+
 
 def main():
     # ============= ARGUMENTS ===========
@@ -64,7 +64,7 @@ def train(start, train_folder, runs, epochs_per_run, name, config, model_dir="mo
         print("{0:5} {1:20} {2}".format(dev.device_type, dev.name, dev.physical_device_desc))
 
     print("== Starting Training ==")
-    net = Erianet(start, input_image_size=(96, 128), config=config)
+    net = Erianet(start, config, input_image_size=(96, 128))
     x_train, y_train = net.prepare_train(train_folder, train_set_size=4000)
 
     for i in range(runs):
