@@ -180,3 +180,5 @@ logs/
 *.gz
 
 apps/trainer/faceScrub/
+
+*.hd5
