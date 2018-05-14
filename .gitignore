@@ -178,3 +178,5 @@ logs/
 *.pdf
 
 *.gz
+
+apps/trainer/faceScrub/
