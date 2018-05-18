@@ -69,7 +69,10 @@ def gen_data_new(train_set_size, class_folder_names, pic_dir, input_image_size=(
 
 def load_one_image(referenceimgpath, name, img, show=False, amount=5):
     if img is not None:
-        img = read_pgm(referenceimgpath + "/" + name + "/" + str(img) + ".pgm")
+        path = os.path.join(referenceimgpath, name, str(img))
+        if not path.endswith(".pgm"):
+            path += ".pgm"
+        img = read_pgm(path)
         if show:
             debug_image(img)
         return img

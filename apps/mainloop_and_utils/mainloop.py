@@ -1,6 +1,7 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
-from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MultiConvConfig, VGG19ish
+from robolib.networks.erianet import Erianet
+from robolib.networks.configurations import VGG19ish
 from robolib.networks.common import contrastive_loss_manual
 import time
 import matplotlib.pyplot as plt
@@ -12,7 +13,7 @@ data_folder = "conv3BHIF"
 print("Using devices: ")
 print(device_lib.list_local_devices())
 
-net = Erianet("vgg_1000.model", input_image_size=(96, 128), config=VGG19ish)
+net = Erianet("test_1000.model", input_image_size=(96, 128), config=VGG19ish)
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)

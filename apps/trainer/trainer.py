@@ -3,8 +3,10 @@ from tensorflow.python.client import device_lib
 import os
 import argparse
 import importlib
+from robolib.util.model_uuid import get_model_identifier
+
 __ROBOLIB_CONFIG_PACKAGE = "robolib.networks.configurations"
-MODEL_EXTENSION = ".hd5"
+MODEL_EXTENSION = ".model"
 
 
 def main():
@@ -65,12 +67,13 @@ def train(start, train_folder, runs, epochs_per_run, name, config, model_dir="mo
 
     print("== Starting Training ==")
     net = Erianet(start, config, input_image_size=(96, 128))
-    x_train, y_train = net.prepare_train(train_folder, train_set_size=4000)
+    x_train, y_train = net.get_train_data(train_set_size=2000, data_folder=train_folder)
 
     for i in range(runs):
         print("==== RUN {0}/{1} ====".format(i, runs))
-        net.execute_train(x_train, y_train, epochs_per_run, validation_split=0.128)
-        file_name = "{0}_{1}.model".format(name, (i+1)*epochs_per_run)
+        net.execute_train((x_train, y_train), epochs_per_run)
+        uuid = get_model_identifier((i+1)*epochs_per_run)
+        file_name = "{0}_{1}_{2}.model".format(name, (i+1)*epochs_per_run, uuid)
         file_name = os.path.join(model_dir, file_name)
         print("==== SAVING {0} ====".format(file_name))
         if not os.path.isdir(model_dir):

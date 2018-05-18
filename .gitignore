@@ -179,3 +179,4 @@ logs/
 
 *.gz
 *.hd5
+*.interm
