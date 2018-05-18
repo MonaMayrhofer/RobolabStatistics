@@ -5,10 +5,10 @@ import os
 
 intermediate = True
 
-input_set = "conv3BHIF"
-reference_set = "interm3BHIF" if intermediate else input_set
+input_set = "convlfwa"
+reference_set = "intermconvlfwa" if intermediate else input_set
 
-model_name = "test_100_1526669017001.model"
+model_name = "modern_100_1526676974001.model"
 
 net = Erianet(model_name, input_image_size=(96, 128), config=VGG19ish)
 
@@ -27,8 +27,7 @@ while True:
         break
 
     image = load_one_image(input_set, name, img, True)
-    probs = net.predict(image, reference_set, input_img_intermediate=False, reference_img_intermediate=intermediate,
-                        verbose=True)
+    probs = net.predict(image, reference_set)
 
     for pair in probs:
-        print(pair[0], str(pair[1]), str(pair[2]))
+        print(pair[0], str(pair[1]))

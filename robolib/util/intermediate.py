@@ -1,6 +1,7 @@
 import numpy as np
 import os
 
+INTERMEDIATE_FILE_EXTENSION = ".interm"
 
 def save_intermediate(intermediate, path):
     if not os.path.exists(os.path.dirname(path)):

@@ -1,49 +1,55 @@
+# coding=utf-8
 import os
 import time
 from os import path
 from typing import Tuple, List
 
 import numpy as np
-from keras import backend
 from keras.layers import Input, Lambda
-from keras.models import Model, load_model
+from keras.models import Model
 
-from robolib.datamanager.siamese_data_loader import load_one_image
-from robolib.images.pgmtools import read_pgm
+from robolib.images.pgmtools import read_pgm, RAW_IMAGE_EXTENSION
 from robolib.networks.common import contrastive_loss, euclidean_dist_output_shape, euclidean_distance_tensor, \
     euclidean_distance_numeric
 from robolib.networks.configurations import NetConfig
 from robolib.networks.debug import debug_train_data
+from robolib.networks.predict_result import PredictResult
+from robolib.util.averager import Averager, ArithmeticAverager
+from robolib.util.intermediate import load_intermediate, INTERMEDIATE_FILE_EXTENSION
 from robolib.util.random import random_different_numbers
-from robolib.util.intermediate import load_intermediates
 
 
 class Erianet:
-    def __init__(self, model_path, config: type(NetConfig), input_image_size=(128, 128), input_to_output_stride=2,
-                 do_not_init=False, load_only_weights=True, insets=(0, 0, 0, 0)):
-        self.config = config()
+    def __init__(self, model_path, config: type(NetConfig), input_image_size=(96, 128), input_to_output_stride=2,
+                 insets=(0, 0, 0, 0), for_train=False):
+
+        # = Sizes =
         self.input_image_size = input_image_size
         self.input_to_output_stride = input_to_output_stride
+        self.insets = insets
+
+        # = Config =
+        self.config = config()
+        self.base_network_input_dim = self.config.get_input_dim(input_image_size, input_to_output_stride, self.insets)
+
+        # = Placeholders for Model =
         self.model = None
         self.base_network = None
-        self.insets = insets
-        self.input_dim = self.config.get_input_dim(input_image_size, input_to_output_stride, self.insets)
-        self.model_path = model_path
-        if not do_not_init:
-            if model_path is None or not path.isfile(model_path):
-                self.create(input_image_size, input_to_output_stride)
-                self.is_blank = True
-            else:
-                if load_only_weights:
-                    self.create(input_image_size, input_to_output_stride)
-                self.load(model_path)
-                self.is_blank = False
+
+        # = Status variables =
+        self.is_blank = True
+        self.for_train = for_train
+
+        # = Initiate =
+        self.create()
+        if model_path is not None:
+            assert path.isfile(model_path), 'Model file {0} could not be found.'.format(model_path)
+            self.load(model_path)
 
     # =========TRAIN========
 
-    def execute_train(self, train_data: Tuple[np.array, np.array], epochs: int,
-                      initial_epochs: int = None, verbose: int = 1,
-                      callbacks=None, batch_size=128) -> None:
+    def execute_train(self, train_data: Tuple[np.array, np.array], epochs: int, initial_epochs: int = None,
+                      verbose: int = 1, callbacks=None) -> None:
         """
         Does the actual training.
 
@@ -63,26 +69,24 @@ class Erianet:
             0 = silent, 1 = progress bar, 2 = one line per epoch.
         callbacks: List
             An array of Keras callbacks, which is passed to model.fit
-        batch_size:
-            Passthrough parameter to model.fit
 
         """
+        assert self.for_train, "If you intend to train this model, please specify it in the constructor 'for_train'"
         if initial_epochs is not None and self.is_blank:
             epochs = initial_epochs
         if callbacks is None:
             callbacks = []
         x_train, y_train = train_data
-        print(type(train_data))
-        print("Calling Tensorflow")
+        self.is_blank = False
         self.model.fit([x_train[:, 0], x_train[:, 1]], y_train,
                        validation_split=0.1,
-                       batch_size=batch_size,
+                       batch_size=128,
                        verbose=verbose,
                        epochs=epochs,
                        callbacks=callbacks)
 
     def train(self, data_folder: str, epochs: int = 100, initial_epochs: int = None, verbose: int = 2,
-              train_set_size: int = 1000, callbacks: np.array = None, batch_size: int = 128):
+              train_set_size: int = 1000, callbacks: np.array = None):
         """
         Trains the model.
 
@@ -101,14 +105,12 @@ class Erianet:
             was loaded) this value is used for 'epochs'.
         train_set_size : int
             How many different training-pairs shall be sampled
-        batch_size : int
-            Parameter is forwarded to model.train
-        verbose : {0, 1, 2}
+        verbose: {0, 1, 2}
+            0 = silent, 1 = progress bar, 2 = one line per epoch.
         """
         train_data = self.get_train_data(train_set_size=train_set_size, data_folder=data_folder)
         self.execute_train(train_data=train_data, epochs=epochs,
-                           callbacks=callbacks, initial_epochs=initial_epochs,
-                           batch_size=batch_size, verbose=verbose)
+                           callbacks=callbacks, initial_epochs=initial_epochs, verbose=verbose)
 
     def get_train_data(self, train_set_size, data_folder, class_folder_names=None, verbose=True) -> Tuple:
         """
@@ -124,6 +126,8 @@ class Erianet:
             The path to the data-folder
         class_folder_names
             Use only these classes
+        verbose : bool
+            Print out status info?
 
         Returns
         -------
@@ -137,7 +141,7 @@ class Erianet:
         classes = len(class_folder_names)
         examples_per_class = int(max(1.0, train_set_size / classes))
 
-        total_image_length = self.input_dim
+        total_image_length = self.base_network_input_dim
         x_shape = np.concatenate(([classes * examples_per_class, 2], total_image_length))
         y_shape = [classes * examples_per_class, 1]
 
@@ -198,153 +202,91 @@ class Erianet:
                 negative_y[count] = 0
                 count += 1
 
-        x_train = np.concatenate([positive_x, negative_x], axis=0) / 255  # Squish training-data from 0-255 to 0-1
-        y_train = np.concatenate([positive_y, negative_y], axis=0)
+        x_train = np.concatenate([positive_x, negative_x]) / 255  # Squish training-data from 0-255 to 0-1
+        y_train = np.concatenate([positive_y, negative_y])
 
         return x_train, y_train
 
-    def load_image(self, reference_path, name, img, show=False, stride=None, preprocess=False):
-        if stride is None:
-            stride = self.input_to_output_stride
-        image = load_one_image(reference_path, name, img, show)
-        if preprocess:
-            if img is not None:
-                image = self.preprocess(image, stride)
-            else:
-                image = [self.preprocess(currimg, stride) for currimg in image]
-        return image
-
-    def preprocess(self, image, stride=None):
-        if stride is None:
-            stride = self.input_to_output_stride
-
-        assert (self.input_image_size[0] *
-                self.input_image_size[1]) == \
-               (image.shape[0] *
-                image.shape[1]), \
-            "Images({0}) must have the same size as specified in input_image_size({1})".format(image.shape,
-                                                                                               self.input_image_size)
-
-        image = image[::stride, ::stride]
-        image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[1] - self.insets[2]]
-        image = image.reshape(tuple(np.concatenate(([1], np.array(self.input_dim)))))
-        image = image.astype("float32")
-        return image
-
-    # =========LOAD AND SAVE========
-
-    def create(self, input_image_size=(128, 128), input_to_output_stride=2):
-        assert all(np.mod(input_image_size, input_to_output_stride) == (0, 0))
-        self.model, self.base_network = self.create_erianet()
-
-        optimizer = self.config.new_optimizer()
-        self.model.compile(loss=contrastive_loss, optimizer=optimizer)
-
-    def create_erianet(self):
-        input_a = Input(shape=tuple(self.input_dim))
-        input_b = Input(shape=tuple(self.input_dim))
-        base_network = self.config.create_base(self.input_dim)
-        processed_a = base_network(input_a)  # n-Dim classification Vector
-        processed_b = base_network(input_b)  # n-Dim classification vector
-        distance = Lambda(euclidean_distance_tensor, output_shape=euclidean_dist_output_shape)(
-            [processed_a, processed_b])
-        model = Model(inputs=[input_a, input_b], outputs=distance)
-        return model, base_network
-
-    def save(self, modelpath, weights_only=True):
-        if weights_only:
-            print("Saving weights {0}".format(modelpath))
-            self.model.save_weights(modelpath)
+    def load_image_forwarded(self, file_path):
+        extension = os.path.splitext(file_path)[1]
+        if extension == INTERMEDIATE_FILE_EXTENSION:
+            return load_intermediate(file_path)
+        elif extension == RAW_IMAGE_EXTENSION:
+            print("Unprocessed image found @ {0}".format(file_path))
+            img = read_pgm(file_path)
+            img = self.preprocess(img)
+            return self.forward(img)
         else:
-            self.model.save(modelpath)
+            raise Exception("Unknown file-extension '{0}' at '{1}'".format(extension, path))
 
-    def load(self, modelpath, weights_only=True):
-        # print("Loading model from File {}".format(modelpath))
-        if weights_only:
-            assert self.model is not None, "Model must be created before loaded, if only weights are given."
-            print("Loading weights {0}".format(modelpath))
-            self.model.load_weights(modelpath)
-        else:
-            self.model = load_model(modelpath,
-                                    custom_objects={'contrastive_loss': contrastive_loss, 'backend': backend})
-
-    # =========PREDICT========
+    # ========= USE-Time Model Functions ========
 
     def forward(self, image):
         print("Calling Tensorflow!")
         intermediate = self.base_network.predict(image)
         return intermediate
 
-    def distance(self, image_a, image_b, a_is_intermediate=False, b_is_intermediate=False):
-        if not a_is_intermediate:
-            image_a = self.forward(image_a)
-        if not b_is_intermediate:
-            image_b = self.forward(image_b)
-
-        assert image_a.shape == image_b.shape
-        distance = euclidean_distance_numeric((image_a, image_b))
-        return distance
-
-    def compare(self, input_img, reference_path, reference_name, input_img_intermediate=False,
-                reference_img_intermediate=False, show=False, stride=None, preprocess=False):
-        # Optimierungsideen:
-        # Wenn Standardabweichung klein genug ist, den bis jetztigen Durchschnitt als gegeben annehmen
-        if reference_img_intermediate:
-            reference_imgs = load_intermediates(reference_path, reference_name)
-        else:
-            reference_imgs = self.load_image(reference_path, reference_name, None, show=show, stride=stride,
-                                             preprocess=preprocess)
-        probability_sum = 0
-        probability_amount = 0
-        for reference_img in reference_imgs:
-            probability_sum += float(self.distance(image_a=input_img, image_b=reference_img,
-                                                   a_is_intermediate=input_img_intermediate,
-                                                   b_is_intermediate=reference_img_intermediate))
-            probability_amount += 1
-        return probability_sum / probability_amount
-
-    def predict(self, input_img, reference_data_path, candidates=None, give_all=False, verbose=False,
-                input_img_intermediate=False, reference_img_intermediate=False,):
+    def predict(self, input_img, reference_data_path, averager: type(Averager) = ArithmeticAverager):
         mon_start_time = time.time()
-        input_img = self.preprocess(input_img)
 
-        if candidates is None:
-            candidates = os.listdir(reference_data_path)
-        probabilities = np.array([], dtype=[('class', int), ('probability', float)])
-        last = 0
+        # == Prepare input img ==
+        input_img_forwarded = self.forward(self.preprocess(input_img))
 
-        if not input_img_intermediate:
-            input_img = self.forward(input_img)
-        for i in range(0, len(candidates)):
-            if time.time() - last > 1:
-                last = time.time()
-                print("{0:.1f}%".format(i / len(candidates) * 100))
+        result = PredictResult()
 
-            probability = self.compare(input_img, reference_data_path, candidates[i],
-                                       input_img_intermediate=True,
-                                       reference_img_intermediate=reference_img_intermediate,
-                                       show=False, preprocess=True)
-            pair = (i, probability)
-            probabilities = np.append(probabilities, np.array(pair, dtype=probabilities.dtype))
-        probabilities = np.sort(probabilities, order='probability')
-        probs = probabilities
-        certainties = []
-        biggestind = 0
-        for i in range(len(probs)):
-            if i != len(probs) - 1:
-                certainty = probs[i + 1][1] - probs[i][1]
-            else:
-                certainty = 0
-            certainties.append([candidates[probs[i][0]], probs[i][0], probs[i][1], certainty])
-            if certainties[biggestind][2] < certainty:
-                biggestind = i
-        if verbose:
-            print("Predict took: " + str(time.time() - mon_start_time))
-        if give_all:
-            return certainties
-        return certainties[0:biggestind + 1]
+        for person in os.listdir(reference_data_path):
+            avg = averager()
+            for image in os.listdir(os.path.join(reference_data_path, person)):
+                reference_image_path = os.path.join(reference_data_path, person, image)
+                reference_img_forwarded = self.load_image_forwarded(reference_image_path)
+                distance = euclidean_distance_numeric((input_img_forwarded, reference_img_forwarded))
+                avg += distance
+            result.append(person, float(avg))
+        distances = result.get()
+
+        print("Predict took: " + str(time.time() - mon_start_time))
+        return distances
+
+    # =========LOAD AND SAVE========
+
+    def create(self):
+        assert all(np.mod(self.input_image_size, self.input_to_output_stride) == (0, 0))
+        self.base_network = self.config.create_base(self.base_network_input_dim)
+
+        if self.for_train:
+            input_a = Input(shape=tuple(self.base_network_input_dim))
+            input_b = Input(shape=tuple(self.base_network_input_dim))
+            processed_a = self.base_network(input_a)  # n-Dim classification Vector
+            processed_b = self.base_network(input_b)  # n-Dim classification vector
+            distance = Lambda(euclidean_distance_tensor, output_shape=euclidean_dist_output_shape)(
+                [processed_a, processed_b])
+            self.model = Model(inputs=[input_a, input_b], outputs=distance)
+            optimizer = self.config.new_optimizer()
+            self.model.compile(loss=contrastive_loss, optimizer=optimizer)
+
+    def save(self, modelpath):
+        print("Saving weights {0}".format(modelpath))
+        self.base_network.save_weights(modelpath)
+
+    def load(self, modelpath):
+        assert self.base_network is not None, "Model must be created before loaded, if only weights are given."
+        self.is_blank = False
+        print("Loading weights {0}".format(modelpath))
+        self.base_network.load_weights(modelpath)
 
     # =========UTIL========
 
     def debug(self, data):
         debug_train_data(data, self.input_image_size, self.input_to_output_stride)
+
+    def preprocess(self, image):
+
+        assert self.input_image_size[0] * self.input_image_size[1] == image.shape[0] * image.shape[1], \
+            "Images({0}) must have the same size as specified in input_image_size({1})".format(image.shape,
+                                                                                               self.input_image_size)
+
+        image = image[::self.input_to_output_stride, ::self.input_to_output_stride]
+        image = image[self.insets[1]:image.shape[0] - self.insets[3], self.insets[0]:image.shape[1] - self.insets[2]]
+        image = image.reshape(tuple(np.concatenate(([1], np.array(self.base_network_input_dim)))))
+        image = image.astype("float32")
+        return image

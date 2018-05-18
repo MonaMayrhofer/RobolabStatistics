@@ -40,6 +40,7 @@ def process(model, folder, config, output):
     net = Erianet(model, config, input_image_size=(96, 128))
 
     for person in os.listdir(folder):
+        print(" - {0}".format(person))
         for image_name in os.listdir(os.path.join(folder, person)):
             image = load_one_image(folder, person, image_name, False)
             intermediate = net.forward(net.preprocess(image))

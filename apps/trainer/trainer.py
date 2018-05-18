@@ -66,7 +66,7 @@ def train(start, train_folder, runs, epochs_per_run, name, config, model_dir="mo
         print("{0:5} {1:20} {2}".format(dev.device_type, dev.name, dev.physical_device_desc))
 
     print("== Starting Training ==")
-    net = Erianet(start, config, input_image_size=(96, 128))
+    net = Erianet(start, config, input_image_size=(96, 128), for_train=True)
     x_train, y_train = net.get_train_data(train_set_size=2000, data_folder=train_folder)
 
     for i in range(runs):

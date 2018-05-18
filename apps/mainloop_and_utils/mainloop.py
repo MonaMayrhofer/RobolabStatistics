@@ -59,7 +59,7 @@ def recognise_faces(faces):
     names = []
     ts = time.time()
     for face in faces:
-        person = net.predict(face, data_folder, give_all=True)
+        person = net.predict(face, data_folder)
         for i in range(len(personlist[0])):
             if personlist[0][i] == person[0][0]:
                 print(person[2])

@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import os
 
+RAW_IMAGE_EXTENSION = '.pgm'
+
 
 def read_pgm(filename):
     assert os.path.exists(filename), "File '{0}' wasn't found".format(filename)
