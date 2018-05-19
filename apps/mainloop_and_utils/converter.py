@@ -21,17 +21,27 @@ if not os.path.isdir(src):
     print("Folder does not exist.")
     exit(1)
 
-add = False
+addO = False
+addA = False
+addN = False
 dst = input("Destination folder: ")
 if os.path.isdir(dst):
     ow = ""
     while ow != "O" and ow != "A" and ow != "Q":
-        ow = input("Folder already exists. Overwrite, add or quit? (O/A/Q): ")
+        ow = input("Folder already exists. Overwrite folder, add people or exit? (O/A/E): ")
         if ow == "O":
             shutil.rmtree(dst)
         elif ow == "A":
-            add = True
-        elif ow == "Q":
+            ow = ""
+            while ow != "O" and ow != "A" and ow != "N":
+                ow = input("Overwrite existing people, add pictures to people or nothing? (O/A/N)")
+                if ow == "O":
+                    addO = True
+                elif ow == "A":
+                    addA = True
+                elif ow == "N":
+                    addN = True
+        elif ow == "E":
             exit(0)
 else:
     os.makedirs(dst)
@@ -41,6 +51,7 @@ for name in os.listdir(src):
     for dstname in os.listdir(dst):
         if name == dstname:
             dstexists = True
+    # TODO implement add
     if dstexists or len(os.listdir('./' + src + '/' + name)) < 2:
         continue
     imgcnt = 0

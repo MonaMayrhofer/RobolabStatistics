@@ -12,7 +12,7 @@ data_folder = "conv3BHIF"
 print("Using devices: ")
 print(device_lib.list_local_devices())
 
-net = Erianet("model.model", input_image_size=(96, 128), config=MutliConvConfig)
+net = Erianet("classcon1_.model", input_image_size=(96, 128), config=ClassicConfig)
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)

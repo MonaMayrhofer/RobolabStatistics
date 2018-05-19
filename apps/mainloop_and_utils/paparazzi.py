@@ -19,22 +19,26 @@ import shutil
 name = input("Name: ")
 if os.path.isdir(name):
     ow = ""
-    while ow != "Y" and ow != "N":
-        ow = input("Folder already exists. Overwrite? (Y/N): ")
-        if ow == "Y":
+    while ow != "O" and ow != "A" and ow != "E":
+        ow = input("Folder already exists. Overwrite folder, add pictures or exit? (O/A/E): ")
+        if ow == "O":
             shutil.rmtree(name)
-        elif ow == "N":
+            os.makedirs(name)
+        elif ow == "E":
             exit(0)
-os.makedirs(name)
+else:
+    os.makedirs(name)
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 cap = cv2.VideoCapture(0)
-cap.set(3, 1920)
-cap.set(4, 1080)
+#cap.set(3, 1920)
+#cap.set(4, 1080)
 
 imgNumber = 1
+while os.path.exists(name + "/" + str(imgNumber) + ".pgm"):
+    imgNumber += 1
 lastTime = time.time()
 
 cv2.namedWindow('img')
@@ -56,8 +60,10 @@ while True:
                 if not series:
                     taking = False
                 cv2.imwrite(name + "/" + str(imgNumber) + ".pgm", resImg)
-                imgNumber = imgNumber + 1
-                lastTime = time.time()
+                print("Picture taken")
+                while os.path.exists(name + "/" + str(imgNumber) + ".pgm"):
+                    imgNumber += 1
+            lastTime = time.time()
             if taking:
                 cv2.putText(resImg, str(3 - int(time.time() - lastTime)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
             cv2.imshow('resImg', resImg)
