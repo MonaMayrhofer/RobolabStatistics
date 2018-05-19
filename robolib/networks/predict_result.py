@@ -22,3 +22,11 @@ class PredictResult:
         if not self.finished:
             self.finish()
         return self.values
+
+    @staticmethod
+    def name(item) -> str:
+        return item[0]
+
+    @staticmethod
+    def difference(item) -> float:
+        return item[1]
