@@ -6,6 +6,7 @@ from robolib.networks.common import contrastive_loss_manual
 import time
 import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
+from robolib.networks.predict_result import PredictResult
 # https://www.openu.ac.il/home/hassner/data/lfwa/
 
 data_folder = "intermconv3BHIFbigset"
@@ -19,7 +20,7 @@ MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
-cap = cv2.VideoCapture("examplevideo.mp4")
+cap = cv2.VideoCapture(0)
 #cap.set(3, 1920)
 #cap.set(4, 1080)
 
@@ -69,7 +70,7 @@ def recognise_faces(faces):
         for name in person:
             if name[0] not in timeline:
                 #print(name[0])
-                timeline[name[0]] = [[ts], [name[1]]]
+                timeline[PredictResult.name(name)] = [[ts], [PredictResult.difference(name())]]
             else:
                 timeline[name[0]][0].append(ts)
                 timeline[name[0]][1].append(name[1])

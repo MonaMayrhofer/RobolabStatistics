@@ -1,4 +1,3 @@
-
 from keras.optimizers import SGD, RMSprop
 from keras.models import Sequential, Model, load_model
 from keras.layers import Input, Dense, Dropout, Conv2D, Flatten, BatchNormalization, Lambda, MaxPooling2D
@@ -99,7 +98,7 @@ class VGG19ish(NetConfig):
         pass
 
     def create_base(self, input_d):
-        print("Generating FaceNetInspired")
+        print("Generating VGG19ish")
         seq = Sequential()
         seq.add(Conv2D(filters=64, kernel_size=(7, 7), strides=(2, 2), padding='same',
                        activation='relu', input_shape=input_d, name="conv1"))
