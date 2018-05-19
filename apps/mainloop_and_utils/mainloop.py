@@ -8,18 +8,18 @@ import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
 # https://www.openu.ac.il/home/hassner/data/lfwa/
 
-data_folder = "conv3BHIF"
+data_folder = "intermconv3BHIFbigset"
 
 print("Using devices: ")
 print(device_lib.list_local_devices())
 
-net = Erianet("test_1000.model", input_image_size=(96, 128), config=VGG19ish)
+net = Erianet("bigset_4400_1526739422044.model", input_image_size=(96, 128), config=VGG19ish)
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("examplevideo.mp4")
 #cap.set(3, 1920)
 #cap.set(4, 1080)
 
@@ -63,18 +63,16 @@ def recognise_faces(faces):
         for i in range(len(personlist[0])):
             if personlist[0][i] == person[0][0]:
                 print(person[2])
-                personlist[3][i] = person[0][2]
+                personlist[3][i] = person[0][1]
         names.append(person[0][0])
-        #print(person)
-        #print("Correct: {0} - Incorrect:{0}".format(contrastive_loss_manual(True, person[0][2]),
-                                                    #contrastive_loss_manual(False, person[0][2])))
+
         for name in person:
             if name[0] not in timeline:
                 #print(name[0])
-                timeline[name[0]] = [[ts], [name[2]]]
+                timeline[name[0]] = [[ts], [name[1]]]
             else:
                 timeline[name[0]][0].append(ts)
-                timeline[name[0]][1].append(name[2])
+                timeline[name[0]][1].append(name[1])
     return names
 
 

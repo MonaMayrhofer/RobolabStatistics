@@ -23,4 +23,4 @@ class ArithmeticAverager(Averager):
         self.amount += 1
 
     def get_average(self) -> float:
-        return self.amount / self.sum
+        return self.sum / self.amount
