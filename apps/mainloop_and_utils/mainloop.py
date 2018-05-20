@@ -34,8 +34,7 @@ class PersonData:
         return True
 
 
-data_folder = "conv3BHIF"
-data_folder = "intermconv3BHIFbigset"
+data_folder = "conv3BHIFprep"
 
 print("Using devices: ")
 print(device_lib.list_local_devices())
@@ -85,21 +84,22 @@ def recognise_faces(faces):
     names = []
     ts = time.time()
     for face in faces:
-        predicted_person = net.predict(face, data_folder, give_all=True)
+        predicted_person = net.predict(face, data_folder)
+        print(predicted_person)
         for person in person_list:
-            if person.name == predicted_person[0][0]:
-                person.probability = predicted_person[0][2]
-        names.append(predicted_person[0][0])
+            if person.name == PredictResult.name(predicted_person[0]):
+                person.probability = PredictResult.difference(predicted_person[0])
+        names.append(PredictResult.name(predicted_person[0]))
         #print(predicted_person)
         #print("Correct: {0} - Incorrect:{0}".format(contrastive_loss_manual(True, predicted_person[0][2]),
                                                     #contrastive_loss_manual(False, predicted_person[0][2])))
-        for name in predicted_person:
-            if name[0] not in timeline:
+        #for name in predicted_person:
+            #if PredictResult.name(name) not in timeline:
                 #print(name[0])
-                timeline[PredictResult.name(name)] = [[ts], [PredictResult.difference(name())]]
-            else:
-                timeline[name[0]][0].append(ts)
-                timeline[name[0]][1].append(name[1])
+                #timeline[PredictResult.name(name)] = [[ts], [PredictResult.difference(name())]]
+            #else:
+                #timeline[PredictResult.name(name)][0].append(ts)
+                #timeline[PredictResult.name(name).append(name[1])
     return names
 
 
