@@ -178,3 +178,9 @@ logs/
 *.pdf
 
 *.gz
+
+apps/trainer/faceScrub/
+
+*.hd5
+*.interm
+*.mp4

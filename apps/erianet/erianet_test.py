@@ -1,21 +1,22 @@
-from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig
+from robolib.networks.erianet import Erianet
+from robolib.networks.configurations import VGG19ish
 from robolib.datamanager.siamese_data_loader import load_one_image
+from robolib.networks.predict_result import PredictResult
 import os
 
-servantrain = True
+intermediate = False
 
-train_set = "convlfw" if servantrain else "96128res_3BHIF"
-predict_set = "res96128_ModelData_AtnTFaces"
-model_name = "atnt_2500.model"
+input_set = "conv3BHIF"
+reference_set = "intermconv3BHIFsmalltest" if intermediate else input_set
 
-net = Erianet(model_name, input_image_size=(96, 128), config=ConvolutionalConfig)
-# net.train(train_set, 10, initial_epochs=200, servantrain=servantrain)
-# net.save(model_name)
+model_name = "bigset_4400_1526739422044.model"
+
+net = Erianet(model_name, input_image_size=(96, 128), config=VGG19ish)
 
 print("Train Finished!")
 
 while True:
-    name = input("Enter name of {0}:".format(predict_set))
+    name = input("Enter name of {0}:".format(input_set))
     if name == '':
         break
     img = input("Which image:")
@@ -23,11 +24,11 @@ while True:
         break
     img = int(img)
 
-    if not os.path.exists(os.path.join(predict_set, name)):
+    if not os.path.exists(os.path.join(input_set, name)):
         break
 
-    image = load_one_image(predict_set, name, img, True)
-    probs = net.predict(image, predict_set)
+    image = load_one_image(input_set, name, img, True)
+    names = net.predict(image, reference_set)
 
-    for pair in probs:
-        print(pair[0], str(pair[1]), str(pair[2]))
+    for name in names:
+        print(PredictResult.name(name), PredictResult.difference(name))

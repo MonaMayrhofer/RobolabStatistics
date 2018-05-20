@@ -1,10 +1,12 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
-from robolib.networks.erianet import Erianet, ConvolutionalConfig, ClassicConfig, MutliConvConfig
+from robolib.networks.erianet import Erianet
+from robolib.networks.configurations import VGG19ish
 from robolib.networks.common import contrastive_loss_manual
 import time
 import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
+from robolib.networks.predict_result import PredictResult
 # https://www.openu.ac.il/home/hassner/data/lfwa/
 
 
@@ -33,11 +35,12 @@ class PersonData:
 
 
 data_folder = "conv3BHIF"
+data_folder = "intermconv3BHIFbigset"
 
 print("Using devices: ")
 print(device_lib.list_local_devices())
 
-net = Erianet("classcon1_.model", input_image_size=(96, 128), config=ClassicConfig)
+net = Erianet("bigset_4400_1526739422044.model", input_image_size=(96, 128), config=VGG19ish)
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -93,10 +96,10 @@ def recognise_faces(faces):
         for name in predicted_person:
             if name[0] not in timeline:
                 #print(name[0])
-                timeline[name[0]] = [[ts], [name[2]]]
+                timeline[PredictResult.name(name)] = [[ts], [PredictResult.difference(name())]]
             else:
                 timeline[name[0]][0].append(ts)
-                timeline[name[0]][1].append(name[2])
+                timeline[name[0]][1].append(name[1])
     return names
 
 
