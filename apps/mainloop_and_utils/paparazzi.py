@@ -36,13 +36,13 @@ cap = cv2.VideoCapture(0)
 #cap.set(3, 1920)
 #cap.set(4, 1080)
 
-imgNumber = 1
-while os.path.exists(name + "/" + str(imgNumber) + ".pgm"):
-    imgNumber += 1
-lastTime = time.time()
+image_number = 1
+while os.path.exists(name + "/" + str(image_number) + ".pgm"):
+    image_number += 1
+last_time = time.time()
 
 cv2.namedWindow('img')
-cv2.namedWindow('resImg')
+cv2.namedWindow('res_img')
 
 taking = False
 series = False
@@ -55,29 +55,29 @@ while True:
         x, y, w, h = faces[0]
         if not (y - 0.22 * h < 0 or y + h * 1.11 > img.shape[0]):
             face = gray[int(y - 0.22 * h):int(y + h * 1.11), x:x + w]
-            resImg = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
-            if taking and time.time() - lastTime > 3:
+            res_img = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
+            if taking and time.time() - last_time > 3:
                 if not series:
                     taking = False
-                cv2.imwrite(name + "/" + str(imgNumber) + ".pgm", resImg)
+                cv2.imwrite(name + "/" + str(image_number) + ".pgm", res_img)
                 print("Picture taken")
-                while os.path.exists(name + "/" + str(imgNumber) + ".pgm"):
-                    imgNumber += 1
-            lastTime = time.time()
+                while os.path.exists(name + "/" + str(image_number) + ".pgm"):
+                    image_number += 1
+            last_time = time.time()
             if taking:
-                cv2.putText(resImg, str(3 - int(time.time() - lastTime)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-            cv2.imshow('resImg', resImg)
+                cv2.putText(res_img, str(3 - int(time.time() - last_time)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+            cv2.imshow('res_img', res_img)
     cv2.imshow('img', img)
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
     if not taking and k == 112:
-        lastTime = time.time() - 3
+        last_time = time.time() - 3
         taking = True
     if k == 115:
         series = not series
         if not taking:
             taking = True
-            lastTime = time.time()
+            last_time = time.time()
 cap.release()
 cv2.destroyAllWindows()
