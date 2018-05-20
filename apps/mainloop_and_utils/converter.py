@@ -13,17 +13,7 @@ import shutil
 import robolib.modelmanager.downloader as downloader
 
 MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-
-src = input("Source folder: ")
-if not os.path.isdir(src):
-    print("Folder does not exist.")
-    exit(1)
-
-add_overwrite = False
-add_add = False
-add_ignore = False
 
 
 def convert_image(source_path, destination_path):
@@ -53,65 +43,77 @@ def convert_images(source_path, destination_path):
         shutil.rmtree(destination_path)
 
 
-dst = input("Destination folder: ")
-if os.path.isdir(dst):
-    ow = ""
-    while ow != "O" and ow != "A" and ow != "Q":
-        ow = input("Folder already exists. Overwrite folder, add people or exit? (O/A/E): ")
-        if ow == "O":
-            shutil.rmtree(dst)
-            os.makedirs(dst)
-        elif ow == "A":
-            owa = ""
-            while owa != "O" and owa != "A" and owa != "I":
-                owa = input("Overwrite existing people, add pictures to people or ignore them? (O/A/I): ")
-                if owa == "O":
-                    add_overwrite = True
-                elif owa == "A":
-                    add_add = True
-                elif owa == "I":
-                    add_ignore = True
-        elif ow == "E":
-            exit(0)
-else:
-    os.makedirs(dst)
-
-for src_name in os.listdir(src):
-    src_path = src + '/' + src_name
-    dst_path = dst + '/' + src_name
-    if add_overwrite:
-        for dst_name in os.listdir(dst):
-            if src_name == dst_name:
-                shutil.rmtree(dst_path)
-                break
-        os.makedirs(dst_path)
-        convert_images(src_path, dst_path)
-    elif add_add:
-        exists = False
-        for dst_name in os.listdir(dst):
-            if src_name == dst_name:
-                exists = True
-                break
-        if exists:
-            img_count = 1
-            for img_name in os.listdir(src_path):
-                while os.path.exists(dst_path + "/" + str(img_count) + ".pgm"):
-                    img_count += 1
-                if convert_image(src_path + '/' + img_name, dst_path + '/' + str(img_count) + '.pgm'):
-                    img_count += 1
+def main():
+    add_overwrite = False
+    add_add = False
+    add_ignore = False
+    downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
+    src = input("Source folder: ")
+    if not os.path.isdir(src):
+        print("Folder does not exist.")
+        exit(1)
+    dst = input("Destination folder: ")
+    if os.path.isdir(dst):
+        ow = ""
+        while ow != "O" and ow != "A" and ow != "Q":
+            ow = input("Folder already exists. Overwrite folder, add people or exit? (O/A/E): ")
+            if ow == "O":
+                shutil.rmtree(dst)
+                os.makedirs(dst)
+            elif ow == "A":
+                owa = ""
+                while owa != "O" and owa != "A" and owa != "I":
+                    owa = input("Overwrite existing people, add pictures to people or ignore them? (O/A/I): ")
+                    if owa == "O":
+                        add_overwrite = True
+                    elif owa == "A":
+                        add_add = True
+                    elif owa == "I":
+                        add_ignore = True
+            elif ow == "E":
+                exit(0)
+    else:
+        os.makedirs(dst)
+    for src_name in os.listdir(src):
+        src_path = src + '/' + src_name
+        dst_path = dst + '/' + src_name
+        if add_overwrite:
+            for dst_name in os.listdir(dst):
+                if src_name == dst_name:
+                    shutil.rmtree(dst_path)
+                    break
+            os.makedirs(dst_path)
+            convert_images(src_path, dst_path)
+        elif add_add:
+            exists = False
+            for dst_name in os.listdir(dst):
+                if src_name == dst_name:
+                    exists = True
+                    break
+            if exists:
+                img_count = 1
+                for img_name in os.listdir(src_path):
+                    while os.path.exists(dst_path + "/" + str(img_count) + ".pgm"):
+                        img_count += 1
+                    if convert_image(src_path + '/' + img_name, dst_path + '/' + str(img_count) + '.pgm'):
+                        img_count += 1
+            else:
+                os.makedirs(dst_path)
+                convert_images(src_path, dst_path)
+        elif add_ignore:
+            exists = False
+            for dst_name in os.listdir(dst):
+                if src_name == dst_name:
+                    exists = True
+                    break
+            if exists:
+                continue
+            os.makedirs(dst_path)
+            convert_images(src_path, dst_path)
         else:
             os.makedirs(dst_path)
             convert_images(src_path, dst_path)
-    elif add_ignore:
-        exists = False
-        for dst_name in os.listdir(dst):
-            if src_name == dst_name:
-                exists = True
-                break
-        if exists:
-            continue
-        os.makedirs(dst_path)
-        convert_images(src_path, dst_path)
-    else:
-        os.makedirs(dst_path)
-        convert_images(src_path, dst_path)
+
+
+if __name__ == "__main__":
+    main()

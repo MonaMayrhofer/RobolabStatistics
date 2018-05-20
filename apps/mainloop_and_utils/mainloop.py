@@ -9,6 +9,15 @@ from tensorflow.python.client import device_lib
 from robolib.networks.predict_result import PredictResult
 # https://www.openu.ac.il/home/hassner/data/lfwa/
 
+data_folder = "conv3BHIFprep"
+timeout_in = 3
+timeout_out = 8
+net = Erianet("bigset_4400_1526739422044.model", input_image_size=(96, 128), config=VGG19ish)
+MODEL_FILE = 'FrontalFace.xml'
+face_cascades = cv2.CascadeClassifier(MODEL_FILE)
+person_list = []
+timeline = dict()
+
 
 class PersonData:
     def __init__(self, name):
@@ -34,36 +43,13 @@ class PersonData:
         return True
 
 
-data_folder = "conv3BHIFprep"
-
-print("Using devices: ")
-print(device_lib.list_local_devices())
-
-net = Erianet("bigset_4400_1526739422044.model", input_image_size=(96, 128), config=VGG19ish)
-
-MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
-face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-
-cap = cv2.VideoCapture(0)
-#cap.set(3, 1920)
-#cap.set(4, 1080)
-
-# [0] = name, [1] = timeout for window creation, [2] timeout for window destruction, [3] current probability
-person_list = []
-
-timeout_in = 3
-timeout_out = 8
-timeline = dict()
-
-
 def get_resized_faces(imgtoresize):
     gray = cv2.cvtColor(imgtoresize, cv2.COLOR_BGR2GRAY)
     faces, rejectlevels, levelleights = face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (480, 480), True)
     resfaces = []
     for face in faces:
         x, y, w, h = face
-        if y - 0.22 * h < 0 or y + h * 1.11 > img.shape[0]:
+        if y - 0.22 * h < 0 or y + h * 1.11 > imgtoresize.shape[0]:
             continue
         face = gray[int(y - 0.22 * h):int(y + h * 1.11), x:x + w]
         resface = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
@@ -135,30 +121,39 @@ def create_or_destroy_windows():
             person_list.remove(person)
 
 
-cv2.namedWindow('img')
-while True:
-    ret, img = cap.read()
-    print("Image read")
-    resized_faces = get_resized_faces(img)
-    recognised_names = recognise_faces(resized_faces)
-    set_timeouts(recognised_names)
-    create_or_destroy_windows()
-    if len(recognised_names) != len(resized_faces):
-        print("ERROR: Name count not same as facecount: ")
-        print("Names: " + str(person_list[0]))
-        print("Facecount: ", len(resized_faces))
-    cv2.imshow('img', img)
-    show_faces(resized_faces, recognised_names)
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        break
-cap.release()
-cv2.destroyAllWindows()
+def main():
+    print("Using devices: ")
+    print(device_lib.list_local_devices())
+    cap = cv2.VideoCapture(0)
+    downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
+    cv2.namedWindow('img')
+    while True:
+        ret, img = cap.read()
+        print("Image read")
+        resized_faces = get_resized_faces(img)
+        recognised_names = recognise_faces(resized_faces)
+        set_timeouts(recognised_names)
+        create_or_destroy_windows()
+        if len(recognised_names) != len(resized_faces):
+            print("ERROR: Name count not same as facecount: ")
+            print("Names: " + str(person_list[0]))
+            print("Facecount: ", len(resized_faces))
+        cv2.imshow('img', img)
+        show_faces(resized_faces, recognised_names)
+        k = cv2.waitKey(30) & 0xff
+        if k == 27:
+            break
+    cap.release()
+    cv2.destroyAllWindows()
 
-legend = []
-for key, value in timeline.items():
-    plt.plot(value[0], value[1])
-    legend.append(key)
+    legend = []
+    for key, value in timeline.items():
+        plt.plot(value[0], value[1])
+        legend.append(key)
 
-plt.legend(legend, loc='upper left')
-plt.show()
+    plt.legend(legend, loc='upper left')
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
