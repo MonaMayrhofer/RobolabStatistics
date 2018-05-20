@@ -9,10 +9,10 @@ from tensorflow.python.client import device_lib
 from robolib.networks.predict_result import PredictResult
 # https://www.openu.ac.il/home/hassner/data/lfwa/
 
-data_folder = "conv3BHIFprep"
+data_folder = 'conv3BHIFprep'
 timeout_in = 3
 timeout_out = 8
-net = Erianet("bigset_4400_1526739422044.model", input_image_size=(96, 128), config=VGG19ish)
+net = Erianet('bigset_4400_1526739422044.model', input_image_size=(96, 128), config=VGG19ish)
 MODEL_FILE = 'FrontalFace.xml'
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 person_list = []
@@ -155,5 +155,5 @@ def main():
     plt.show()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

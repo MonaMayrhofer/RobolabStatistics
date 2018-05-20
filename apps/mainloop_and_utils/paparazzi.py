@@ -1,15 +1,3 @@
-"""
-How to use:
-Start script.
-Enter directory name of person.
-If the directory exists, you can either overwrite it or exit the program.
-When the 2 Windows appear, check if the grey one reacts to the face.
-When pressing 'P' a picture will be taken immediately.
-With 'S' you can toggle a series of pictures taken every 3 seconds.
-Press ESC to close the program.
-The pictures will be named like [1-9999].pgm.
-The more different the faces are.
-"""
 import cv2
 import time
 import robolib.modelmanager.downloader as downloader
@@ -18,16 +6,17 @@ import shutil
 
 name = input("Name: ")
 if os.path.isdir(name):
-    ow = ""
-    while ow != "O" and ow != "A" and ow != "E":
+    ow = ''
+    while ow != 'O' and ow != 'A' and ow != 'E':
         ow = input("Folder already exists. Overwrite folder, add pictures or exit? (O/A/E): ")
-        if ow == "O":
+        if ow == 'O':
             shutil.rmtree(name)
             os.makedirs(name)
-        elif ow == "E":
+        elif ow == 'E':
             exit(0)
 else:
     os.makedirs(name)
+print("Take pictures with P and start picture series with S. Exit with ESC")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -37,7 +26,7 @@ cap = cv2.VideoCapture(0)
 #cap.set(4, 1080)
 
 image_number = 1
-while os.path.exists(name + "/" + str(image_number) + ".pgm"):
+while os.path.exists(name + '/' + str(image_number) + '.pgm'):
     image_number += 1
 last_time = time.time()
 
@@ -59,9 +48,9 @@ while True:
             if taking and time.time() - last_time > 3:
                 if not series:
                     taking = False
-                cv2.imwrite(name + "/" + str(image_number) + ".pgm", res_img)
+                cv2.imwrite(name + '/' + str(image_number) + '.pgm', res_img)
                 print("Picture taken")
-                while os.path.exists(name + "/" + str(image_number) + ".pgm"):
+                while os.path.exists(name + '/' + str(image_number) + '.pgm'):
                     image_number += 1
             last_time = time.time()
             if taking:
