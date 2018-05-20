@@ -4,10 +4,10 @@ from robolib.datamanager.siamese_data_loader import load_one_image
 from robolib.networks.predict_result import PredictResult
 import os
 
-intermediate = False
+intermediate = True
 
 input_set = "conv3BHIF"
-reference_set = "intermconv3BHIFsmalltest" if intermediate else input_set
+reference_set = "conv3BHIFprep" if intermediate else input_set
 
 model_name = "bigset_4400_1526739422044.model"
 
@@ -16,10 +16,10 @@ net = Erianet(model_name, input_image_size=(96, 128), config=VGG19ish)
 print("Train Finished!")
 
 while True:
-    name = input("Enter name of {0}:".format(input_set))
+    name = input("Enter name of {0}: ".format(input_set))
     if name == '':
         break
-    img = input("Which image:")
+    img = input("Which image: ")
     if img == '':
         break
     img = int(img)

@@ -9,28 +9,38 @@ from tensorflow.python.client import device_lib
 from robolib.networks.predict_result import PredictResult
 # https://www.openu.ac.il/home/hassner/data/lfwa/
 
-data_folder = "intermconv3BHIFbigset"
-
-print("Using devices: ")
-print(device_lib.list_local_devices())
-
+data_folder = "conv3BHIFprep"
+timeout_in = 3
+timeout_out = 8
 net = Erianet("bigset_4400_1526739422044.model", input_image_size=(96, 128), config=VGG19ish)
-
 MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-
-cap = cv2.VideoCapture(0)
-#cap.set(3, 1920)
-#cap.set(4, 1080)
-
-facewindows = 0
-# [0] = name, [1] = timeout for window creation, [2] timeout for window destruction, [3] current probability
-personlist = [[], [], [], []]
-
-timeoutin = 3
-timeoutout = 8
+person_list = []
 timeline = dict()
+
+
+class PersonData:
+    def __init__(self, name):
+        self.name = name
+        self.timeout_in = 1
+        self.timeout_out = 0
+        self.probability = 0
+
+    # Returns False if person was not even recognised 3 frames in a row
+    def recognised(self, recognised):
+        if recognised:
+            if self.timeout_in < 4:
+                self.timeout_in += 1
+                if self.timeout_in == 3:
+                    self.timeout_out = 8
+            else:
+                self.timeout_out = 8
+        else:
+            if self.timeout_in < 3:
+                return False
+            else:
+                self.timeout_out -= 1
+        return True
 
 
 def get_resized_faces(imgtoresize):
@@ -39,7 +49,7 @@ def get_resized_faces(imgtoresize):
     resfaces = []
     for face in faces:
         x, y, w, h = face
-        if y - 0.22 * h < 0 or y + h * 1.11 > img.shape[0]:
+        if y - 0.22 * h < 0 or y + h * 1.11 > imgtoresize.shape[0]:
             continue
         face = gray[int(y - 0.22 * h):int(y + h * 1.11), x:x + w]
         resface = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
@@ -48,110 +58,102 @@ def get_resized_faces(imgtoresize):
 
 
 def show_faces(faces, names):
-    for i in range(len(faces)):
-        if personlist[1][personlist[0].index(names[i])] >= timeoutin:
-            print(personlist[3][i])
-            cv2.putText(faces[i], str(personlist[3][i]), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            cv2.imshow(names[i], faces[i])
-            cv2.waitKey(30)
+    for person in person_list:
+        for name in names:
+            if person.name == name and person.timeout_in >= timeout_in:
+                cv2.putText(faces[names.index(name)], str(person.probability), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.imshow(name, faces[names.index(name)])
+                cv2.waitKey(30)
 
 
 def recognise_faces(faces):
     names = []
     ts = time.time()
     for face in faces:
-        person = net.predict(face, data_folder)
-        for i in range(len(personlist[0])):
-            if personlist[0][i] == person[0][0]:
-                print(person[2])
-                personlist[3][i] = person[0][1]
-        names.append(person[0][0])
-
-        for name in person:
-            if name[0] not in timeline:
+        predicted_person = net.predict(face, data_folder)
+        print(predicted_person)
+        for person in person_list:
+            if person.name == PredictResult.name(predicted_person[0]):
+                person.probability = PredictResult.difference(predicted_person[0])
+        names.append(PredictResult.name(predicted_person[0]))
+        #print(predicted_person)
+        #print("Correct: {0} - Incorrect:{0}".format(contrastive_loss_manual(True, predicted_person[0][2]),
+                                                    #contrastive_loss_manual(False, predicted_person[0][2])))
+        #for name in predicted_person:
+            #if PredictResult.name(name) not in timeline:
                 #print(name[0])
-                timeline[PredictResult.name(name)] = [[ts], [PredictResult.difference(name())]]
-            else:
-                timeline[name[0]][0].append(ts)
-                timeline[name[0]][1].append(name[1])
+                #timeline[PredictResult.name(name)] = [[ts], [PredictResult.difference(name())]]
+            #else:
+                #timeline[PredictResult.name(name)][0].append(ts)
+                #timeline[PredictResult.name(name).append(name[1])
     return names
 
 
 def set_timeouts(names):
     # checking for already recognised people
-    for i in range(len(personlist[0])):
+    for person in reversed(person_list):
         exists = False
         for name in names:
-            if name == personlist[0][i]:
+            if name == person.name:
                 exists = True
-        # person was recognised
-        if exists:
-            personlist[1][i] = personlist[1][i] + 1
-            # person has not been recognised 3 frames in a row
-            if personlist[1][i] > timeoutin:
-                personlist[2][i] = timeoutout
-        # person was not even recognised 3 frames in a row
-        elif personlist[1][i] < timeoutin:
-            personlist[0].pop(i)
-            personlist[1].pop(i)
-            personlist[2].pop(i)
-            personlist[3].pop(i)
-        # person was not recognised
-        else:
-            personlist[2][i] = personlist[2][i] - 1
+        if not person.recognised(exists):
+            person_list.remove(person)
     # checking for newly recognised people
     for name in names:
         exists = False
-        for i in range(len(personlist[0])):
-            if name == personlist[0][i]:
+        for person in person_list:
+            if name == person.name:
                 exists = True
         if not exists:
-            personlist[0].append(name)
-            personlist[1].append(1)
-            personlist[2].append(0)
-            personlist[3].append(0)
-    for i in range(len(personlist[0])):
-        print("Person: " + personlist[0][i] + ", Timeout in: " + str(personlist[1][i]) + ", Timeout out: " + str(personlist[2][i]))
+            person_list.append(PersonData(name))
+    for person in person_list:
+        print("Person: " + person.name + ", Timeout in: " + str(person.timeout_in) + ", Timeout out: " + str(person.timeout_out))
 
 
 def create_or_destroy_windows():
-    for i in range(len(personlist[1])):
-        if personlist[1][i] == timeoutin and personlist[2][i] == 0:
-            print("Creating " + personlist[0][i])
-            cv2.namedWindow(personlist[0][i])
-            personlist[2][i] = timeoutout
-        elif personlist[1][i] >= timeoutin and personlist[2][i] == 0:
-            print("Destroying " + personlist[0][i])
-            cv2.destroyWindow(personlist[0][i])
-            personlist[0].pop(i)
-            personlist[1].pop(i)
-            personlist[2].pop(i)
-            personlist[3].pop(i)
+    for person in reversed(person_list):
+        if person.timeout_in == timeout_in and person.timeout_out == timeout_out:
+            print("Creating " + person.name)
+            cv2.namedWindow(person.name)
+        elif person.timeout_in >= timeout_in and person.timeout_out == 0:
+            print("Destroying " + person.name)
+            cv2.destroyWindow(person.name)
+            person_list.remove(person)
 
 
-cv2.namedWindow('img')
-while True:
-    ret, img = cap.read()
-    resizedfaces = get_resized_faces(img)
-    recognisednames = recognise_faces(resizedfaces)
-    set_timeouts(recognisednames)
-    create_or_destroy_windows()
-    if len(recognisednames) != len(resizedfaces):
-        print("ERROR: Name count not same as facecount: ")
-        print("Names: " + str(personlist[0]))
-        print("Facecount: ", len(resizedfaces))
-    cv2.imshow('img', img)
-    show_faces(resizedfaces, recognisednames)
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        break
-cap.release()
-cv2.destroyAllWindows()
+def main():
+    print("Using devices: ")
+    print(device_lib.list_local_devices())
+    cap = cv2.VideoCapture(0)
+    downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
+    cv2.namedWindow('img')
+    while True:
+        ret, img = cap.read()
+        print("Image read")
+        resized_faces = get_resized_faces(img)
+        recognised_names = recognise_faces(resized_faces)
+        set_timeouts(recognised_names)
+        create_or_destroy_windows()
+        if len(recognised_names) != len(resized_faces):
+            print("ERROR: Name count not same as facecount: ")
+            print("Names: " + str(person_list[0]))
+            print("Facecount: ", len(resized_faces))
+        cv2.imshow('img', img)
+        show_faces(resized_faces, recognised_names)
+        k = cv2.waitKey(30) & 0xff
+        if k == 27:
+            break
+    cap.release()
+    cv2.destroyAllWindows()
 
-legend = []
-for key, value in timeline.items():
-    plt.plot(value[0], value[1])
-    legend.append(key)
+    legend = []
+    for key, value in timeline.items():
+        plt.plot(value[0], value[1])
+        legend.append(key)
 
-plt.legend(legend, loc='upper left')
-plt.show()
+    plt.legend(legend, loc='upper left')
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
