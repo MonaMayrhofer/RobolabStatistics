@@ -36,13 +36,15 @@ class PersonData:
 
 
 class Mainloop:
-    def __init__(self, data_folder, log_folder, timeout_in, timeout_out, net, face_cascades):
+    def __init__(self, data_folder, log_folder, net, face_cascades, log=False, timeout_in=3, timeout_out=8, video_capture=0):
+        self.cap = cv2.VideoCapture(video_capture)
         self.data_folder = data_folder
         self.log_folder = log_folder
         self.timeout_in = timeout_in
         self.timeout_out = timeout_out
         self.net = net
         self.face_cascades = face_cascades
+        self.log = log
         self.person_list = []
         self.timeline = dict()
 
@@ -114,11 +116,12 @@ class Mainloop:
         for person in reversed(self.person_list):
             if person.timeout_in == self.timeout_in and person.timeout_out == self.timeout_out:
                 print("Creating " + person.name)
-                if not os.path.isdir(self.log_folder):
-                    os.makedirs(self.log_folder)
-                file = open(self.log_folder + 'log.txt', 'a')
-                file.write(time.strftime('%Y %b %d %H:%M:%S ') + person.name + '\n')
-                file.close()
+                if self.log:
+                    if not os.path.isdir(self.log_folder):
+                        os.makedirs(self.log_folder)
+                    file = open(self.log_folder + '/log.txt', 'a')
+                    file.write(time.strftime('%Y %b %d %H:%M:%S ') + person.name + '\n')
+                    file.close()
                 cv2.namedWindow(person.name)
             elif person.timeout_in >= self.timeout_in and person.timeout_out == 0:
                 print("Destroying " + person.name)
@@ -128,11 +131,10 @@ class Mainloop:
     def run(self):
         print("Using devices: ")
         print(device_lib.list_local_devices())
-        cap = cv2.VideoCapture(0)
         downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
         cv2.namedWindow('img')
         while True:
-            ret, img = cap.read()
+            ret, img = self.cap.read()
             print("Image read")
             resized_faces = self.get_resized_faces(img)
             recognised_names = self.recognise_faces(resized_faces)
@@ -147,7 +149,7 @@ class Mainloop:
             k = cv2.waitKey(30) & 0xff
             if k == 27:
                 break
-        cap.release()
+        self.cap.release()
         cv2.destroyAllWindows()
 
         legend = []
@@ -161,8 +163,8 @@ class Mainloop:
 
 if __name__ == '__main__':
     MODEL_FILE = 'FrontalFace.xml'
-    face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-    main = Mainloop('conv3BHIFprep', 'log', 3, 8,
+    main_face_cascades = cv2.CascadeClassifier(MODEL_FILE)
+    main = Mainloop('conv3BHIFprep', 'log',
                     Erianet('bigset_4400_1526739422044.model', input_image_size=(96, 128), config=VGG19ish),
-                    face_cascades)
+                    main_face_cascades, log=True)
     main.run()
