@@ -37,22 +37,30 @@ class PersonData:
 
 
 class Mainloop:
-    def __init__(self, data_folder, log_folder, net, face_cascades, log=False, hidden=False, timeout_in=3, timeout_out=8, video_capture=0):
+    def __init__(self, data_folder, log_folder, face_cascades, model_path, config, input_image_size=(96, 128),
+                 input_to_output_stride=2, insets=(0, 0, 0, 0), for_train=False, log=False, hidden=False, timeout_in=3,
+                 timeout_out=8, video_capture=0):
         self.interrupted = False
         self.cap = cv2.VideoCapture(video_capture)
         self.data_folder = data_folder
         self.log_folder = log_folder
         self.timeout_in = timeout_in
         self.timeout_out = timeout_out
-        self.net = net
         self.face_cascades = face_cascades
         self.log = log
         self.hidden = hidden
         self.person_list = []
         self.timeline = dict()
+        self.model_path = model_path
+        self.config = config
+        self.input_image_size = input_image_size
+        self.input_to_output_stride = input_to_output_stride
+        self.insets = insets
+        self.for_train = for_train
+        self.net = None
 
     def interrupt(self):
-        self.interrupted = True 
+        self.interrupted = True
 
     def hide(self):
         if not self.hidden:
@@ -150,6 +158,9 @@ class Mainloop:
 
     def run(self):
         self.interrupted = False
+        self.net = Erianet(self.model_path, input_image_size=self.input_image_size, config=self.config,
+                           input_to_output_stride=self.input_to_output_stride, insets=self.insets,
+                           for_train=self.for_train)
         print("Using devices: ")
         print(device_lib.list_local_devices())
         downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -190,6 +201,6 @@ class Mainloop:
 if __name__ == '__main__':
     MODEL_FILE = 'FrontalFace.xml'
     main_face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-    main_net = Erianet('bigset_4400_1526739422044.model', input_image_size=(96, 128), config=VGG19ish)
-    main = Mainloop('conv3BHIFprep', 'log', main_net, main_face_cascades, log=True)
+    main = Mainloop('conv3BHIFprep', 'log', main_face_cascades, 'bigset_4400_1526739422044.model', VGG19ish,
+                    input_image_size=(96, 128), log=True)
     main.start()
