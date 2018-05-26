@@ -4,6 +4,7 @@ from robolib.networks.erianet import Erianet
 from robolib.networks.configurations import VGG19ish
 from robolib.networks.common import contrastive_loss_manual
 import time
+import threading
 import os
 import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
@@ -36,7 +37,8 @@ class PersonData:
 
 
 class Mainloop:
-    def __init__(self, data_folder, log_folder, net, face_cascades, log=False, timeout_in=3, timeout_out=8, video_capture=0):
+    def __init__(self, data_folder, log_folder, net, face_cascades, log=False, hidden=False, timeout_in=3, timeout_out=8, video_capture=0):
+        self.interrupted = False
         self.cap = cv2.VideoCapture(video_capture)
         self.data_folder = data_folder
         self.log_folder = log_folder
@@ -45,10 +47,26 @@ class Mainloop:
         self.net = net
         self.face_cascades = face_cascades
         self.log = log
+        self.hidden = hidden
         self.person_list = []
         self.timeline = dict()
 
-    def get_resized_faces(self, img_to_resize):
+    def interrupt(self):
+        self.interrupted = True 
+
+    def hide(self):
+        if not self.hidden:
+            cv2.destroyAllWindows()
+            self.hidden = True
+
+    def show(self):
+        if self.hidden:
+            for person in self.person_list:
+                if person.timeout_in >= self.timeout_in:
+                    cv2.namedWindow(person.name)
+            self.hidden = False
+
+    def __get_resized_faces(self, img_to_resize):
         gray = cv2.cvtColor(img_to_resize, cv2.COLOR_BGR2GRAY)
         faces, rejectlevels, levelleights = self.face_cascades.detectMultiScale3(gray, 1.3, 5, 0, (60, 60), (480, 480), True)
         res_faces = []
@@ -61,7 +79,7 @@ class Mainloop:
             res_faces.append(res_face)
         return res_faces
 
-    def show_faces(self, faces, names):
+    def __show_faces(self, faces, names):
         for person in self.person_list:
             for name in names:
                 if person.name == name and person.timeout_in >= self.timeout_in:
@@ -70,7 +88,7 @@ class Mainloop:
                     cv2.imshow(name, faces[names.index(name)])
                     cv2.waitKey(30)
 
-    def recognise_faces(self, faces):
+    def __recognise_faces(self, faces):
         names = []
         ts = time.time()
         for face in faces:
@@ -92,7 +110,7 @@ class Mainloop:
                     #timeline[PredictResult.name(name).append(name[1])
         return names
 
-    def set_timeouts(self, names):
+    def __set_timeouts(self, names):
         # checking for already recognised people
         for person in reversed(self.person_list):
             exists = False
@@ -112,43 +130,47 @@ class Mainloop:
         for person in self.person_list:
             print("Person: " + person.name + ", Timeout in: " + str(person.timeout_in) + ", Timeout out: " + str(person.timeout_out))
 
-    def create_or_destroy_windows(self):
+    def __create_or_destroy_windows(self):
         for person in reversed(self.person_list):
             if person.timeout_in == self.timeout_in and person.timeout_out == self.timeout_out:
-                print("Creating " + person.name)
+                if not self.hidden:
+                    print("Creating " + person.name)
+                    cv2.namedWindow(person.name)
                 if self.log:
                     if not os.path.isdir(self.log_folder):
                         os.makedirs(self.log_folder)
                     file = open(self.log_folder + '/log.txt', 'a')
                     file.write(time.strftime('%Y %b %d %H:%M:%S ') + person.name + '\n')
                     file.close()
-                cv2.namedWindow(person.name)
             elif person.timeout_in >= self.timeout_in and person.timeout_out == 0:
-                print("Destroying " + person.name)
-                cv2.destroyWindow(person.name)
+                if not self.hidden:
+                    print("Destroying " + person.name)
+                    cv2.destroyWindow(person.name)
                 self.person_list.remove(person)
 
     def run(self):
+        self.interrupted = False
         print("Using devices: ")
         print(device_lib.list_local_devices())
         downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
         cv2.namedWindow('img')
-        while True:
+        while not self.interrupted:
             ret, img = self.cap.read()
             print("Image read")
-            resized_faces = self.get_resized_faces(img)
-            recognised_names = self.recognise_faces(resized_faces)
-            self.set_timeouts(recognised_names)
-            self.create_or_destroy_windows()
+            resized_faces = self.__get_resized_faces(img)
+            recognised_names = self.__recognise_faces(resized_faces)
+            self.__set_timeouts(recognised_names)
             if len(recognised_names) != len(resized_faces):
                 print("ERROR: Name count not same as facecount: ")
                 print("Names: " + str(self.person_list[0]))
                 print("Facecount: ", len(resized_faces))
-            cv2.imshow('img', img)
-            self.show_faces(resized_faces, recognised_names)
-            k = cv2.waitKey(30) & 0xff
-            if k == 27:
-                break
+            self.__create_or_destroy_windows()
+            if not self.hidden:
+                cv2.imshow('img', img)
+                self.__show_faces(resized_faces, recognised_names)
+                k = cv2.waitKey(30) & 0xff
+                if k == 27:
+                    self.interrupt()
         self.cap.release()
         cv2.destroyAllWindows()
 
@@ -160,11 +182,14 @@ class Mainloop:
         plt.legend(legend, loc='upper left')
         plt.show()
 
+    def start(self):
+        t = threading.Thread(target=self.run)
+        t.start()
+
 
 if __name__ == '__main__':
     MODEL_FILE = 'FrontalFace.xml'
     main_face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-    main = Mainloop('conv3BHIFprep', 'log',
-                    Erianet('bigset_4400_1526739422044.model', input_image_size=(96, 128), config=VGG19ish),
-                    main_face_cascades, log=True)
-    main.run()
+    main_net = Erianet('bigset_4400_1526739422044.model', input_image_size=(96, 128), config=VGG19ish)
+    main = Mainloop('conv3BHIFprep', 'log', main_net, main_face_cascades, log=True)
+    main.start()
