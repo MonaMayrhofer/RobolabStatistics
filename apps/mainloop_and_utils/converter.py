@@ -1,6 +1,7 @@
 import cv2
 import os
 import shutil
+import argparse
 import robolib.modelmanager.downloader as downloader
 
 MODEL_FILE = 'FrontalFace.xml'
@@ -36,15 +37,21 @@ def convert_images(source_path, destination_path):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Train Erianet')
+    parser.add_argument('--src', '-s', type=str, nargs='?', help='The source folder containing the pictures to be converted')
+    parser.add_argument('--dst', '-d', type=str, nargs='?',
+                        help='The destination folder where the pictures will be converted into')
+    parser.add_argument('--exists', '-e', type=str, nargs='?',
+                        help='What should happen if dst already exists (O/AO/AA/AI)')
+    src = parser.src
+    dst = parser.dst
+    if not os.path.isdir(src):
+        print("Folder does not exist.")
+        exit(1)
     add_overwrite = False
     add_add = False
     add_ignore = False
     downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
-    src = input("Source folder: ")
-    if not os.path.isdir(src):
-        print("Folder does not exist.")
-        exit(1)
-    dst = input("Destination folder: ")
     if os.path.isdir(dst):
         ow = ''
         while ow != 'O' and ow != 'A' and ow != 'Q':

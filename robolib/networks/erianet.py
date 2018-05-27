@@ -222,7 +222,7 @@ class Erianet:
     # ========= USE-Time Model Functions ========
 
     def forward(self, image):
-        print("Calling Tensorflow!")
+        #print("Calling Tensorflow!")
         intermediate = self.base_network.predict(image)
         return intermediate
 
@@ -244,7 +244,7 @@ class Erianet:
             result.append(person, float(avg))
         distances = result.get()
 
-        print("Predict took: " + str(time.time() - mon_start_time))
+        #print("Predict took: " + str(time.time() - mon_start_time))
         return distances
 
     # =========LOAD AND SAVE========
@@ -271,7 +271,7 @@ class Erianet:
     def load(self, modelpath):
         assert self.base_network is not None, "Model must be created before loaded, if only weights are given."
         self.is_blank = False
-        print("Loading weights {0}".format(modelpath))
+        #print("Loading weights {0}".format(modelpath))
         self.base_network.load_weights(modelpath)
 
     # =========UTIL========

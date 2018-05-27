@@ -69,6 +69,7 @@ class Mainloop:
 
     def show(self):
         if self.hidden:
+            cv2.namedWindow('img')
             for person in self.person_list:
                 if person.timeout_in >= self.timeout_in:
                     cv2.namedWindow(person.name)
@@ -101,7 +102,7 @@ class Mainloop:
         ts = time.time()
         for face in faces:
             predicted_person = self.net.predict(face, self.data_folder)
-            print(predicted_person)
+            #print(predicted_person)
             for person in self.person_list:
                 if person.name == PredictResult.name(predicted_person[0]):
                     person.probability = PredictResult.difference(predicted_person[0])
@@ -135,14 +136,14 @@ class Mainloop:
                     exists = True
             if not exists:
                 self.person_list.append(PersonData(name))
-        for person in self.person_list:
-            print("Person: " + person.name + ", Timeout in: " + str(person.timeout_in) + ", Timeout out: " + str(person.timeout_out))
+        #for person in self.person_list:
+            #print("Person: " + person.name + ", Timeout in: " + str(person.timeout_in) + ", Timeout out: " + str(person.timeout_out))
 
     def __create_or_destroy_windows(self):
         for person in reversed(self.person_list):
             if person.timeout_in == self.timeout_in and person.timeout_out == self.timeout_out:
                 if not self.hidden:
-                    print("Creating " + person.name)
+                    #print("Creating " + person.name)
                     cv2.namedWindow(person.name)
                 if self.log:
                     if not os.path.isdir(self.log_folder):
@@ -152,7 +153,7 @@ class Mainloop:
                     file.close()
             elif person.timeout_in >= self.timeout_in and person.timeout_out == 0:
                 if not self.hidden:
-                    print("Destroying " + person.name)
+                    #print("Destroying " + person.name)
                     cv2.destroyWindow(person.name)
                 self.person_list.remove(person)
 
@@ -161,20 +162,20 @@ class Mainloop:
         self.net = Erianet(self.model_path, input_image_size=self.input_image_size, config=self.config,
                            input_to_output_stride=self.input_to_output_stride, insets=self.insets,
                            for_train=self.for_train)
-        print("Using devices: ")
-        print(device_lib.list_local_devices())
+        #print("Using devices: ")
+        #print(device_lib.list_local_devices())
         downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
         cv2.namedWindow('img')
         while not self.interrupted:
             ret, img = self.cap.read()
-            print("Image read")
+            #print("Image read")
             resized_faces = self.__get_resized_faces(img)
             recognised_names = self.__recognise_faces(resized_faces)
             self.__set_timeouts(recognised_names)
-            if len(recognised_names) != len(resized_faces):
-                print("ERROR: Name count not same as facecount: ")
-                print("Names: " + str(self.person_list[0]))
-                print("Facecount: ", len(resized_faces))
+            #if len(recognised_names) != len(resized_faces):
+                #print("ERROR: Name count not same as facecount: ")
+                #print("Names: " + str(self.person_list[0]))
+                #print("Facecount: ", len(resized_faces))
             self.__create_or_destroy_windows()
             if not self.hidden:
                 cv2.imshow('img', img)
@@ -182,6 +183,8 @@ class Mainloop:
                 k = cv2.waitKey(30) & 0xff
                 if k == 27:
                     self.interrupt()
+                if self.hidden:
+                    cv2.destroyAllWindows()
         self.cap.release()
         cv2.destroyAllWindows()
 
@@ -203,4 +206,15 @@ if __name__ == '__main__':
     main_face_cascades = cv2.CascadeClassifier(MODEL_FILE)
     main = Mainloop('conv3BHIFprep', 'log', main_face_cascades, 'bigset_4400_1526739422044.model', VGG19ish,
                     input_image_size=(96, 128), log=True)
-    main.start()
+    print("Commands available: start, int, hide, show")
+    main_input = ''
+    while main_input != 'exit':
+        main_input = input("Mainloop: ")
+        if main_input == 'start':
+            main.start()
+        elif main_input == 'int' or main_input == 'exit':
+            main.interrupt()
+        elif main_input == 'hide':
+            main.hide()
+        elif main_input == 'show':
+            main.show()
