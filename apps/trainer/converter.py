@@ -18,13 +18,13 @@ MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
-src = input("Source folder: ")
+src = input("Source folder [in unconverted]: ")
 if not os.path.isdir(src):
     print("Folder does not exist.")
     exit(1)
 
 add = False
-dst = input("Destination folder: ")
+dst = input("Destination folder [in converted]: ")
 if os.path.isdir(dst):
     ow = ""
     while ow != "O" and ow != "A" and ow != "Q":

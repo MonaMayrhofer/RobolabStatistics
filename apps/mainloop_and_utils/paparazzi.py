@@ -17,7 +17,7 @@ import os
 import shutil
 import robolib.datamanager.datadir as datadir
 
-print(datadir.DATA_DIR)
+print(datadir.__DATA_DIR)
 
 group = input("Group: ")
 name = input("Name: ")

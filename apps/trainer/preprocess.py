@@ -5,6 +5,7 @@ import os
 import argparse
 import importlib
 from robolib.util.intermediate import save_intermediate, load_intermediate
+import robolib.datamanager.datadir as datadir
 import numpy as np
 
 __ROBOLIB_CONFIG_PACKAGE = "robolib.networks.configurations"
@@ -37,7 +38,7 @@ def process(model, folder, config, output):
         print("{0:5} {1:20} {2}".format(dev.device_type, dev.name, dev.physical_device_desc))
 
     print("== Starting Preprocess ==")
-    net = Erianet(model, config, input_image_size=(96, 128))
+    net = Erianet(datadir.get_model_dir(model), config, input_image_size=(96, 128))
 
     for person in os.listdir(folder):
         print(" - {0}".format(person))
