@@ -15,19 +15,25 @@ import time
 import robolib.modelmanager.downloader as downloader
 import os
 import shutil
+import robolib.datamanager.datadir as datadir
 
+print(datadir.DATA_DIR)
+
+group = input("Group: ")
 name = input("Name: ")
-if os.path.isdir(name):
+imdir = datadir.paparazzi_output(name, group)
+
+if os.path.isdir(imdir):
     ow = ""
     while ow != "O" and ow != "A" and ow != "E":
-        ow = input("Folder already exists. Overwrite folder, add pictures or exit? (O/A/E): ")
+        ow = input("Folder '"+imdir+"' already exists. Overwrite folder, add pictures or exit? (O/A/E): ")
         if ow == "O":
-            shutil.rmtree(name)
-            os.makedirs(name)
+            shutil.rmtree(imdir)
+            os.makedirs(imdir)
         elif ow == "E":
             exit(0)
 else:
-    os.makedirs(name)
+    os.makedirs(imdir)
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
@@ -37,7 +43,7 @@ cap = cv2.VideoCapture(0)
 #cap.set(4, 1080)
 
 image_number = 1
-while os.path.exists(name + "/" + str(image_number) + ".pgm"):
+while os.path.exists(os.path.join(imdir, name, str(image_number) + ".pgm")):
     image_number += 1
 last_time = time.time()
 
@@ -59,9 +65,9 @@ while True:
             if taking and time.time() - last_time > 3:
                 if not series:
                     taking = False
-                cv2.imwrite(name + "/" + str(image_number) + ".pgm", res_img)
+                cv2.imwrite(os.path.join(imdir, str(image_number) + ".pgm"), res_img)
                 print("Picture taken")
-                while os.path.exists(name + "/" + str(image_number) + ".pgm"):
+                while os.path.exists(os.path.join(imdir, str(image_number) + ".pgm")):
                     image_number += 1
             last_time = time.time()
             if taking:

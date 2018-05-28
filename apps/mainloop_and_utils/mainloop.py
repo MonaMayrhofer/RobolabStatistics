@@ -9,7 +9,7 @@ from tensorflow.python.client import device_lib
 from robolib.networks.predict_result import PredictResult
 # https://www.openu.ac.il/home/hassner/data/lfwa/
 
-data_folder = "conv3BHIFprep"
+data_folder = "interm3BHIF"
 timeout_in = 3
 timeout_out = 8
 net = Erianet("bigset_4400_1526739422044.model", input_image_size=(96, 128), config=VGG19ish)
@@ -125,6 +125,10 @@ def main():
     print("Using devices: ")
     print(device_lib.list_local_devices())
     cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_CONTRAST, 0.2)
+    cap.set(cv2.CAP_PROP_BRIGHTNESS, 1)
+    cap.set(cv2.CAP_PROP_SATURATION, 0.6)
+    cap.set(cv2.CAP_PROP_TEMPERATURE, 1)
     downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
     cv2.namedWindow('img')
     while True:

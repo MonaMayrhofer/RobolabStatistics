@@ -28,7 +28,7 @@ class Verbosity(Enum):
 
 class Erianet:
     def __init__(self, model_path, config: type(NetConfig), input_image_size=(96, 128), input_to_output_stride=2,
-                 insets=(0, 0, 0, 0), for_train=False, verbosity: Verbosity=Verbosity.VERBOSITY_NONE):
+                 insets=(0, 0, 0, 0), for_train=False, verbosity: Verbosity=Verbosity.VERBOSITY_WARN):
 
         self.verbosity = verbosity
 
