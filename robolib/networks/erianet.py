@@ -1,6 +1,7 @@
 # coding=utf-8
 import os
 import time
+from enum import Enum
 from os import path
 from typing import Tuple, List
 
@@ -18,10 +19,18 @@ from robolib.util.averager import Averager, ArithmeticAverager
 from robolib.util.intermediate import load_intermediate, INTERMEDIATE_FILE_EXTENSION
 from robolib.util.random import random_different_numbers
 
+class Verbosity(Enum):
+    VERBOSITY_NONE = 0
+    VERBOSITY_WARN = 1
+    VERBOSITY_FEEDBACK = 25
+    VERBOSITY_STATUS = 50
+    VERBOSITY_ALL = 99
 
 class Erianet:
     def __init__(self, model_path, config: type(NetConfig), input_image_size=(96, 128), input_to_output_stride=2,
-                 insets=(0, 0, 0, 0), for_train=False):
+                 insets=(0, 0, 0, 0), for_train=False, verbosity: Verbosity=Verbosity.VERBOSITY_NONE):
+
+        self.verbosity = verbosity
 
         # = Sizes =
         self.input_image_size = input_image_size
@@ -112,7 +121,7 @@ class Erianet:
         self.execute_train(train_data=train_data, epochs=epochs,
                            callbacks=callbacks, initial_epochs=initial_epochs, verbose=verbose)
 
-    def get_train_data(self, train_set_size, data_folder, class_folder_names=None, verbose=True) -> Tuple:
+    def get_train_data(self, train_set_size, data_folder, class_folder_names=None) -> Tuple:
         """
         Generates training pairs.
 
@@ -148,7 +157,7 @@ class Erianet:
         positive_x = np.zeros(x_shape)
         positive_y = np.zeros(y_shape)
         count = 0
-        if verbose:
+        if self.verbose(Verbosity.VERBOSITY_STATUS):
             print("Generating Positives")
         for i in range(classes):
             this_class_path = os.path.join(os.getcwd(), data_folder, class_folder_names[i])
@@ -173,7 +182,7 @@ class Erianet:
 
         negative_x = np.zeros(x_shape)
         negative_y = np.zeros(y_shape)
-        if verbose:
+        if self.verbose(Verbosity.VERBOSITY_STATUS):
             print("Generating Negatives")
         for i in range(classes):
             first_class_path = os.path.join(os.getcwd(), data_folder, class_folder_names[i])
@@ -212,7 +221,8 @@ class Erianet:
         if extension == INTERMEDIATE_FILE_EXTENSION:
             return load_intermediate(file_path)
         elif extension == RAW_IMAGE_EXTENSION:
-            print("Unprocessed image found @ {0}".format(file_path))
+            if self.verbose(Verbosity.VERBOSITY_WARN):
+                print("Unprocessed image found @ {0}".format(file_path))
             img = read_pgm(file_path)
             img = self.preprocess(img)
             return self.forward(img)
@@ -222,7 +232,8 @@ class Erianet:
     # ========= USE-Time Model Functions ========
 
     def forward(self, image):
-        print("Calling Tensorflow!")
+        if self.verbose(Verbosity.VERBOSITY_STATUS):
+            print("Calling Tensorflow!")
         intermediate = self.base_network.predict(image)
         return intermediate
 
@@ -244,7 +255,8 @@ class Erianet:
             result.append(person, float(avg))
         distances = result.get()
 
-        print("Predict took: " + str(time.time() - mon_start_time))
+        if self.verbose(Verbosity.VERBOSITY_STATUS):
+            print("Predict took: " + str(time.time() - mon_start_time))
         return distances
 
     # =========LOAD AND SAVE========
@@ -265,13 +277,15 @@ class Erianet:
             self.model.compile(loss=contrastive_loss, optimizer=optimizer)
 
     def save(self, modelpath):
-        print("Saving weights {0}".format(modelpath))
+        if self.verbose(Verbosity.VERBOSITY_FEEDBACK):
+            print("Saving weights {0}".format(modelpath))
         self.base_network.save_weights(modelpath)
 
     def load(self, modelpath):
         assert self.base_network is not None, "Model must be created before loaded, if only weights are given."
         self.is_blank = False
-        print("Loading weights {0}".format(modelpath))
+        if self.verbose(Verbosity.VERBOSITY_FEEDBACK):
+            print("Loading weights {0}".format(modelpath))
         self.base_network.load_weights(modelpath)
 
     # =========UTIL========
@@ -290,3 +304,6 @@ class Erianet:
         image = image.reshape(tuple(np.concatenate(([1], np.array(self.base_network_input_dim)))))
         image = image.astype("float32")
         return image
+
+    def verbose(self, verbosity: Verbosity):
+        return self.verbosity.value >= verbosity.value
