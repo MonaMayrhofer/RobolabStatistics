@@ -15,16 +15,21 @@ INTERMEDIATE_EXTENSION = "interm"
 def main():
     # ============= ARGUMENTS ===========
     parser = argparse.ArgumentParser(description='Train Erianet')
-    parser.add_argument('--model', '-m', type=str, nargs='?', help='The path to the model?')
-    parser.add_argument('--folder', '-f', type=str, nargs='?', help='The folder to be preprocessed')
+    parser.add_argument('--model', '-m', type=str, nargs='?', help='The path to the model [in model-datadir]')
+    parser.add_argument('--folder', '-f', type=str, nargs='?',
+                        help='The folder to be preprocessed [in converted-datadir]')
     parser.add_argument('--config', '-c', type=str, nargs='?', help='Which configuration shall be used?')
-    parser.add_argument('--output', '-o', type=str, nargs='?', help='Output directory name')
+    parser.add_argument('--output', '-o', type=str, nargs='?', help='Output directory name [in intermediate-datadir]')
 
     args = parser.parse_args()
     model = args.model
     folder = args.folder
     config = args.config
     output = args.output
+
+    if None in [model, folder, config, output]:
+        print("Please specify all arguments (--help).")
+        exit(1)
 
     config = getattr(importlib.import_module(__ROBOLIB_CONFIG_PACKAGE), config)
 
@@ -33,6 +38,8 @@ def main():
 
 # ============= TRAINING ============
 def process(model, folder, config, output):
+    folder = datadir.get_converted_dir(folder)
+    output = datadir.get_intermediate_dir(output)
     print("Available devices: ")
     for dev in device_lib.list_local_devices():
         print("{0:5} {1:20} {2}".format(dev.device_type, dev.name, dev.physical_device_desc))
