@@ -9,6 +9,7 @@ import os
 import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
 from robolib.networks.predict_result import PredictResult
+import robolib.datamanager.datadir as datadir
 # https://www.openu.ac.il/home/hassner/data/lfwa/
 
 
@@ -42,8 +43,8 @@ class Mainloop:
                  timeout_out=8, video_capture=0):
         self.interrupted = False
         self.cap = cv2.VideoCapture(video_capture)
-        self.data_folder = data_folder
-        self.log_folder = log_folder
+        self.data_folder = datadir.get_intermediate_dir(data_folder)
+        self.log_folder = datadir.get_log_dir(log_folder)
         self.timeout_in = timeout_in
         self.timeout_out = timeout_out
         self.face_cascades = face_cascades
@@ -51,13 +52,18 @@ class Mainloop:
         self.hidden = hidden
         self.person_list = []
         self.timeline = dict()
-        self.model_path = model_path
+        self.model_path = datadir.get_model_dir(model_path)
         self.config = config
         self.input_image_size = input_image_size
         self.input_to_output_stride = input_to_output_stride
         self.insets = insets
         self.for_train = for_train
         self.net = None
+
+        if not os.path.exists(self.data_folder):
+            raise FileNotFoundError(self.data_folder)
+        if not os.path.exists(self.model_path):
+            raise FileNotFoundError(self.model_path)
 
     def interrupt(self):
         self.interrupted = True
@@ -148,7 +154,7 @@ class Mainloop:
                 if self.log:
                     if not os.path.isdir(self.log_folder):
                         os.makedirs(self.log_folder)
-                    file = open(self.log_folder + '/log.txt', 'a')
+                    file = open(os.path.join(self.log_folder, 'log.txt'), 'a')
                     file.write(time.strftime('%Y %b %d %H:%M:%S ') + person.name + '\n')
                     file.close()
             elif person.timeout_in >= self.timeout_in and person.timeout_out == 0:
@@ -164,7 +170,6 @@ class Mainloop:
                            for_train=self.for_train)
         #print("Using devices: ")
         #print(device_lib.list_local_devices())
-        downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
         cv2.namedWindow('img')
         while not self.interrupted:
             ret, img = self.cap.read()
@@ -202,9 +207,9 @@ class Mainloop:
 
 
 if __name__ == '__main__':
-    MODEL_FILE = 'FrontalFace.xml'
+    MODEL_FILE = downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, False)
     main_face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-    main = Mainloop('conv3BHIFprep', 'log', main_face_cascades, 'bigset_4400_1526739422044.model', VGG19ish,
+    main = Mainloop('i3BHIFbigset', 'log', main_face_cascades, 'bigset_4400_1526739422044.model', VGG19ish,
                     input_image_size=(96, 128), log=True)
     print("Commands available: start, int, hide, show")
     main_input = ''

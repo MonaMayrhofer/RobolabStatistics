@@ -7,6 +7,7 @@ __CONVERTED_IMG_DIR = os.path.join(__DATA_DIR, 'converted')
 __UNCONVERTED_IMG_DIR = os.path.join(__DATA_DIR, 'unconverted')
 __OPENCV_DIR = os.path.join(__DATA_DIR, 'opencv')
 __INTERMEDIATE_DIR = os.path.join(__DATA_DIR, 'intermediate')
+__LOG_DIR = '.'
 
 
 def converted_image_dir():
@@ -35,3 +36,7 @@ def get_opencv_dir(name):
 
 def get_intermediate_dir(name):
     return os.path.join(__INTERMEDIATE_DIR, name)
+
+
+def get_log_dir(name):
+    return os.path.join(__LOG_DIR, name)
