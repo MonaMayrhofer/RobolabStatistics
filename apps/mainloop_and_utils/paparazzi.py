@@ -1,15 +1,3 @@
-"""
-How to use:
-Start script.
-Enter directory name of person.
-If the directory exists, you can either overwrite it or exit the program.
-When the 2 Windows appear, check if the grey one reacts to the face.
-When pressing 'P' a picture will be taken immediately.
-With 'S' you can toggle a series of pictures taken every 3 seconds.
-Press ESC to close the program.
-The pictures will be named like [1-9999].pgm.
-The more different the faces are.
-"""
 import cv2
 import time
 import robolib.modelmanager.downloader as downloader
@@ -22,7 +10,6 @@ print(datadir.__DATA_DIR)
 group = input("Group: ")
 name = input("Name: ")
 imdir = datadir.paparazzi_output(name, group)
-
 if os.path.isdir(imdir):
     ow = ""
     while ow != "O" and ow != "A" and ow != "E":
@@ -31,9 +18,11 @@ if os.path.isdir(imdir):
             shutil.rmtree(imdir)
             os.makedirs(imdir)
         elif ow == "E":
+
             exit(0)
 else:
     os.makedirs(imdir)
+print("Take pictures with P and start picture series with S. Exit with ESC")
 
 MODEL_FILE = 'FrontalFace.xml'
 downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
