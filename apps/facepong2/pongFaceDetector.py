@@ -7,10 +7,10 @@ PONG_FACE_DETECTOR_DEBUG = CONFIG.debug.face_detector_debug
 
 
 class PongFaceDetector:
-    def __init__(self, file):
+    def __init__(self):
         print()
 
-        downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, file, False)
+        file = downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, False)
         self.face_cascades = cv2.CascadeClassifier(file)
 
     def get_faces(self, img, min_size, max_size, left_field_end, right_field_end):

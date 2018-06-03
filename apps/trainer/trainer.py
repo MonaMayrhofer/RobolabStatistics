@@ -4,6 +4,7 @@ import os
 import argparse
 import importlib
 from robolib.util.model_uuid import get_model_identifier
+import robolib.datamanager.datadir as datadir
 
 __ROBOLIB_CONFIG_PACKAGE = "robolib.networks.configurations"
 MODEL_EXTENSION = ".model"
@@ -13,9 +14,10 @@ def main():
     # ============= ARGUMENTS ===========
     parser = argparse.ArgumentParser(description='Train Erianet')
     parser.add_argument('--name', '-n', type=str, nargs='?', help='The prefix for the trained model file?')
-    parser.add_argument('--base', '-b', type=str, nargs='?', help='Shall this model be trained ontop of existing one?')
-    parser.add_argument('--runs', '-r', type=str, nargs='?', help='How many runs (files) shall be made?')
-    parser.add_argument('--epochs', '-e', type=str, nargs='?', help='Each run shall last for how many epochs?')
+    parser.add_argument('--base', '-b', type=str, nargs='?',
+                        help='Shall this model be trained ontop of existing one? [Optional]')
+    parser.add_argument('--runs', '-r', type=int, nargs='?', help='How many runs (files) shall be made?')
+    parser.add_argument('--epochs', '-e', type=int, nargs='?', help='Each run shall last for how many epochs?')
     parser.add_argument('--folder', '-f', type=str, nargs='?', help='Where are the training-images?')
     parser.add_argument('--config', '-c', type=str, nargs='?', help='Which configuration shall be used?')
 
@@ -26,32 +28,9 @@ def main():
     epochs_per_run = args.epochs
     train_folder = args.folder
     config_name = args.config
-    # ============= INPUT ============
 
-    if name is None:
-        name = input("Enter the model's family-name [or specify -n]: ")
-
-    if start == '':
-        start = None
-    elif start is not None:
-        if not start.endswith(MODEL_EXTENSION):
-            start += MODEL_EXTENSION
-        if not os.path.exists(start):
-            print("File '{0}' does not exist.".format(start))
-            exit(1)
-
-    if runs is None:
-        runs = input("Enter runs [or specify -r]: ")
-    runs = int(runs)
-
-    if epochs_per_run is None:
-        epochs_per_run = input("Enter epochs per run [or specify -e]: ")
-    epochs_per_run = int(epochs_per_run)
-
-    if train_folder is None:
-        train_folder = input("Enter image-folder [or specify -f]: ")
-    if not os.path.exists(train_folder):
-        print("Folder '{0}' couldn't be found!".format(train_folder))
+    if None in [name, runs, epochs_per_run, train_folder, config_name]:
+        print("Please specify all arguments (--help)")
         exit(1)
 
     config = getattr(importlib.import_module(__ROBOLIB_CONFIG_PACKAGE), config_name)
@@ -60,7 +39,10 @@ def main():
 
 
 # ============= TRAINING ============
-def train(start, train_folder, runs, epochs_per_run, name, config, model_dir="models"):
+def train(start, train_folder, runs, epochs_per_run, name, config):
+    start = datadir.get_model_dir(start) if start is not None else None
+    train_folder = datadir.get_converted_dir(train_folder)
+
     print("Available devices: ")
     for dev in device_lib.list_local_devices():
         print("{0:5} {1:20} {2}".format(dev.device_type, dev.name, dev.physical_device_desc))
@@ -74,10 +56,8 @@ def train(start, train_folder, runs, epochs_per_run, name, config, model_dir="mo
         net.execute_train((x_train, y_train), epochs_per_run)
         uuid = get_model_identifier((i+1)*epochs_per_run)
         file_name = "{0}_{1}_{2}.model".format(name, (i+1)*epochs_per_run, uuid)
-        file_name = os.path.join(model_dir, file_name)
+        file_name = datadir.get_model_dir(file_name)
         print("==== SAVING {0} ====".format(file_name))
-        if not os.path.isdir(model_dir):
-            os.mkdir(model_dir)
         net.save(file_name)
 
 
