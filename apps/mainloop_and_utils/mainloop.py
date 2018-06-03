@@ -59,6 +59,7 @@ class Mainloop:
         self.insets = insets
         self.for_train = for_train
         self.net = None
+        self.to_hide = False
 
         if not os.path.exists(self.data_folder):
             raise FileNotFoundError(self.data_folder)
@@ -70,8 +71,7 @@ class Mainloop:
 
     def hide(self):
         if not self.hidden:
-            cv2.destroyAllWindows()
-            self.hidden = True
+            self.to_hide = True
 
     def show(self):
         if self.hidden:
@@ -80,6 +80,8 @@ class Mainloop:
                 if person.timeout_in >= self.timeout_in:
                     cv2.namedWindow(person.name)
             self.hidden = False
+        if self.to_hide:
+            self.to_hide = False
 
     def __get_resized_faces(self, img_to_resize):
         gray = cv2.cvtColor(img_to_resize, cv2.COLOR_BGR2GRAY)
@@ -155,11 +157,9 @@ class Mainloop:
         for person in reversed(self.person_list):
             if person.timeout_in == self.timeout_in and person.timeout_out == self.timeout_out:
                 if not self.hidden:
-                    #print("Creating " + person.name)
                     cv2.namedWindow(person.name)
             elif person.timeout_in >= self.timeout_in and person.timeout_out == 0:
                 if not self.hidden:
-                    #print("Destroying " + person.name)
                     cv2.destroyWindow(person.name)
                 self.person_list.remove(person)
 
@@ -190,14 +190,9 @@ class Mainloop:
         cv2.namedWindow('img')
         while not self.interrupted:
             ret, img = cap.read()
-            #print("Image read")
             resized_faces = self.__get_resized_faces(img)
             recognised_names = self.__recognise_faces(resized_faces)
             self.__set_timeouts(recognised_names)
-            #if len(recognised_names) != len(resized_faces):
-                #print("ERROR: Name count not same as facecount: ")
-                #print("Names: " + str(self.person_list[0]))
-                #print("Facecount: ", len(resized_faces))
             if self.log:
                 self.__log(recognised_names, resized_faces)
             self.__create_or_destroy_windows()
@@ -207,8 +202,10 @@ class Mainloop:
                 k = cv2.waitKey(30) & 0xff
                 if k == 27:
                     self.interrupt()
-                if self.hidden:
-                    cv2.destroyAllWindows()
+            if self.to_hide:
+                self.to_hide = False
+                cv2.destroyAllWindows()
+                self.hidden = True
         cap.release()
         cv2.destroyAllWindows()
         """legend = []
