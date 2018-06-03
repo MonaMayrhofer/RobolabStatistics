@@ -50,18 +50,24 @@ def train(start, train_folder, runs, epochs_per_run, name, config):
 
     print("== Starting Training ==")
     net = Erianet(start, config, input_image_size=(96, 128), for_train=True)
-    start_ms = time.time()
+    start_s = time.time()
     x_train, y_train = net.get_train_data(train_set_size=2000, data_folder=train_folder)
-    print("Data-Generation took {0}".format(time.time()-start_ms))
+    print("Data-Generation took {0:.2f}s".format(time.time()-start_s))
 
+    avg_time_sum = 0
     for i in range(runs):
+        last_run_start = time.time()
         print("==== RUN {0}/{1} ====".format(i, runs))
-        net.execute_train((x_train, y_train), epochs_per_run)
+        net.execute_train((x_train, y_train), epochs_per_run, verbose=2)
         uuid = get_model_identifier((i+1)*epochs_per_run)
         file_name = "{0}_{1}_{2}.model".format(name, (i+1)*epochs_per_run, uuid)
         file_name = datadir.get_model_dir(file_name)
         print("==== SAVING {0} ====".format(file_name))
         net.save(file_name)
+        run_duration = time.time()-last_run_start
+        avg_time_sum += run_duration
+        print("Run took: {0:.2f}s".format(run_duration))
+        print("Remaining runs: {0} -> {1:.2f}min".format(runs-(i+1), (runs-(i+1))*(avg_time_sum/(i+1))/60))
 
 
 if __name__ == "__main__":
