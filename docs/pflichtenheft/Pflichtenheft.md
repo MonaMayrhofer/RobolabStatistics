@@ -31,7 +31,7 @@ Dieses Projekt wird im Rahmen des SYP-Unterrichts durchgeführt und wurde von He
 
 In der HTL-Leonding gibt es im Untergeschoss das Robolab. Darin arbeiten Schüler und Lehrer zum einen an den NAO's (Humanoide Roboter) und zum anderen an Raspberries und anderen ähnlichen Projekten.
 
-<img src="./images/Robolab-Plan.jpg" width="400px"/>
+<img src="./images/Robolab-Plan.jpg" width="400px"/>\
 Relevanter Bereich des Robolabs (nicht maßstabsgetreu)
 
 Da die Tür des Robolabs nicht immer abgesperrt wird und sich zusätzlich fast jeder Schüler Zugriff verschaffen kann, ist die Sicherheit des Robolabs nicht gewährleistet. Wenn Schäden - ob willkürlich oder durch einen Unfall - auftreten, kann zur Zeit nicht nachgewiesen werden, wer dafür verantwortlich ist. Durch das Bewusstsein der Schüler über eine Überwachungskamera können Vandalenakte vermieden werden.
@@ -61,7 +61,7 @@ Verwendet wird das System bzw. dessen generiertes Protokoll nur von den Admins d
 ## Sollzustand
 
 Die Software auf dem Raspberry Pi erkennt Gesichter und speichert sowohl Daten über die Person, als auch Zeitpunkt des Eintrittsereignisses in eine Datei. Die Gesichter werden nicht zwingend frontal aufgenommen, demnach muss Winkelagnostizität gegeben sein.\
-Neue Personen können dem System hinzugefügt werden, ohne die Software darauf trainieren zu müssen.
+Neue Personen können dem System hinzugefügt werden, ohne die Software darauf trainieren zu müssen.ß
 
 ### Funktionale Anforderungen
 
@@ -73,7 +73,8 @@ ID: Req05: Neue Personen dem System hinzufügen
 
 ### RobolabStatistics Use-Case-Diagramm
 
-![Use-Case-Diagramm von RobolabStatistics](./images/Use-Case-Diagram.jpg "Use-Case-Diagramm von RobolabStatistics")
+<img src="./images/Use-Case-Diagram.jpg" width="400px"/>\
+Use-Case-Diagramm von RobolabStatistics
 
 ### Nicht-Funktionale Anforderungen
 * Möglichst hohe Erkennungsgenauigkeit, mindestens 90%
@@ -106,6 +107,9 @@ Die Protokolle können über FTP direkt am Raspberry eingesehen werden. Der Rasp
 * Software auf dem Git-Repository
 * Installation auf einem Raspberry Pi mit entsprechenden Kameras
 * Installation des Gerätes im Robolab
+
+<img src="./images/Deployment-Diagram.jpg" width="400px"/>\
+Deployment-Diagramm von RobolabStatistics
 
 ## Abnahmekriterien
 Die Punkte, die in den funktionalen und nicht-funktionalen Anforderungen beschrieben wurden, müssen erreicht werden.
