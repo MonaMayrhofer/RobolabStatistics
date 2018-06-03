@@ -2,16 +2,17 @@ from robolib.networks.erianet import Erianet
 from robolib.networks.configurations import VGG19ish
 from robolib.datamanager.siamese_data_loader import load_one_image
 from robolib.networks.predict_result import PredictResult
+import robolib.datamanager.datadir as datadir
 import os
 
 intermediate = True
 
-input_set = "conv3BHIF"
-reference_set = "conv3BHIFprep" if intermediate else input_set
+input_set = datadir.get_converted_dir("conv3BHIF")
+reference_set = datadir.get_intermediate_dir("i3BHIFbigset")
 
 model_name = "bigset_4400_1526739422044.model"
 
-net = Erianet(model_name, input_image_size=(96, 128), config=VGG19ish)
+net = Erianet(datadir.get_model_dir(model_name), input_image_size=(96, 128), config=VGG19ish)
 
 print("Train Finished!")
 

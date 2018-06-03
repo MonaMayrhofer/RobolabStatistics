@@ -19,12 +19,14 @@ from robolib.util.averager import Averager, ArithmeticAverager
 from robolib.util.intermediate import load_intermediate, INTERMEDIATE_FILE_EXTENSION
 from robolib.util.random import random_different_numbers
 
+
 class Verbosity(Enum):
     VERBOSITY_NONE = 0
     VERBOSITY_WARN = 1
     VERBOSITY_FEEDBACK = 25
     VERBOSITY_STATUS = 50
     VERBOSITY_ALL = 99
+
 
 class Erianet:
     def __init__(self, model_path, config: type(NetConfig), input_image_size=(96, 128), input_to_output_stride=2,
