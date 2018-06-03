@@ -15,10 +15,10 @@ from robolib.networks.common import contrastive_loss, euclidean_dist_output_shap
 from robolib.networks.configurations import NetConfig
 from robolib.networks.debug import debug_train_data
 from robolib.networks.predict_result import PredictResult
-from robolib.util.averager import Averager, ArithmeticAverager
+from robolib.util.averager import Averager, ArithmeticAverager, AdvancedAverager
 from robolib.util.intermediate import load_intermediate, INTERMEDIATE_FILE_EXTENSION
 from robolib.util.random import random_different_numbers
-
+import matplotlib.pyplot as plt
 
 class Verbosity(Enum):
     VERBOSITY_NONE = 0
@@ -239,7 +239,7 @@ class Erianet:
         intermediate = self.base_network.predict(image)
         return intermediate
 
-    def predict(self, input_img, reference_data_path, averager: type(Averager) = ArithmeticAverager):
+    def predict(self, input_img, reference_data_path, averager: type(Averager) = AdvancedAverager, debug=False):
         mon_start_time = time.time()
 
         # == Prepare input img ==
@@ -247,15 +247,42 @@ class Erianet:
 
         result = PredictResult()
 
+        if debug:
+            debug_vals = dict()
+
         for person in os.listdir(reference_data_path):
             avg = averager()
+
+            if debug:
+                print("=={0}==".format(person))
+                debug_person_vals = []
+
             for image in os.listdir(os.path.join(reference_data_path, person)):
                 reference_image_path = os.path.join(reference_data_path, person, image)
                 reference_img_forwarded = self.load_image_forwarded(reference_image_path)
                 distance = euclidean_distance_numeric((input_img_forwarded, reference_img_forwarded))
+                # TODO REMOVE
+                if distance == 0:
+                    continue
                 avg += distance
+
+                if debug:
+                    print(" - {0}: {1}".format(image, float(distance)))
+                    debug_person_vals.append(float(distance))
             result.append(person, float(avg))
+
+            if debug:
+                debug_vals[person] = debug_person_vals
+                print(" --= {0}".format(float(avg)))
         distances = result.get()
+
+        if debug:
+            val_y = 0
+            for i, v in debug_vals.items():
+                val_y += 1
+                plt.plot(np.full((len(v)), val_y), v, '.', label=i)
+            plt.legend()
+            plt.show()
 
         if self.verbose(Verbosity.VERBOSITY_STATUS):
             print("Predict took: " + str(time.time() - mon_start_time))
