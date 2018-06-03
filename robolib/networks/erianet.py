@@ -159,6 +159,17 @@ class Erianet:
         positive_x = np.zeros(x_shape)
         positive_y = np.zeros(y_shape)
         count = 0
+
+        cache = dict()
+
+        def get_preprocessed(img_path):
+            if img_path in cache:
+                return cache[img_path]
+            else:
+                im = self.preprocess(read_pgm(img_path))
+                cache[img_path] = im
+                return im
+
         if self.verbose(Verbosity.VERBOSITY_STATUS):
             print("Generating Positives")
         for i in range(classes):
@@ -170,8 +181,11 @@ class Erianet:
                 i1, i2 = random_different_numbers(len(this_class_images))
                 image_path1 = os.path.join(this_class_path, this_class_images[i1])
                 image_path2 = os.path.join(this_class_path, this_class_images[i2])
-                im1 = self.preprocess(read_pgm(image_path1))
-                im2 = self.preprocess(read_pgm(image_path2))
+
+                #im1 = self.preprocess(read_pgm(image_path1))
+                #im2 = self.preprocess(read_pgm(image_path2))
+                im1 = get_preprocessed(image_path1)
+                im2 = get_preprocessed(image_path2)
 
                 positive_x[count, 0, :] = im1
                 positive_x[count, 1, :] = im2
@@ -205,8 +219,10 @@ class Erianet:
                 image_path1 = os.path.join(first_class_path, first_class_images[i1])
                 image_path2 = os.path.join(other_class_path, other_class_images[i2])
 
-                im1 = self.preprocess(read_pgm(image_path1))
-                im2 = self.preprocess(read_pgm(image_path2))
+                # im1 = self.preprocess(read_pgm(image_path1))
+                # im2 = self.preprocess(read_pgm(image_path2))
+                im1 = get_preprocessed(image_path1)
+                im2 = get_preprocessed(image_path2)
 
                 negative_x[count, 0, :] = im1
                 negative_x[count, 1, :] = im2

@@ -5,6 +5,7 @@ import argparse
 import importlib
 from robolib.util.model_uuid import get_model_identifier
 import robolib.datamanager.datadir as datadir
+import time
 
 __ROBOLIB_CONFIG_PACKAGE = "robolib.networks.configurations"
 MODEL_EXTENSION = ".model"
@@ -49,7 +50,9 @@ def train(start, train_folder, runs, epochs_per_run, name, config):
 
     print("== Starting Training ==")
     net = Erianet(start, config, input_image_size=(96, 128), for_train=True)
+    start_ms = time.time()
     x_train, y_train = net.get_train_data(train_set_size=2000, data_folder=train_folder)
+    print("Data-Generation took {0}".format(time.time()-start_ms))
 
     for i in range(runs):
         print("==== RUN {0}/{1} ====".format(i, runs))
