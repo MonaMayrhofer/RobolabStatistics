@@ -176,6 +176,7 @@ logs/
 *.mat
 
 *.pdf
+!FacePong.pdf
 
 *.gz
 

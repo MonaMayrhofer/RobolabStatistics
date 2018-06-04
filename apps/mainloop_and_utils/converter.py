@@ -43,36 +43,31 @@ def main():
                         help='The destination folder where the pictures will be converted into')
     parser.add_argument('--exists', '-e', type=str, nargs='?',
                         help='What should happen if dst already exists (O/AO/AA/AI)')
-    src = parser.src
-    dst = parser.dst
+    args = parser.parse_args()
+    src = args.src
+    dst = args.dst
     if not os.path.isdir(src):
         print("Folder does not exist.")
         exit(1)
+    mode = args.exists
     add_overwrite = False
     add_add = False
     add_ignore = False
-    downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
-    if os.path.isdir(dst):
-        ow = ''
-        while ow != 'O' and ow != 'A' and ow != 'Q':
-            ow = input("Folder already exists. Overwrite folder, add people or exit? (O/A/E): ")
-            if ow == 'O':
-                shutil.rmtree(dst)
-                os.makedirs(dst)
-            elif ow == 'A':
-                owa = ''
-                while owa != 'O' and owa != 'A' and owa != 'I':
-                    owa = input("Overwrite existing people, add pictures to people or ignore them? (O/A/I): ")
-                    if owa == 'O':
-                        add_overwrite = True
-                    elif owa == 'A':
-                        add_add = True
-                    elif owa == 'E':
-                        add_ignore = True
-            elif ow == 'E':
-                exit(0)
-    else:
+    if mode == 'AO':
+        add_overwrite = True
+    elif mode == 'AA':
+        add_add = True
+    elif mode == 'AI':
+        add_ignore = True
+    elif mode != 'O':
+        print("Exists invalid")
+        exit(1)
+    if os.path.isdir(dst) and not add_overwrite and not add_add and not add_ignore:
+        shutil.rmtree(dst)
         os.makedirs(dst)
+    elif not os.path.isdir(dst):
+        os.makedirs(dst)
+    downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
     for src_name in os.listdir(src):
         src_path = src + '/' + src_name
         dst_path = dst + '/' + src_name
