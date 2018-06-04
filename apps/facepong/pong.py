@@ -12,8 +12,7 @@ import robolib.modelmanager.downloader as downloader
 pointsToWin = 3
 
 # ==MODEL==
-MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, True)
+MODEL_FILE = downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, True)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 
 # ==WINDOW==
