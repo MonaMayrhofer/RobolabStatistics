@@ -24,8 +24,7 @@ else:
     os.makedirs(imdir)
 print("Take pictures with P and start picture series with S. Exit with ESC")
 
-MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
+MODEL_FILE = downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 cap = cv2.VideoCapture(0)
 #cap.set(3, 1920)
@@ -51,23 +50,23 @@ while True:
         if not (y - 0.22 * h < 0 or y + h * 1.11 > img.shape[0]):
             face = gray[int(y - 0.22 * h):int(y + h * 1.11), x:x + w]
             res_img = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
-            if taking and time.time() - last_time > 3:
+            if taking and time.time() - last_time > 2:
                 if not series:
                     taking = False
                 cv2.imwrite(os.path.join(imdir, str(image_number) + ".pgm"), res_img)
                 print("Picture taken")
                 while os.path.exists(os.path.join(imdir, str(image_number) + ".pgm")):
                     image_number += 1
-            last_time = time.time()
+                last_time = time.time()
             if taking:
-                cv2.putText(res_img, str(3 - int(time.time() - last_time)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                cv2.putText(res_img, str(2 - int(time.time() - last_time)), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
             cv2.imshow('res_img', res_img)
     cv2.imshow('img', img)
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
     if not taking and k == 112:
-        last_time = time.time() - 3
+        last_time = time.time() - 2
         taking = True
     if k == 115:
         series = not series
