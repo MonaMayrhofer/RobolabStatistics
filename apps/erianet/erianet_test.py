@@ -5,10 +5,12 @@ from robolib.networks.predict_result import PredictResult
 import robolib.datamanager.datadir as datadir
 import os
 
+#Test
+
 intermediate = True
 
-input_set = datadir.get_converted_dir("conv3BHIF")
-reference_set = datadir.get_intermediate_dir("i3BHIFbigset")
+input_set = datadir.get_converted_dir("3BHIF")
+reference_set = datadir.get_intermediate_dir("i3BHIF")
 
 model_name = "bigset_4400_1526739422044.model"
 
