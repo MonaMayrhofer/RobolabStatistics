@@ -60,6 +60,7 @@ class Mainloop:
         self.for_train = for_train
         self.net = None
         self.to_hide = False
+        self.to_show = False
 
         if not os.path.exists(self.data_folder):
             raise FileNotFoundError(self.data_folder)
@@ -72,14 +73,12 @@ class Mainloop:
     def hide(self):
         if not self.hidden:
             self.to_hide = True
+        if self.to_show:
+            self.to_show = False
 
     def show(self):
         if self.hidden:
-            cv2.namedWindow('img')
-            for person in self.person_list:
-                if person.timeout_in >= self.timeout_in:
-                    cv2.namedWindow(person.name)
-            self.hidden = False
+            self.to_show = True
         if self.to_hide:
             self.to_hide = False
 
@@ -189,6 +188,12 @@ class Mainloop:
         #print(device_lib.list_local_devices())
         cv2.namedWindow('img')
         while not self.interrupted:
+            if self.to_show:
+                self.to_show = False
+                for person in self.person_list:
+                    if person.timeout_in > 2:
+                        cv2.namedWindow(person.name);
+                self.hidden = False
             ret, img = cap.read()
             resized_faces = self.__get_resized_faces(img)
             recognised_names = self.__recognise_faces(resized_faces)
