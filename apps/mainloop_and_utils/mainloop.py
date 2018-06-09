@@ -37,13 +37,14 @@ class PersonData:
         return True
 
 
-class Mainloop:
+class Mainloop(threading.Thread):
     def __init__(self, data_folder, log_folder, face_cascades, model_path, config, input_image_size=(96, 128),
                  input_to_output_stride=2, insets=(0, 0, 0, 0), for_train=False, log=False, hidden=False, timeout_in=3,
                  timeout_out=8, video_capture=0):
+        threading.Thread.__init__(self)
         self.interrupted = True
         self.vcap = video_capture
-        self.data_folder = data_folder
+        self.data_folder = datadir.get_intermediate_dir(data_folder)
         self.log_folder = log_folder
         self.timeout_in = timeout_in
         self.timeout_out = timeout_out
@@ -60,6 +61,7 @@ class Mainloop:
         self.for_train = for_train
         self.net = None
         self.to_hide = False
+        self.to_show = False
 
         if not os.path.exists(self.data_folder):
             raise FileNotFoundError(self.data_folder)
@@ -69,17 +71,24 @@ class Mainloop:
     def interrupt(self):
         self.interrupted = True
 
+    def is_interrupted(self):
+        return self.interrupted
+
     def hide(self):
+        """
+        Hides all windows
+        """
         if not self.hidden:
             self.to_hide = True
+        if self.to_show:
+            self.to_show = False
 
     def show(self):
+        """
+        Shows all windows
+        """
         if self.hidden:
-            cv2.namedWindow('img')
-            for person in self.person_list:
-                if person.timeout_in >= self.timeout_in:
-                    cv2.namedWindow(person.name)
-            self.hidden = False
+            self.to_show = True
         if self.to_hide:
             self.to_hide = False
 
@@ -173,7 +182,6 @@ class Mainloop:
             if person.timeout_in == self.timeout_in and person.timeout_out == self.timeout_out:
                 file.write(time.strftime('%Y-%b-%d;%H:%M:%S;') + person.name + '\n')
                 face = faces[names.index(person.name)]
-                print(self.log_folder + '/pictures/' + time.strftime('%Y-%b-%d-%H-%M-%S-') + person.name + ".pgm")
                 cv2.imwrite(self.log_folder + '/pictures/' + time.strftime('%Y-%b-%d-%H-%M-%S-') + person.name + ".pgm", face)
         file.close()
 
@@ -183,12 +191,16 @@ class Mainloop:
         cap = cv2.VideoCapture(self.vcap)
         if self.net is None:
             self.net = Erianet(self.model_path, input_image_size=self.input_image_size, config=self.config,
-                           input_to_output_stride=self.input_to_output_stride, insets=self.insets,
-                           for_train=self.for_train)
-        #print("Using devices: ")
-        #print(device_lib.list_local_devices())
+                               input_to_output_stride=self.input_to_output_stride, insets=self.insets,
+                               for_train=self.for_train)
         cv2.namedWindow('img')
         while not self.interrupted:
+            if self.to_show:
+                self.to_show = False
+                for person in self.person_list:
+                    if person.timeout_in > 2:
+                        cv2.namedWindow(person.name)
+                self.hidden = False
             ret, img = cap.read()
             resized_faces = self.__get_resized_faces(img)
             recognised_names = self.__recognise_faces(resized_faces)
@@ -216,29 +228,22 @@ class Mainloop:
         plt.legend(legend, loc='upper left')
         plt.show()"""
 
-    def start(self):
-        t = threading.Thread(target=self.run)
-        t.start()
-
 
 if __name__ == '__main__':
     MODEL_FILE = downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, False)
     main_face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-    main = Mainloop('i3BHIFbigset', 'log', main_face_cascades, 'bigset_4400_1526739422044.model', VGG19ish,
+    main = Mainloop('3BHIFinterm', 'log', main_face_cascades, 'bigset_4400_1526739422044.model', VGG19ish,
                     input_image_size=(96, 128), log=True)
-    print("Commands available: start, stop, hide, show")
+    print("Commands available: start, hide, show, stop")
     main_input = ''
-    running = False
-    while main_input != 'exit':
+    while main_input != 'stop':
         main_input = input("Mainloop: ")
         if main_input == 'start':
-            if not running:
+            if main.is_interrupted():
                 main.start()
-                running = True
-        elif main_input == 'stop' or main_input == 'exit':
-            if running:
+        elif main_input == 'stop':
+            if not main.is_interrupted():
                 main.interrupt()
-                running = False
         elif main_input == 'hide':
             main.hide()
         elif main_input == 'show':
