@@ -75,12 +75,18 @@ class Mainloop(threading.Thread):
         return self.interrupted
 
     def hide(self):
+        """
+        Hides all windows
+        """
         if not self.hidden:
             self.to_hide = True
         if self.to_show:
             self.to_show = False
 
     def show(self):
+        """
+        Shows all windows
+        """
         if self.hidden:
             self.to_show = True
         if self.to_hide:
