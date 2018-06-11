@@ -186,3 +186,12 @@ apps/trainer/faceScrub/
 *.interm
 *.mp4
 data/
+apps/mainloop_and_utils/log/log\.txt
+
+*.aux
+
+*.fdb_latexmk
+
+*.fls
+
+*.toc
