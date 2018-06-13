@@ -197,3 +197,5 @@ apps/mainloop_and_utils/log/log\.txt
 *.toc
 
 *.tdo
+
+!Architektur.xml
