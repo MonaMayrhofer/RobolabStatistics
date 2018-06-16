@@ -24,8 +24,7 @@ else:
     os.makedirs(imdir)
 print("Take pictures with P and start picture series with S. Exit with ESC")
 
-MODEL_FILE = 'FrontalFace.xml'
-downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, MODEL_FILE, False)
+MODEL_FILE = downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, False)
 face_cascades = cv2.CascadeClassifier(MODEL_FILE)
 cap = cv2.VideoCapture(0)
 #cap.set(3, 1920)
@@ -42,6 +41,8 @@ cv2.namedWindow('res_img')
 taking = False
 series = False
 
+dst_size = (224, 224)
+
 while True:
     ret, img = cap.read()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -50,7 +51,7 @@ while True:
         x, y, w, h = faces[0]
         if not (y - 0.22 * h < 0 or y + h * 1.11 > img.shape[0]):
             face = gray[int(y - 0.22 * h):int(y + h * 1.11), x:x + w]
-            res_img = cv2.resize(face, dst=None, dsize=(96, 128), interpolation=cv2.INTER_LINEAR)
+            res_img = cv2.resize(face, dst=None, dsize=dst_size, interpolation=cv2.INTER_LINEAR)
             if taking and time.time() - last_time > 3:
                 if not series:
                     taking = False

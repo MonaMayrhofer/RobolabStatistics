@@ -1,7 +1,7 @@
 import cv2
 import robolib.modelmanager.downloader as downloader
 from robolib.networks.erianet import Erianet
-from robolib.networks.configurations import VGG19ish
+from robolib.networks.configurations import VGG19ish, VGG19simplified
 from robolib.networks.common import contrastive_loss_manual
 import time
 import threading
@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from tensorflow.python.client import device_lib
 from robolib.networks.predict_result import PredictResult
 import robolib.datamanager.datadir as datadir
-# https://www.openu.ac.il/home/hassner/data/lfwa/
 
 
 class PersonData:
@@ -209,7 +208,7 @@ class Mainloop:
 if __name__ == '__main__':
     MODEL_FILE = downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, False)
     main_face_cascades = cv2.CascadeClassifier(MODEL_FILE)
-    main = Mainloop('i3BHIFbigset', 'log', main_face_cascades, 'bigset_4400_1526739422044.model', VGG19ish,
+    main = Mainloop('i3BHIFsimplified', 'log', main_face_cascades, 'vggsimple_5000_1528508930050.model', VGG19simplified,
                     input_image_size=(96, 128), log=True)
     print("Commands available: start, int, hide, show")
     main_input = ''

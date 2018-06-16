@@ -49,7 +49,7 @@ def train(start, train_folder, runs, epochs_per_run, name, config):
         print("{0:5} {1:20} {2}".format(dev.device_type, dev.name, dev.physical_device_desc))
 
     print("== Starting Training ==")
-    net = Erianet(start, config, input_image_size=(96, 128), for_train=True)
+    net = Erianet(start, config, for_train=True)
     start_s = time.time()
     x_train, y_train = net.get_train_data(train_set_size=2000, data_folder=train_folder)
     print("Data-Generation took {0:.2f}s".format(time.time()-start_s))
@@ -59,6 +59,7 @@ def train(start, train_folder, runs, epochs_per_run, name, config):
         last_run_start = time.time()
         print("==== RUN {0}/{1} ====".format(i, runs))
         net.execute_train((x_train, y_train), epochs_per_run, verbose=2)
+
         uuid = get_model_identifier((i+1)*epochs_per_run)
         file_name = "{0}_{1}_{2}.model".format(name, (i+1)*epochs_per_run, uuid)
         file_name = datadir.get_model_dir(file_name)

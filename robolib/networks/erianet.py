@@ -29,19 +29,22 @@ class Verbosity(Enum):
 
 
 class Erianet:
-    def __init__(self, model_path, config: type(NetConfig), input_image_size=(96, 128), input_to_output_stride=2,
+    def __init__(self, model_path, config: type(NetConfig), input_image_size=None, input_to_output_stride=None,
                  insets=(0, 0, 0, 0), for_train=False, verbosity: Verbosity=Verbosity.VERBOSITY_WARN):
 
+        assert input_to_output_stride is None, "input_to_output_stride parameter is deprecated. Don't use it."
+        assert input_image_size is None, "input_image_size parameter is deprecated. Don't use it."
         self.verbosity = verbosity
 
         # = Sizes =
-        self.input_image_size = input_image_size
-        self.input_to_output_stride = input_to_output_stride
         self.insets = insets
 
         # = Config =
         self.config = config()
-        self.base_network_input_dim = self.config.get_input_dim(input_image_size, input_to_output_stride, self.insets)
+        self.input_to_output_stride = self.config.get_input_to_output_stride()
+        self.input_image_size = self.config.get_input_image_size()
+        self.base_network_input_dim = \
+            self.config.get_input_dim(self.input_image_size, self.input_to_output_stride, self.insets)
 
         # = Placeholders for Model =
         self.model = None
