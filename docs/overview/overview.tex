@@ -35,7 +35,7 @@ Bei der Entwicklung bediente man sich einiger Python-Libraries.
 So wurde OpenCV als Gesichtsdetektor eingesetzt und mit Keras das neurale
 Netz erstellt und trainiert.
 \paragraph{}
-Zum Trainieren des Modells wurden vorgefertigte Sammlungen für genau diesen
+Zum Trainieren des Modells wurden vorgefertigte Sammlungen f"ur genau diesen
 Zweck auf dem Internet verwendet. Einige davon waren die \glqq Labelled Faces in the Wild\grqq{},
 \glqq AT\&T Faces\grqq{} und \glqq YouTube face database\grqq{}. Es wurden
 auch selbst Bilder mit einem dazu erstellten Programm geschossen und zum Training verwendet.
@@ -73,14 +73,14 @@ nimmt die, vorher aufgenommenen Bilder und
 \section{Einleitung}
 %\todo{Was Warum und Spielweise}
 \paragraph{}
-Für den Tag der offenen T"ur an der HTL Leonding wurde dem Projektteam
+F"ur den Tag der offenen T"ur an der HTL Leonding wurde dem Projektteam
 aufgetragen, mithilfe ihrer gesammelten Erfahrung im Bereich Gesichtsdetektion
 ein kleines Programm zu entwickeln, welches man den Besuchern Vorstellen kann.
 Dabei kam die Idee auf, ein Spiel zu programmieren, bei dem man mit seinem Gesicht
 gegen einen anderen Spieler das klassische Spiel \glqq Pong\grqq{} spielen kann.
 \paragraph{}
-Zusätzlich zu OpenCV für die Gesichtsdetektion wurde in diesem Teil des Projektes
-die Library PyGame für realistische Physiksimulation und einfache Bildausgabe
+Zus"atzlich zu OpenCV f"ur die Gesichtsdetektion wurde in diesem Teil des Projektes
+die Library PyGame f"ur realistische Physiksimulation und einfache Bildausgabe
 herangezogen.
 \section{Aufbau und Spielweise}
 \paragraph{}
@@ -89,20 +89,20 @@ wird m"oglichst mittig entweder unter oder "uber der Bildausgabe aufgestellt und
 Anschließend wird das Programm gestartet und es kann gespielt werden.
 Betreten die beiden Spieler ihren Bereich links und rechts vor der Kamera,
 startet das Spiel automatisch. Der Ball kann nun mit dem Kopf angestoßen werden
-und muss das Tor des Gegners berühren. Zu beachten ist hierbei, dass
+und muss das Tor des Gegners ber"uhren. Zu beachten ist hierbei, dass
 das Gesicht jederzeit gerade zur Kamera gerichtet sein muss, damit es erkannt werden kann.
 \section{Probleme und Zukunftspl"ane}
 \paragraph{}
 %\todo{Probleme und Z.}
-Wie bereits erwähnt muss man den Kopf zu jeder Zeit gerade in Richtung
+Wie bereits erw"ahnt muss man den Kopf zu jeder Zeit gerade in Richtung
 der Kamera halten. Dadurch wird bei zu großer Neigung durch nach unten oder zur
 Seite blicken das Spiel angehalten, da kein Gesicht erkannt wird.
 \paragraph{}
 Zuk"unftige Verbesserungen w"aren zum einen die Behebung des oben genannten Problems
-durch Einsatz besserer Modelle unter Beachtung der Performance. Das Spiel läuft aktuell
+durch Einsatz besserer Modelle unter Beachtung der Performance. Das Spiel l"auft aktuell
 in 480p und verlangsamt sich beim Upgrade auf 1080p auf unter 10 Bilder pro Sekunde,
-was auf das inperformante Modell zur Gesichtsdetektion zurückzuführen ist.
-Für den jetzigen Einsatz mit Beamer und Kamera sind 480p jedoch ausreichend.
+was auf das inperformante Modell zur Gesichtsdetektion zur"uckzuf"uhren ist.
+F"ur den jetzigen Einsatz mit Beamer und Kamera sind 480p jedoch ausreichend.
 \section{Architektur}
 %\todo{Architektur}
 \end{document}
