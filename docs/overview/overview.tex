@@ -39,8 +39,8 @@ Zum Trainieren des Modells wurden vorgefertigte Sammlungen f"ur genau diesen
 Zweck auf dem Internet verwendet. Einige davon waren die \glqq Labelled Faces in the Wild\grqq{},
 \glqq AT\&T Faces\grqq{} und \glqq YouTube face database\grqq{}. Es wurden
 auch selbst Bilder mit einem dazu erstellten Programm geschossen und zum Training verwendet.
-\section{Architektur}
 \newpage
+\section{Architektur}
 \afterpage{\clearpage}
 \begin{figure}[H]
     \includegraphics[height=0.9\textheight]{Architektur}
@@ -52,20 +52,48 @@ Die Fotobox ist ein kleiner Rechner,
 mit dessen Hilfe Referenzbilder aufgenommen werden
 k"onnen.
 \paragraph{paparazzi.py}
-greift den Kamera-Feed einer Webcam ab, und nutzt
-OpenCVs Haar-Classifier dazu ein erkanntes Gesicht 
+greift den Kamera-Feed einer Webcam ab und nutzt
+OpenCVs Haar-Classifier dazu, ein erkanntes Gesicht 
 herauszuschneiden. Dieses wird dann in unser verwendetes
-Format (\ref{formats}).
+Format (Siehe \ref{formats}) umgewandelt.
 \paragraph{preprozess.py}
-nimmt die, vorher aufgenommenen Bilder und 
+nimmt die, vorher aufgenommenen Bilder und lässt sie einmal 
+durch einen Fuß (Siehe \ref{neuralfoot}) des Erianet laufen. Dadurch
+werden sie in die interne Repräsentation des neuralen Netzes 
+umgewandelt und als sogenannte intermediate-Datei gespeichert.
+Dieser Schritt spart extrem viel Rechenzeit, da sonst
+jedes einzelne Bild zur Laufzeit wieder und wieder 
+umgewandelt werden müsste.
 \subsection{Train-Rechner}
+Der Train-Rechner ist ein leistungsfähiger Rechner, welcher nur selten
+benötigt wird. Damit das neurale Netz fähig wird, Gesichter verlässlich
+zu unterscheiden, muss man es trainieren. Das heißt, man muss ihm viele
+Daten geben, mit deren Hilfe es lernt, die vorgegebene Aufgabe zu erfüllen.
+\paragraph{Train Folder} Am Train-Rechner müssen die rohen
+Bilder vorhanden sein, welche vorher aufgenommen wurden.
+Diese Bilder müssen nicht zwingend Bilder von Menschen sein,
+die man später erkennen möchte, sondern eine möglichst diverse
+Menge an unterschiedlichen Bildern von Gesichtern. Um gute Ergebnisse
+zu erzielen, rechnen wir damit, eine ungefähre Menge von insgesamt
+10.000 Bildern von mindestens 500 Personen zu benötigen.
+\paragraph{trainer.py}
+Der Trainer nutzt die Referenzdaten aus dem Train Folder 
+um die weights des neuralen Netzes zu ermitteln und diese
+als trainiertes Modell zu speichern.
 \subsection{Raspberry}
+Am Raspberry-PI würde die finale Gesichtserkennung stattfinden.
+Dazu sind ein trainiertes Modell und die intermediate-Daten vonnöten.
 \subsection{Formate}
 \label{formats}
 
 %\todo{Diagramm mit Annotationen}
 %\todo{Kapitel f"ur alle Annotationen}
 \section{Neurales Netz}
+\subsection{Aufbau}
+\paragraph{Fußnetzwerk}
+\label{neuralfoot}
+\subsection{Training}
+
 %\todo{Erweiterung zu Kaptiel in Architektur}
 
 
