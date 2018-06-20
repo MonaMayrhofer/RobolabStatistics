@@ -2,40 +2,34 @@
 \usepackage{german}
 \usepackage{todonotes}
 \usepackage{tikz}
-
-\tikzset{
-    mysymbol/.pic={
-        \node[circle,draw,thick,inner sep=0pt, minimum size=2ex] (-sum) {};
-        \draw[semithick] (-sum.north west)--(-sum.south east);
-        \draw[semithick] (-sum.south west)--(-sum.north east);
-        \fill (-sum.center)--(-sum.south west) arc (-135:-35):1ex)--cycle;
-    }
-}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\graphicspath{{./images/}}
 
 \begin{document}
 
-\listoftodos
+%\listoftodos
 \tableofcontents
 \newpage
 
 \part{Erianet}
 \section{Einleitung}
-\todo{Namensherkunft}
-\todo{Warum Projekt?}
-\todo{Welche Technologien}
+%\todo{Namensherkunft}
+%\todo{Warum Projekt?}
+%\todo{Welche Technologien}
 \section{Architektur}
-\include{test}
-\todo{Diagramm mit Annotationen}
-\todo{Kapitel f"ur alle Annotationen}
+
+%\todo{Diagramm mit Annotationen}
+%\todo{Kapitel f"ur alle Annotationen}
 \section{Neurales Netz}
-\todo{Erweiterung zu Kaptiel in Architektur}
+%\todo{Erweiterung zu Kaptiel in Architektur}
 
 
 \part{Facepong}
 \section{Einleitung}
-\todo{Was Warum und Spielweisee}
+%\todo{Was Warum und Spielweisee}
 \section{Probleme und Zukunftspl"ane}
-\todo{Probleme und Z.}
+%\todo{Probleme und Z.}
 \section{Architektur}
-\todo{Architektur}
+%\todo{Architektur}
 \end{document}
