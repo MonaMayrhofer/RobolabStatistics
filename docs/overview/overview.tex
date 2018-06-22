@@ -6,8 +6,10 @@
 \usepackage{adjustbox}
 \usepackage{graphicx}
 \usepackage{afterpage}
+\usepackage{listings}
 \usepackage{float}
 \graphicspath{{./images/}}
+\lstset{language=Python}
 
 \begin{document}
 
@@ -88,28 +90,70 @@ Dazu sind ein trainiertes Modell und die intermediate-Daten vonnöten.
 Die Mainloop ist das Hauptprogramm, das mithilfe des Erianet und einer Kamera
 die aufgenommenen Gesichter erkennt und mitloggt.
 \subparagraph{Erianet}
+Das Erianet im Mainloop wandelt ein aufgenommenes Gesichtsbild in
+das Intermediate-Format um und vergleicht dieses über die 
+euklid'sche Distanz mit den Referenzbildern aus dem Reference-Folder.
+Für jede Referenzklasse wird dann die durchschnittliche Distanz
+ermittelt und nach dieser werden die Klassen geordnet und als
+Kandidaten wieder zurückgegeben.
 \paragraph{Log-Folder}
 Im Log-Verzeichnis wird in einer Textdatei jede Erkennung mitprotokolliert.
 Sowohl die Zeit der Erkennung als auch der Name werden gespeichert und zu
 jedem Eintritt wird das Bild der Person in den Pictures-Ordner gespeichert
 und nach dem Logeintrag benannt.
 \subsection{Formate}
+\paragraph{Kamerarohbilder}
+dürfen so groß sein, wie die Kamera liefert, und müssen RGB sein.
+\paragraph{Gesichtsbilder}
+sind 128 Pixel hoch und 96 Pixel breit und sollten in Greyscale 
+sein.
+\paragraph{Intermediate}
+sind im HDF5-Format gespeichert und 128 floats lang.
+\paragraph{Weights}
+werden von Keras gespeichert, sind im HDF5-Format. 
 \label{formats}
 
 %\todo{Diagramm mit Annotationen}
 %\todo{Kapitel f"ur alle Annotationen}
 \section{Neurales Netz}
+Als erianet.py wird in dieser Software eine Wrapper-Klasse für 
+Keras bezeichnet. Diese Klasse repräsentiert eine Instanz des 
+Erianet und bietet verschiedene Methoden an, welche die 
+Bedienung um einiges einfacher machen. Der durchschnittliche
+Lebenszyklus eines Erianet sieht folgendermaßen aus:
+\begin{lstlisting}[frame=single]
+net = Erianet("model.name", config=VGG19ish)
+
+names = net.predict(image, reference_set)
+
+for name in names:
+    print(PredictResult.name(name), 
+    PredictResult.difference(name))
+\end{lstlisting}
+In der Config sind die eigentlichen Layer des Neuralen Netzes definiert.
 \subsection{Aufbau}
-\paragraph{Fußnetzwerk}
 \label{neuralfoot}
+Das Erianet baut auf einem sogenannten "Siamesischen Netzwerk" auf.
+Ein siamesisches Netzwerk zeichent sich dadurch aus, dass es zwei
+\glqq{}F"uße\grqq gibt, welche aus dem exakt gleichen Convolutional-Netzwerk 
+bestehen, welche sich die weights teilen. Ein Bild wird durch den
+einen Fuß geschickt, das andere Bild durch den anderen Fuß.
+Ein Fußnetzwerk gibt jeweils einen Vektor (Intermediate-Repräsentation)
+zurück und zwischen diesen Vektoren wird dann die euklid'sche Distanz
+gebildet, um festzustellen, wie ähnlich die beiden Bilder sind.
+\paragraph{Fußnetzwerk}
+Das Fußnetzwerk ist meist ein Deep-Convolutional-Neural-Network, was heißt
+dass viele Schichten von Convolutional-Layern und Pooling-Layern genutzt werden.
+Der am vielversprechendste Ansatz ist ein VGG19-Netzwerk.
 \subsection{Training}
-
-%\todo{Erweiterung zu Kaptiel in Architektur}
-
+Das Training eines Siamesischen Netzwerks ist supervised. Das heißt, dass
+dem Netzwerk zwei Bilder gezeigt werden, und je nachdem, ob die beiden Bilder
+von derselben Person oder von unterschiedlichen Personen stammen, wird dann 
+versucht die Distanz zwischen den Intermediate-Vektoren möglichst hoch, oder 
+niedrig zu halten.
 
 \part{Facepong}
 \section{Einleitung}
-%\todo{Was Warum und Spielweise}
 \paragraph{}
 F"ur den Tag der offenen T"ur an der HTL Leonding wurde dem Projektteam
 aufgetragen, mithilfe ihrer gesammelten Erfahrung im Bereich Gesichtsdetektion
