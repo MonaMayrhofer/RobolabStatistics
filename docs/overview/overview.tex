@@ -85,8 +85,14 @@ Am Raspberry-PI würde die finale Gesichtserkennung stattfinden.
 Dazu sind ein trainiertes Modell und die intermediate-Daten vonnöten.
 \paragraph{mainloop.py}
 % TODO Fill this in
+Die Mainloop ist das Hauptprogramm, das mithilfe des Erianet und einer Kamera
+die aufgenommenen Gesichter erkennt und mitloggt.
 \subparagraph{Erianet}
-\paragraph{Log-Folder} 
+\paragraph{Log-Folder}
+Im Log-Verzeichnis wird in einer Textdatei jede Erkennung mitprotokolliert.
+Sowohl die Zeit der Erkennung als auch der Name werden gespeichert und zu
+jedem Eintritt wird das Bild der Person in den Pictures-Ordner gespeichert
+und nach dem Logeintrag benannt.
 \subsection{Formate}
 \label{formats}
 
