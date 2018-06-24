@@ -188,7 +188,7 @@ Gesichtsdetektion zur"uckzuf"uhren ist. F"ur den jetzigen Einsatz mit
 Beamer und Kamera sind 480p jedoch ausreichend.
 \section{Architektur}
 \paragraph{PongGame}
-k"ummert sich um den Hauptloop, welcher den aktuellen Gamestate aufruft, dann die 
+k"ummert sich um die Hauptloop, welche den aktuellen Gamestate aufruft, dann die 
 Grafik rendert und schlussendlich die Keyboard-Events bearbeitet.
 Der Hauptloop holt sich auch die Bilder der Kamera und versucht die Framerate 
 stabil zu halten.
@@ -198,21 +198,21 @@ Der Haar-Classifier aus OpenCV sucht sich die Gesichter heraus und danach wird
 der wahrscheinlichste Kandidat genommen und als finales Gesicht zur"uckgegeben.
 \paragraph{pongConfig}
 behinaltet eine Reihe von Datenklassen, welche grunds"atzliche Variablen beherbergen,
-damit man das FacePong schnell und effizient an die Umgebung anpassen kann.
+damit man FacePong schnell und effizient an die Umgebung anpassen kann.
 \paragraph{pongPhysics}
 bildet eine Wrapperklasse um PyMunk, und k"ummert sich darum, dass die Spielobjekte richtig
-positioniert werden. Eigene Objekte werden gebildet aus: Gesichtern, R"ander des Spielfelds und 
-dem Ball. In dieser Klasse wird auch erkannt, ob der Ball in einem Tor oder aus dem Spielfeld
+positioniert werden. Eigene Objekte werden gebildet aus: Gesichtern, R"andern des Spielfelds und 
+dem Ball. In dieser Klasse wird auch erkannt, ob der Ball in ein Tor oder aus dem Spielfeld
 geflogen ist.
 \paragraph{pongRenderer}
 sorgt daf"ur dass das Kamerabild richtig dargestellt wird. Die eigentlichen Spielobjekte
 werden vom Gamestate gezeichnet, pongRenderer behinhaltet aber ein paar Hilfsmethoden,
-um z.B Linien, Kreise o."a zu zeichnen. Manche Objekte k"onnen in zwei Ebenen gezeichnet
-werden (draw\_in\_front), damit z.B Text alle anderen Spielobjekte "uberdeckt.
+um z.B Linien, Kreise o."a. zu zeichnen. Manche Objekte k"onnen in zwei Ebenen gezeichnet
+werden (draw\_in\_front), damit z.B. Text alle anderen Spielobjekte "uberdeckt.
 \paragraph{GameState}
 werden im selben File wie pongGame geschrieben und beinhalten jeweils eine Methode zum 
 rendern und zum updaten der Spiellogik. Um den GameState zu wechseln wird die Methode
-game.change\_state\_to(newState)aufgerufen.
+game.change\_state\_to(newState) aufgerufen.
 
 
 \end{document}
