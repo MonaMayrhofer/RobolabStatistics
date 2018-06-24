@@ -182,7 +182,7 @@ Seite blicken das Spiel angehalten, da kein Gesicht erkannt wird.
 Die Behebung des oben genannten Problems k"onnte durch Einsatz besserer
 Modelle unter R"ucksichtnahme auf die Performance m"oglich sein.
 \subsection{Aufl"osung und Performance}
-Das Spiel l"auft aktuell einer Auflösung von 480p und verlangsamt sich beim Upgrade auf 1080p
+Das Spiel l"auft aktuell einer Aufl"osung von 480p und verlangsamt sich beim Upgrade auf 1080p
 auf unter 10 Bilder pro Sekunde, was auf das inperformante Modell zur
 Gesichtsdetektion zur"uckzuf"uhren ist. F"ur den jetzigen Einsatz mit
 Beamer und Kamera sind 480p jedoch ausreichend.
@@ -195,13 +195,13 @@ stabil zu halten.
 \paragraph{pongFaceDetector}
 k"ummert sich darum, aus dem mitgegeben Bild erkannte Gesichter herauszukratzen.
 Der Haar-Classifier aus OpenCV sucht sich die Gesichter heraus und danach wird
-der wahrscheinlichste Kandidat genommen und als finales Gesicht zurückgegeben.
+der wahrscheinlichste Kandidat genommen und als finales Gesicht zur"uckgegeben.
 \paragraph{pongConfig}
 behinaltet eine Reihe von Datenklassen, welche grunds"atzliche Variablen beherbergen,
 damit man das FacePong schnell und effizient an die Umgebung anpassen kann.
 \paragraph{pongPhysics}
 bildet eine Wrapperklasse um PyMunk, und k"ummert sich darum, dass die Spielobjekte richtig
-positioniert werden. Eigene Objekte werden gebildet aus: Gesichtern, Ränder des Spielfelds und 
+positioniert werden. Eigene Objekte werden gebildet aus: Gesichtern, R"ander des Spielfelds und 
 dem Ball. In dieser Klasse wird auch erkannt, ob der Ball in einem Tor oder aus dem Spielfeld
 geflogen ist.
 \paragraph{pongRenderer}
