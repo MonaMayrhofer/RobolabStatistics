@@ -199,3 +199,6 @@ apps/mainloop_and_utils/log/log\.txt
 *.tdo
 
 !Architektur.xml
+
+!docs/pflichtenheft/
+!docs/overview/
