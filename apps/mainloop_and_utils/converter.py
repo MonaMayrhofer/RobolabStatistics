@@ -63,6 +63,8 @@ def main():
 
     run(src, dst, mode)
 
+    print("Converting finished.")
+
 
 def run(inp, out, mode):
     MODE = cv2.COLOR_RGB2GRAY
