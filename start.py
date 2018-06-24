@@ -16,26 +16,33 @@ ALIASES = {
 
 
 def main():
+    keyargs = sys.argv
+    otherind = 0
+    for ind, val in enumerate(sys.argv):
+        if not val[0] == "-":
+            otherind = ind
+        if otherind > 0:
+            break
+
     parser = argparse.ArgumentParser(description='Execute apps')
     parser.add_argument('app', type=str, help='The app to be started.')
     parser.add_argument('arguments', type=str, nargs='*',
                         help='Supply arguments to specified app')
-    args = parser.parse_args()
-
+    args = parser.parse_args(keyargs[1:otherind+1])
     app = args.app
-    arguments = args.arguments
+
+    for i in range(otherind):
+        keyargs.remove(keyargs[0])
+    arguments = keyargs
 
     if app in ALIASES:
         app = ALIASES[app]
-
-    print(app)
-    print(arguments)
 
     app_path = "apps.{}".format(app)
 
     print("====== [{}] ======".format(app_path))
     os.environ["KERAS_BACKEND"] = "tensorflow"
-    sys.argv = np.concatenate(([app], arguments))
+    sys.argv = arguments
     importlib.import_module(app_path).main()
 
 
