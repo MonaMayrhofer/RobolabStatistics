@@ -8,10 +8,18 @@
 \usepackage{afterpage}
 \usepackage{listings}
 \usepackage{float}
+\usepackage[headsepline]{scrpage2}
+\pagestyle{scrheadings}
+\clearscrheadfoot
 \graphicspath{{./images/}}
+
 \lstset{language=Python}
 
 \begin{document}
+
+\ohead{Erianet}
+\ihead{Florian Schwarcz \& Erik Mayrhofer}
+\ofoot{\pagemark}
 
 %\listoftodos
 \tableofcontents
@@ -55,10 +63,10 @@ k"onnen.
 greift den Kamera-Feed einer Webcam ab und nutzt
 OpenCVs Haar-Classifier dazu, ein erkanntes Gesicht 
 herauszuschneiden. Dieses wird dann in unser verwendetes
-Format (Siehe \ref{formats}) umgewandelt.
+Format umgewandelt.
 \paragraph{preprozess.py}
 nimmt die, vorher aufgenommenen Bilder und l"asst sie einmal 
-durch einen Fu{\ss} (Siehe \ref{neuralfoot}) des Erianet laufen. Dadurch
+durch einen Fu{\ss} des Erianet laufen. Dadurch
 werden sie in die interne Repr"asentation des neuralen Netzes 
 umgewandelt und als sogenannte intermediate-Datei gespeichert.
 Dieser Schritt spart extrem viel Rechenzeit, da sonst
@@ -109,7 +117,6 @@ sein.
 sind im HDF5-Format gespeichert und 128 floats lang.
 \paragraph{Weights}
 werden von Keras gespeichert, sind im HDF5-Format. 
-\label{formats}
 
 %\todo{Diagramm mit Annotationen}
 %\todo{Kapitel f"ur alle Annotationen}
@@ -131,7 +138,6 @@ for name in names:
 \end{lstlisting}
 In der Config sind die eigentlichen Layer des Neuralen Netzes definiert.
 \subsection{Aufbau}
-\label{neuralfoot}
 Das Erianet baut auf einem sogenannten "Siamesischen Netzwerk" auf.
 Ein siamesisches Netzwerk zeichent sich dadurch aus, dass es zwei
 {\glqq}F"u{\ss}e{\grqq} gibt, welche aus dem exakt gleichen Convolutional-Netzwerk 
@@ -185,5 +191,32 @@ auf unter 10 Bilder pro Sekunde, was auf das inperformante Modell zur
 Gesichtsdetektion zur"uckzuf"uhren ist. F"ur den jetzigen Einsatz mit
 Beamer und Kamera sind 480p jedoch ausreichend.
 \section{Architektur}
-%\todo{Architektur}
+\paragraph{PongGame}
+k"ummert sich um den Hauptloop, welcher den aktuellen Gamestate aufruft, dann die 
+Grafik rendert und schlussendlich die Keyboard-Events bearbeitet.
+Der Hauptloop holt sich auch die Bilder der Kamera und versucht die Framerate 
+stabil zu halten.
+\paragraph{pongFaceDetector}
+k"ummert sich darum, aus dem mitgegeben Bild erkannte Gesichter herauszukratzen.
+Der Haar-Classifier aus OpenCV sucht sich die Gesichter heraus und danach wird
+der wahrscheinlichste Kandidat genommen und als finales Gesicht zurückgegeben.
+\paragraph{pongConfig}
+behinaltet eine Reihe von Datenklassen, welche grunds"atzliche Variablen beherbergen,
+damit man das FacePong schnell und effizient an die Umgebung anpassen kann.
+\paragraph{pongPhysics}
+bildet eine Wrapperklasse um PyMunk, und k"ummert sich darum, dass die Spielobjekte richtig
+positioniert werden. Eigene Objekte werden gebildet aus: Gesichtern, Ränder des Spielfelds und 
+dem Ball. In dieser Klasse wird auch erkannt, ob der Ball in einem Tor oder aus dem Spielfeld
+geflogen ist.
+\paragraph{pongRenderer}
+sorgt daf"ur dass das Kamerabild richtig dargestellt wird. Die eigentlichen Spielobjekte
+werden vom Gamestate gezeichnet, pongRenderer behinhaltet aber ein paar Hilfsmethoden,
+um z.B Linien, Kreise o."a zu zeichnen. Manche Objekte k"onnen in zwei Ebenen gezeichnet
+werden (draw\_in\_front), damit z.B Text alle anderen Spielobjekte "uberdeckt.
+\paragraph{GameState}
+werden im selben File wie pongGame geschrieben und beinhalten jeweils eine Methode zum 
+rendern und zum updaten der Spiellogik. Um den GameState zu wechseln wird die Methode
+game.change\_state\_to(newState)aufgerufen.
+
+
 \end{document}
