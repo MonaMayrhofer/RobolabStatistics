@@ -8,7 +8,10 @@ import numpy as np
 
 
 ALIASES = {
-    "pong": "facepong2.pong"
+    "pong": "facepong2.pong",
+    "paparazzi": "mainloop_and_utils.paparazzi",
+    "mainloop": "mainloop_and_utils.mainloop",
+    "converter": "mainloop_and_utils.converter"
 }
 
 

@@ -229,7 +229,7 @@ class Mainloop(threading.Thread):
         plt.show()"""
 
 
-if __name__ == '__main__':
+def main():
     MODEL_FILE = downloader.get_model(downloader.HAARCASCADE_FRONTALFACE_ALT, False)
     main_face_cascades = cv2.CascadeClassifier(MODEL_FILE)
     main = Mainloop('3BHIFinterm', 'log', main_face_cascades, 'bigset_4400_1526739422044.model', VGG19ish,
@@ -248,3 +248,7 @@ if __name__ == '__main__':
             main.hide()
         elif main_input == 'show':
             main.show()
+
+
+if __name__ == '__main__':
+    main()
