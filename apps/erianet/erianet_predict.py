@@ -37,8 +37,8 @@ def predict_face_info(input_img, ref_classes, ref_image_index=4):
 model = load_erianet_model(MODEL_FILENAME)
 
 
-name = input("Enter name:")
-img = int(input("Which image:"))
+name = input("Enter name: ")
+img = int(input("Which image: "))
 
 image = load_one_image("3BHIF", name, img)
 names = get_3bhif_names()

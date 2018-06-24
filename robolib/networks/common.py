@@ -1,5 +1,5 @@
 from keras import backend
-
+import numpy as np
 
 def contrastive_loss(y_true, y_pred):
     margin = 5
@@ -14,9 +14,14 @@ def contrastive_loss_manual(correct, prediction):
         return max(100 - prediction, (prediction - 100) / 10) ** 2
 
 
-def euclidean_distance(vectors):
+def euclidean_distance_tensor(vectors):
     x, y = vectors
     return backend.sqrt(backend.sum(backend.square(x - y), axis=1, keepdims=True))
+
+
+def euclidean_distance_numeric(vectors):
+    x, y = vectors
+    return np.sqrt(np.sum(np.square(x - y), axis=1, keepdims=True))
 
 
 def euclidean_dist_output_shape(shapes):

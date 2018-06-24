@@ -7,7 +7,6 @@ from apps.facepong2.pongConfig import CONFIG
 from enum import Enum
 
 
-
 class TextAlign(Enum):
     LEFT = 0
     RIGHT = 1

@@ -176,5 +176,28 @@ logs/
 *.mat
 
 *.pdf
+!FacePong.pdf
 
 *.gz
+
+apps/trainer/faceScrub/
+
+*.hd5
+*.interm
+*.mp4
+data/
+apps/mainloop_and_utils/log/log\.txt
+
+*.aux
+
+*.fdb_latexmk
+
+*.fls
+
+*.toc
+
+*.tdo
+
+!Architektur.xml
+
+!Deployment-Diagram.jpg
