@@ -21,13 +21,13 @@
 \section{Einleitung}
 \subsection{Name}
 Das Erianet ist eine mit Python entwickelte Software, die
-durch ein Neurales Netzwerk f"ahig ist,
+durch ein neurales Netzwerk f"ahig ist,
 Personen anhand ihrer Gesichter unterscheiden.
 Es wurde von Mayrhofer Erik und Schwarcz Florian
-entwickelt und durch Kombination beider Vornamen und {\glqq} neural net{\grqq}
+entwickelt und durch Kombination beider Vornamen und {\glqq}neural net{\grqq}
 auf seinen Namen getauft.
 \subsection{Hintergrund}
-Im Rahmen des Schulunterrichts im Fach {\glqq} Systemplanung und Projektentwicklung{\grqq}
+Im Rahmen des Schulunterrichts im Fach {\glqq}Systemplanung und Projektentwicklung{\grqq}
 war es die Aufgabe des Projektteams, eine zur Gesichtserkennung
 f"ahige Software zu entwickeln.
 %\todo{Welche Technologien}
@@ -36,8 +36,8 @@ So wurde OpenCV als Gesichtsdetektor eingesetzt und mit Keras das neurale
 Netz erstellt und trainiert.
 \subsection{Verwendete Ressourcen}
 Zum Trainieren des Modells wurden vorgefertigte Sammlungen f"ur genau diesen
-Zweck auf dem Internet verwendet. Einige davon waren die {\glqq} Labelled Faces in the Wild{\grqq},
-{\glqq} AT\&T Faces{\grqq} und {\glqq} YouTube face database{\grqq}. Es wurden
+Zweck auf dem Internet verwendet. Einige davon waren die {\glqq}Labelled Faces in the Wild{\grqq},
+{\glqq}AT\&T Faces{\grqq} und {\glqq}YouTube face database{\grqq}. Es wurden
 auch selbst Bilder mit einem dazu erstellten Programm geschossen und zum Training verwendet.
 \newpage
 \section{Architektur}
@@ -57,7 +57,7 @@ OpenCVs Haar-Classifier dazu, ein erkanntes Gesicht
 herauszuschneiden. Dieses wird dann in unser verwendetes
 Format (Siehe \ref{formats}) umgewandelt.
 \paragraph{preprozess.py}
-nimmt die, vorher aufgenommenen Bilder und l"asst sie einmal 
+nimmt die vorher aufgenommenen Bilder und l"asst sie einmal 
 durch einen Fu{\ss} (Siehe \ref{neuralfoot}) des Erianet laufen. Dadurch
 werden sie in die interne Repr"asentation des neuralen Netzes 
 umgewandelt und als sogenannte intermediate-Datei gespeichert.
@@ -80,14 +80,13 @@ zu erzielen, rechnen wir damit, eine ungef"ahre Menge von insgesamt
 Der Trainer nutzt die Referenzdaten aus dem Train Folder 
 um die weights des neuralen Netzes zu ermitteln und diese
 als trainiertes Modell zu speichern.
-\subsection{Raspberry}
-Am Raspberry-PI w"urde die finale Gesichtserkennung stattfinden.
+\subsection{Hauptrechner}
+Am Hauptrechner w"urde die finale Gesichtserkennung stattfinden.
 Dazu sind ein trainiertes Modell und die intermediate-Daten vonn"oten.
 \paragraph{mainloop.py}
-% TODO Fill this in
 Die Mainloop ist das Hauptprogramm, das mithilfe des Erianet und einer Kamera
 die aufgenommenen Gesichter erkennt und mitloggt.
-\subparagraph{Erianet}
+\paragraph{Erianet}
 Das Erianet im Mainloop wandelt ein aufgenommenes Gesichtsbild in
 das Intermediate-Format um und vergleicht dieses "uber die 
 euklid'sche Distanz mit den Referenzbildern aus dem Reference-Folder.
@@ -101,7 +100,7 @@ jedem Eintritt wird das Bild der Person in den Pictures-Ordner gespeichert
 und nach dem Logeintrag benannt.
 \subsection{Formate}
 \paragraph{Kamerarohbilder}
-d"urfen so gro{\ss} sein, wie die Kamera liefert, und m"ussen RGB sein.
+d"urfen so gro{\ss} sein wie die Kamera sie liefert und m"ussen RGB sein.
 \paragraph{Gesichtsbilder}
 sind 128 Pixel hoch und 96 Pixel breit und sollten in Greyscale 
 sein.
@@ -110,9 +109,6 @@ sind im HDF5-Format gespeichert und 128 floats lang.
 \paragraph{Weights}
 werden von Keras gespeichert, sind im HDF5-Format. 
 \label{formats}
-
-%\todo{Diagramm mit Annotationen}
-%\todo{Kapitel f"ur alle Annotationen}
 \pagebreak
 \section{Neurales Netz}
 Als erianet.py wird in dieser Software eine Wrapper-Klasse f"ur 
@@ -132,10 +128,10 @@ for name in names:
 In der Config sind die eigentlichen Layer des Neuralen Netzes definiert.
 \subsection{Aufbau}
 \label{neuralfoot}
-Das Erianet baut auf einem sogenannten "Siamesischen Netzwerk" auf.
+Das Erianet baut auf einem sogenannten {\glqq}Siamesischen Netzwerk{\grqq} auf.
 Ein siamesisches Netzwerk zeichent sich dadurch aus, dass es zwei
 {\glqq}F"u{\ss}e{\grqq} gibt, welche aus dem exakt gleichen Convolutional-Netzwerk 
-bestehen, welche sich die weights teilen. Ein Bild wird durch den
+bestehen und sich die weights teilen. Ein Bild wird durch den
 einen Fu{\ss} geschickt, das andere Bild durch den anderen Fu{\ss}.
 Ein Fu{\ss}netzwerk gibt jeweils einen Vektor (Intermediate-Repr"asentation)
 zur"uck und zwischen diesen Vektoren wird dann die euklid'sche Distanz
@@ -146,9 +142,9 @@ dass viele Schichten von Convolutional-Layern und Pooling-Layern genutzt werden.
 Der vielversprechendste Ansatz ist ein VGG19-Netzwerk.
 \subsection{Training}
 Das Training eines Siamesischen Netzwerks ist supervised. Das hei{\ss}t, dass
-dem Netzwerk zwei Bilder gezeigt werden, und je nachdem, ob die beiden Bilder
+dem Netzwerk zwei Bilder gezeigt werden und je nachdem, ob die beiden Bilder
 von derselben Person oder von unterschiedlichen Personen stammen, wird dann 
-versucht die Distanz zwischen den Intermediate-Vektoren m"oglichst hoch, oder 
+versucht die Distanz zwischen den Intermediate-Vektoren m"oglichst hoch bzw. 
 niedrig zu halten.
 
 \part{Facepong}
@@ -158,13 +154,12 @@ F"ur den Tag der offenen T"ur an der HTL Leonding wurde dem Projektteam
 aufgetragen, mithilfe ihrer gesammelten Erfahrung im Bereich Gesichtsdetektion
 ein kleines Programm zu entwickeln, welches man den Besuchern Vorstellen kann.
 Dabei kam die Idee auf, ein Spiel zu programmieren, bei dem man mit seinem Gesicht
-gegen einen anderen Spieler das klassische Spiel {\glqq} Pong{\grqq} spielen kann.
+gegen einen anderen Spieler das klassische Spiel {\glqq}Pong{\grqq} spielen kann.
 \subsection{Verwendete Libraries}
 Zus"atzlich zu OpenCV f"ur die Gesichtsdetektion wurden in diesem Teil des Projektes
 die Libraries PyMunk f"ur realistische Physiksimulation und PyGame f"ur einfache Bildausgabe
 herangezogen.
 \section{Aufbau und Spielweise}
-\paragraph{}
 Zum Spielen braucht man eine Kamera und einen Monitor bzw. Beamer. Die Kamera
 wird m"oglichst mittig entweder unter oder "uber der Bildausgabe aufgestellt und angeschlossen.
 Anschlie{\ss}end wird das Programm gestartet und es kann gespielt werden.
@@ -180,7 +175,7 @@ Seite blicken das Spiel angehalten, da kein Gesicht erkannt wird.
 Die Behebung des oben genannten Problems k"onnte durch Einsatz besserer
 Modelle unter R"ucksichtnahme auf die Performance m"oglich sein.
 \subsection{Aufl"osung und Performance}
-Das Spiel l"auft aktuell ain 480p und verlangsamt sich beim Upgrade auf 1080p
+Das Spiel l"auft aktuell einer Auflösung von 480p und verlangsamt sich beim Upgrade auf 1080p
 auf unter 10 Bilder pro Sekunde, was auf das inperformante Modell zur
 Gesichtsdetektion zur"uckzuf"uhren ist. F"ur den jetzigen Einsatz mit
 Beamer und Kamera sind 480p jedoch ausreichend.
